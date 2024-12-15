@@ -241,7 +241,8 @@ export default function CreateProductForm({ branch, units, type, categories, bra
                 description: "The product has been successfully created.",
                 variant:'success'
             })
-        } catch () {
+        } catch (error) {
+            console.error("Error in creating product:", error);
             playErrorSound();
             toast({
                 title: "Error",
