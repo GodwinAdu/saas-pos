@@ -17,6 +17,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { updateBranch } from '@/lib/actions/branch.actions'
 import { useRouter } from 'next/navigation'
 import { playErrorSound, playSuccessSound } from '@/lib/audio'
+import { Switch } from '@/components/ui/switch'
 
 
 const branchFormSchema = z.object({
@@ -44,6 +45,7 @@ const branchFormSchema = z.object({
       closingTime: z.string(),
     })),
   }),
+  sound:z.boolean()
 })
 
 type BranchFormValues = z.infer<typeof branchFormSchema>
@@ -66,6 +68,7 @@ export default function BranchSettingsForm({ branch }: { branch: any }) {
       wholesale: true,
       retail: true,
     },
+    sound: true
   }
 
   const form = useForm<BranchFormValues>({
@@ -86,10 +89,11 @@ export default function BranchSettingsForm({ branch }: { branch: any }) {
       toast({
         title: 'Branch settings updated successfully',
         description: 'Your changes have been saved',
-        variant:'success'
+        variant: 'success'
       })
 
     } catch (error) {
+      console.error('Error occurred while updating branch:', error)
       playErrorSound()
       toast({
         title: 'Something went wrong',
@@ -122,8 +126,9 @@ export default function BranchSettingsForm({ branch }: { branch: any }) {
         <Tabs defaultValue="promotions" className="w-full">
           <TabsList>
             <TabsTrigger value="promotions">Promotions</TabsTrigger>
-            <TabsTrigger value="pricing">Pricing</TabsTrigger>
+            <TabsTrigger value="pricing">Product Price & Stock</TabsTrigger>
             <TabsTrigger value="settings">Branch Settings</TabsTrigger>
+            <TabsTrigger value="sound">Sound Settings</TabsTrigger>
           </TabsList>
           <TabsContent value="promotions">
             <Card>
@@ -316,6 +321,39 @@ export default function BranchSettingsForm({ branch }: { branch: any }) {
                   )}
                 />
                 <OperatingHoursForm control={form.control} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="sound">
+            <Card>
+              <CardHeader>
+                <CardTitle>Sound Settings</CardTitle>
+                <CardDescription>Manage your sound alert settings.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="sound"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">
+                          Sound Effects
+                        </FormLabel>
+                        <FormDescription>
+                          Enable sound effects for notifications.
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
               </CardContent>
             </Card>
           </TabsContent>

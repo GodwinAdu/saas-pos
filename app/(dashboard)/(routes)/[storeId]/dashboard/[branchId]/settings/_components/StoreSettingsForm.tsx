@@ -17,6 +17,7 @@ import SubscriptionForm from './SubscriptonForm'
 import { toast } from '@/hooks/use-toast'
 import { updateStore } from '@/lib/actions/store.actions'
 import { useRouter } from 'next/navigation'
+import SoundSettingForm from './soundSetting'
 
 
 const storeFormSchema = z.object({
@@ -59,6 +60,7 @@ const storeFormSchema = z.object({
         subscriptionExpiry: z.coerce.date(),
         paymentStatus: z.string(),
     }),
+    sound: z.boolean(),
 })
 
 type StoreFormValues = z.infer<typeof storeFormSchema>
@@ -101,6 +103,7 @@ export default function StoreSettingsForm({ store }: { store: any }) {
             subscriptionExpiry: new Date(),
             paymentStatus: 'Demo',
         },
+        sound: true,
     }
     
     const form = useForm<StoreFormValues>({
@@ -118,6 +121,7 @@ export default function StoreSettingsForm({ store }: { store: any }) {
                 description: "Your store settings have been saved.",
             })
         } catch (error) {
+            console.log(error)
             toast({
                 title: "Error",
                 description: "An error occurred while saving your settings.",
@@ -138,6 +142,7 @@ export default function StoreSettingsForm({ store }: { store: any }) {
                         <TabsTrigger value="reporting">Reporting</TabsTrigger>
                         <TabsTrigger value="notifications">Notifications</TabsTrigger>
                         <TabsTrigger value="subscription">Subscription</TabsTrigger>
+                        <TabsTrigger value="sound">Sound</TabsTrigger>
                     </TabsList>
                     <TabsContent value="basic-info">
                         <Card>
@@ -191,6 +196,17 @@ export default function StoreSettingsForm({ store }: { store: any }) {
                             </CardHeader>
                             <CardContent>
                                 <SubscriptionForm control={form.control} />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="sound">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Sound Effect</CardTitle>
+                                <CardDescription>Manage Sound alert.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <SoundSettingForm control={form.control} />
                             </CardContent>
                         </Card>
                     </TabsContent>

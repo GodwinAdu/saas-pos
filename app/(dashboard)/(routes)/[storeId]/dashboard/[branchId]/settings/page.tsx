@@ -5,7 +5,7 @@ import StoreSettingsForm from './_components/StoreSettingsForm'
 import { fetchStoreById } from '@/lib/actions/store.actions'
 
 const page = async ({ params }: { params: { storeId: string } }) => {
-  const storeId = params.storeId as string;
+  const storeId = await params.storeId as string;
   const store = await fetchStoreById(storeId) as IStore;
   return (
     <>
