@@ -198,18 +198,18 @@ export default function PosContent({ user, branches, branch, products }: { user:
                                         />
                                     </div>
                                 </div>
-                                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                                {/* <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                                     <SelectTrigger className="w-[180px]">
                                         <SelectValue placeholder="Category" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {categories.map(category => (
-                                            <SelectItem key={category} value={category}>
+                                        {categories.map((category,index) => (
+                                            <SelectItem key={index} value={category}>
                                                 {category}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
-                                </Select>
+                                </Select> */}
                                 <Button variant="outline" onClick={() => setIsBarcodeMode(!isBarcodeMode)}>
                                     {isBarcodeMode ? "Manual" : "Barcode"}
                                 </Button>
@@ -234,7 +234,7 @@ export default function PosContent({ user, branches, branch, products }: { user:
                                         <Card key={product.id} className="overflow-hidden">
                                             <CardHeader className="p-0">
 
-                                                <Image width={100} height={100} src={product.image} alt={product.name} className="w-full h-32 object-cover" />
+                                                <Image width={100} height={100} src='/sardine.jpg' alt={product.name} className="w-full h-32 object-cover" />
                                             </CardHeader>
                                             <CardContent className="p-4">
                                                 <h3 className="font-semibold text-sm mb-1">{product.name}</h3>
@@ -259,13 +259,13 @@ export default function PosContent({ user, branches, branch, products }: { user:
                         </TabsContent>
                         <TabsContent value="categories">
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                {categories.map(category => (
-                                    <Card key={category} className="overflow-hidden">
+                                {categories.map((category,index) => (
+                                    <Card key={index} className="overflow-hidden">
                                         <CardHeader>
                                             <CardTitle>{category}</CardTitle>
                                         </CardHeader>
                                         <CardContent>
-                                            <p className="text-sm text-muted-foreground">
+                                            <p className="text-sm text-muted-foreground" >
                                                 {products.filter(p => p.category === category).length} products
                                             </p>
                                         </CardContent>

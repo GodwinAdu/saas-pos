@@ -1,6 +1,5 @@
-"use client"
+"use client";
 
-import { useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -15,30 +14,25 @@ import { useSelectSellingGroup } from "@/hooks/use-select-selling-group";
 export function SellingGroup({ branch }: { branch: IBranch }) {
   const { selectedValue, setSelectedValue } = useSelectSellingGroup();
 
-  // Determine the default value based on the branch settings
-  useEffect(() => {
-    // Check if the selected value is already in localStorage
-    const storedValue = selectedValue;
+  // Determine default value based on pricingGroups
+  const { retail, wholesale } = branch.pricingGroups;
 
-    if (storedValue) {
-      setSelectedValue(storedValue as "retail" | "wholesale"); // Use the value from localStorage
-    } else {
-      const { retail, wholesale } = branch.pricingGroups;
-      if (!storedValue && retail && wholesale) {
-        setSelectedValue("retail"); // Retail takes precedence if both are true
-      } else if (!storedValue && retail) {
-        setSelectedValue("retail");
-      } else if (!storedValue && wholesale) {
-        setSelectedValue("wholesale");
-      }
+  // Set default if no value is already selected
+  if (!selectedValue) {
+    if (retail && wholesale) {
+      setSelectedValue("retail");
+    } else if (retail) {
+      setSelectedValue("retail");
+    } else if (wholesale) {
+      setSelectedValue("wholesale");
     }
-  }, [branch, selectedValue]);
+  }
 
   return (
     <div>
       <Select
         onValueChange={(value) => setSelectedValue(value as "retail" | "wholesale")}
-        value={selectedValue || undefined} // Use string value directly
+        value={selectedValue || undefined} // Ensure a value is always set
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select an option" />
@@ -46,13 +40,8 @@ export function SellingGroup({ branch }: { branch: IBranch }) {
         <SelectContent>
           <SelectGroup>
             <SelectLabel>Options</SelectLabel>
-            {branch.pricingGroups.retail && (
-              <SelectItem value="retail">Retail Price</SelectItem>
-
-            )}
-            {branch.pricingGroups.wholesale && (
-              <SelectItem value="wholesale">Wholesale Price</SelectItem>
-            )}
+            {retail && <SelectItem value="retail">Retail Price</SelectItem>}
+            {wholesale && <SelectItem value="wholesale">Wholesale Price</SelectItem>}
           </SelectGroup>
         </SelectContent>
       </Select>
