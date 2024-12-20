@@ -5,9 +5,16 @@ import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/components/table/data-table'
 import { columns } from './_components/column'
 import { fetchAllDepartments } from '@/lib/actions/department.actions'
+import DepartmentTable from './_components/DepartmentTable'
 
+
+// type Params = Promise<{ branchId: string }>
 const page = async () => {
+
+
   const data = await fetchAllDepartments() || [];
+ 
+
   const filterOptions = [
     {
       id: "stock",
@@ -28,7 +35,7 @@ const page = async () => {
         </div>
       </div>
       <Separator />
-      <DataTable searchKey='name' columns={columns} data={data}  filterOptions={filterOptions} />
+      <DepartmentTable data={data} />
     </>
   )
 }

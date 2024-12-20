@@ -12,21 +12,11 @@ import TodayTransactions from '@/components/commons/dashboard/today-transaction'
 import TopSellingProducts from '@/components/commons/dashboard/top-selling-products'
 import TransactionHistory from '@/components/commons/dashboard/transaction-history'
 import TrashItemsCount from '@/components/commons/dashboard/trash-item-count'
-import { fetchBranchById } from '@/lib/actions/branch.actions'
-import { CurrentBranchId } from '@/lib/helpers/get-current-branch'
-import { redirect } from 'next/navigation'
-import React from 'react'
 
-const page = async ({ params }: { params: { branchId: string, storeId: string } }) => {
 
-  // const currentBranch = await fetchBranchById(params.branchId)
+const page = async () => {
 
-  // if (!currentBranch) {
-  //   redirect(`/${params.storeId}`)
-  // };
-  // const branchId = await CurrentBranchId()
 
-  // console.log(branchId, "current branch")
   return (
     <main className="flex-1 p-6 space-y-6">
       <h1 className="text-3xl font-bold">Dashboard Overview</h1>

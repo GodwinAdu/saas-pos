@@ -4,7 +4,6 @@ import Navbar from "@/components/dashboard/nav-bar";
 import {
     SidebarInset,
     SidebarProvider,
-    SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { currentUser } from "@/lib/helpers/current-user";
 export default async function RootLayout({
@@ -13,7 +12,7 @@ export default async function RootLayout({
    
     children: React.ReactNode;
 }>) {
-    const user = await currentUser()
+    const user = await currentUser() ?? null;
    
     return (
 

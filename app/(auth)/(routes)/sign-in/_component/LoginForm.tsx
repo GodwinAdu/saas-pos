@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
 import { logInUser } from "@/lib/helpers/login-user"
+import Link from "next/link"
 const formSchema = z.object({
     email: z.string().min(2, {
         message: "Username must be at least 2 characters.",
@@ -84,15 +85,24 @@ const LoginForm = () => {
                     name="password"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Enter Password</FormLabel>
+                            <div className="flex items-center">
+                                <FormLabel htmlFor="password">Password</FormLabel>
+                                <Link
+                                    href="/forget_password"
+                                    className="ml-auto text-sm underline-offset-2 hover:underline"
+                                >
+                                    Forgot your password?
+                                </Link>
+                            </div>
                             <FormControl>
-                                <Input type="password" placeholder="shadcn" {...field} />
+                                <Input type="password" placeholder="password" {...field} />
                             </FormControl>
 
                             <FormMessage />
                         </FormItem>
                     )}
                 />
+
                 <Button disabled={isSubmitting} className="w-full" type="submit">{
                     isSubmitting ? "Please wait..." : "Log In"
                 }</Button>

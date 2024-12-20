@@ -52,6 +52,11 @@ const BranchSchema: Schema<IBranch> = new Schema({
       type: Boolean, default: true,
     },
   },
+  sound: {
+    type: Boolean,
+    default: true,
+  },
+  // Add other fields as needed...
   createdBy: {
     type: Schema.Types.ObjectId,
     ref: "User",

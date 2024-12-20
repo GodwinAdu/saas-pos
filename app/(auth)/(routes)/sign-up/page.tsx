@@ -6,8 +6,8 @@ import SignupForm from './_components/SignupForm'
 const page = () => {
   return (
     <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
-      <div className="flex items-center justify-center py-12">
-        <div className="mx-auto grid gap-6 px-4">
+      <div className="flex items-center justify-center py-1">
+        <div className="mx-auto grid gap-3 px-4">
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold">Sign Up <span className='text-green-700 font-extrabold underline'>POS</span>ify</h1>
             <p className="text-balance text-muted-foreground">
@@ -25,6 +25,10 @@ const page = () => {
             <Link href="/sign-in" className="underline">
               Sign In
             </Link>
+          </div>
+          <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
+            By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+            and <a href="#">Privacy Policy</a>.
           </div>
         </div>
       </div>

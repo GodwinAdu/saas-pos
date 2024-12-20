@@ -233,12 +233,13 @@ interface IBranch extends Document {
             closingTime: string;
         }[];
     };
-    stockType:"manual"| "automated";
-    pricingType:"manual"| "automated";
+    stockType: "manual" | "automated";
+    pricingType: "manual" | "automated";
     pricingGroups: {
         wholesale: boolean;
         retail: boolean;
     };
+    sound: boolean;
     createdBy?: ObjectId | null; // Reference to the User model who created the branch
     modifiedBy?: ObjectId | null; // Reference to the User model who modified the branch
     mod_flag?: boolean; // Modification flag (default: false)

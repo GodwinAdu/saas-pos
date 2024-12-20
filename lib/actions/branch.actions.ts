@@ -1,5 +1,6 @@
 "use server"
 
+import errorMap from "zod/locales/en.js";
 import { currentUser } from "../helpers/current-user";
 import Branch from "../models/branch.models";
 import History from "../models/history.models";
@@ -24,7 +25,7 @@ export async function createBranch(values: any, storeId: string) {
             throw new Error('Store not found');
         }
 
-        if(store.branchIds.length >= store.numberOfBranches){
+        if (store.branchIds.length >= store.numberOfBranches) {
             throw new Error('Store already has maximum number of branches');
         }
 
@@ -47,7 +48,7 @@ export async function createBranch(values: any, storeId: string) {
         // Update user and owner access locations
         const updates: Promise<any>[] = [];
         // Save the new branch
-        updates.push(newBranch.save(),store.save());
+        updates.push(newBranch.save(), store.save());
         if (updateUser) {
             updateUser.accessLocation.push(newBranch._id);
             updates.push(updateUser.save());
@@ -180,11 +181,11 @@ export async function deleteBranch(id: string) {
 
 }
 
-export async function updateBranch(id: string, values: any){
+export async function updateBranch(id: string, values: any) {
     try {
-        const user =  await currentUser();
+        const user = await currentUser();
 
-        const updatedValues ={
+        const updatedValues = {
             ...values,
             modifiedBy: user._id,
             mod_flag: true,
@@ -192,14 +193,31 @@ export async function updateBranch(id: string, values: any){
         }
 
         await Branch.findByIdAndUpdate(id,
-            { ...updatedValues},
+            { ...updatedValues },
             { new: true }
         );
 
-console.log('Updated Branch ')
-        
+        console.log('Updated Branch ')
+
     } catch (error) {
-       console.log('Error updating branch ',error);
-       throw error
+        console.log('Error updating branch ', error);
+        throw error
+    }
+}
+
+
+export async function getBranchSound(branchId: string) {
+    try {
+        await connectToDB();
+        
+        const branch = await Branch.findById(branchId).select('sound');
+    
+        if (!branch || !branch.sound) {
+            return null;
+        }
+        return JSON.parse(JSON.stringify(branch.sound));
+    } catch (error) {
+        console.error('Failed to fetch branch sound setting:', error);
+        throw error;
     }
 }

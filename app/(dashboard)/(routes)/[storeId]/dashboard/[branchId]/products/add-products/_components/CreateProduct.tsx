@@ -17,13 +17,13 @@ import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from '@/hooks/use-toast'
 import MultiText from '@/components/commons/MultiText'
-import { useParams } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import MultiSelect from '@/components/commons/MultiSelect'
 import { cn } from '@/lib/utils'
 import { createProduct } from '@/lib/actions/product.actions'
 import { playErrorSound, playSuccessSound } from '@/lib/audio'
+import { ImageUploader } from '@/components/commons/ImageUpload'
 
 
 
@@ -70,6 +70,9 @@ const productSchema = z.object({
     active: z.boolean(),
     selling: z.boolean(),
     stockCalculationMethod: z.string(),
+    images: z.array(z.string().url()).min(1, {
+        message: "At least one image is required.",
+      }),
 })
 
 type ProductFormValues = z.infer<typeof productSchema>
@@ -130,7 +133,8 @@ export default function CreateProductForm({ branch, units, type, categories, bra
             colors: [],
             sizes: [],
             stockCalculationMethod: '',
-            selling: false
+            selling: false,
+            images:[]
         },
     })
 
@@ -152,8 +156,8 @@ export default function CreateProductForm({ branch, units, type, categories, bra
         }
     }, [selectedUnitIds, units, form]);
 
-     // Set unitId for each productUnit when the component renders
-     useEffect(() => {
+    // Set unitId for each productUnit when the component renders
+    useEffect(() => {
         productUnits.forEach((unit, index) => {
             form.setValue(`manualPrice.${index}.unitId`, unit._id);
         });
@@ -234,12 +238,12 @@ export default function CreateProductForm({ branch, units, type, categories, bra
         setIsSubmitting(true)
         try {
             await createProduct(values)
-           playSuccessSound();
+            playSuccessSound();
 
             toast({
                 title: "Product created",
                 description: "The product has been successfully created.",
-                variant:'success'
+                variant: 'success'
             })
         } catch (error) {
             console.error("Error in creating product:", error);
@@ -264,6 +268,19 @@ export default function CreateProductForm({ branch, units, type, categories, bra
                     </CardHeader>
                     <CardContent>
                         <div className="grid gap-4 py-4">
+                            <FormField
+                                control={form.control}
+                                name="images"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Images</FormLabel>
+                                        <FormControl>
+                                            <ImageUploader {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <FormField
                                     control={form.control}
@@ -627,68 +644,68 @@ export default function CreateProductForm({ branch, units, type, categories, bra
                                 </CardContent>
                             </div>
                             {branch.pricingType === 'manual' ? (
-                             <div>
-                             <h2 className="text-xl font-bold mb-4">Manual Pricing</h2>
-                             <Separator />
-                             <CardContent>
-                                 {productUnits?.map((unit, index) => (
-                                     <div key={unit._id} className="col-span-2 md:col-span-1">
-                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-                                             {/* Tax Rate Input */}
-                                             <FormField
-                                                 control={form.control}
-                                                 name={`manualPrice.${index}.tax`}
-                                                 render={({ field }) => (
-                                                     <FormItem>
-                                                         <FormLabel>Tax Rate (%)</FormLabel>
-                                                         <FormControl>
-                                                             <Input
-                                                                 type="number"
-                                                                 placeholder="Purchase Taxes"
-                                                                 {...field}
-                                                                 onChange={(e) =>
-                                                                     field.onChange(parseFloat(e.target.value))
-                                                                 }
-                                                             />
-                                                         </FormControl>
-                                                         <FormMessage />
-                                                     </FormItem>
-                                                 )}
-                                             />
-                 
-                                             {/* Unit Price Input */}
-                                             <FormField
-                                                 control={form.control}
-                                                 name={`manualPrice.${index}.price`}
-                                                 render={({ field }) => (
-                                                     <FormItem>
-                                                         <FormLabel>Price (GH₵)</FormLabel>
-                                                         <FormControl>
-                                                             <div className="relative">
-                                                                 <Input
-                                                                     type="number"
-                                                                     placeholder="Enter price per unit"
-                                                                     {...field}
-                                                                     onChange={(e) =>
-                                                                         field.onChange(parseFloat(e.target.value))
-                                                                     }
-                                                                     className="pr-20"
-                                                                 />
-                                                                 <span className="absolute font-extrabold inset-y-0 right-0 flex items-center pr-3 text-gray-500">
-                                                                     {unit.name}
-                                                                 </span>
-                                                             </div>
-                                                         </FormControl>
-                                                         <FormMessage />
-                                                     </FormItem>
-                                                 )}
-                                             />
-                                         </div>
-                                     </div>
-                                 ))}
-                             </CardContent>
-                         </div>                
-                           
+                                <div>
+                                    <h2 className="text-xl font-bold mb-4">Manual Pricing</h2>
+                                    <Separator />
+                                    <CardContent>
+                                        {productUnits?.map((unit, index) => (
+                                            <div key={unit._id} className="col-span-2 md:col-span-1">
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+                                                    {/* Tax Rate Input */}
+                                                    <FormField
+                                                        control={form.control}
+                                                        name={`manualPrice.${index}.tax`}
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>Tax Rate (%)</FormLabel>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        type="number"
+                                                                        placeholder="Purchase Taxes"
+                                                                        {...field}
+                                                                        onChange={(e) =>
+                                                                            field.onChange(parseFloat(e.target.value))
+                                                                        }
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+
+                                                    {/* Unit Price Input */}
+                                                    <FormField
+                                                        control={form.control}
+                                                        name={`manualPrice.${index}.price`}
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>Price (GH₵)</FormLabel>
+                                                                <FormControl>
+                                                                    <div className="relative">
+                                                                        <Input
+                                                                            type="number"
+                                                                            placeholder="Enter price per unit"
+                                                                            {...field}
+                                                                            onChange={(e) =>
+                                                                                field.onChange(parseFloat(e.target.value))
+                                                                            }
+                                                                            className="pr-20"
+                                                                        />
+                                                                        <span className="absolute font-extrabold inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                                                                            {unit.name}
+                                                                        </span>
+                                                                    </div>
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </CardContent>
+                                </div>
+
 
                             ) : (
                                 <>

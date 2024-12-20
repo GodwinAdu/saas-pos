@@ -3,22 +3,16 @@
 import { useState } from "react";
 import {
   ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
+  useReactTable,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
+  getFilteredRowModel,
+  SortingState,
+  ColumnFiltersState,
+  VisibilityState,
 } from "@tanstack/react-table";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -30,63 +24,61 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, File, Printer } from 'lucide-react';
+import { File, Printer, Loader2 } from 'lucide-react';
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 interface FilterOption {
+  _id: string;
+  label: string;
+}
+
+interface FilterGroup {
   id: string;
   label: string;
-  options: { value: string; label: string }[];
+  options: FilterOption[];
 }
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
+  searchKey?: string;
   data: TData[];
-  searchKey: string;
-  filterOptions?: FilterOption[];
+  filterGroups?: FilterGroup[];
   onFilterChange?: (filters: Record<string, string>) => void;
+  isLoading?: boolean;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
-  filterOptions,
-  onFilterChange,
+  filterGroups,
+  isLoading,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
-  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
-
-  const table = useReactTable({
-    data,
-    columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
-
-  const handleFilterChange = (filterId: string, value: string) => {
-    const newFilters = { ...activeFilters, [filterId]: value };
-    setActiveFilters(newFilters);
-    onFilterChange?.(newFilters);
-  };
+    const [sorting, setSorting] = useState<SortingState>([])
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+    const [rowSelection, setRowSelection] = useState({})
+    const table = useReactTable({
+        data,
+        columns,
+        onSortingChange: setSorting,
+        onColumnFiltersChange: setColumnFilters,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        onColumnVisibilityChange: setColumnVisibility,
+        onRowSelectionChange: setRowSelection,
+        state: {
+            sorting,
+            columnFilters,
+            columnVisibility,
+            rowSelection,
+        },
+    });
 
   const exportToCSV = () => {
     const csvData = data.map((row) =>
@@ -134,26 +126,29 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center gap-2">
-          <Input
-            placeholder={`Search by ${searchKey}`}
-            value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
+        <Input
+          placeholder={`Search by ${searchKey}`}
+          value={
+              (table?.getColumn(searchKey)?.getFilterValue() as string) ?? ""
+          }
+          onChange={(event) =>
               table.getColumn(searchKey)?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-          {filterOptions && filterOptions.map((filterOption) => (
+          }
+          className="max-w-sm"
+        />
+          {filterGroups && filterGroups.map((filterGroup) => (
             <Select
-              key={filterOption.id}
-              onValueChange={(value) => handleFilterChange(filterOption.id, value)}
-              defaultValue={filterOption.options[0].value}
+              key={filterGroup.id}
+              onValueChange={(value) => handleFilterChange(filterGroup.id, value)}
+              value={filters[filterGroup.id] || ""}
             >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={filterOption.label} />
+                <SelectValue placeholder={filterGroup.label} />
               </SelectTrigger>
               <SelectContent>
-                {filterOption.options.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                <SelectItem value="">All {filterGroup.label}</SelectItem>
+                {filterGroup.options.map((option) => (
+                  <SelectItem key={option._id} value={option._id}>
                     {option.label}
                   </SelectItem>
                 ))}
@@ -162,30 +157,6 @@ export function DataTable<TData, TValue>({
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                Columns <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
           <Button variant="outline" onClick={exportToCSV}>
             <File className="mr-2 h-4 w-4" /> CSV
           </Button>
@@ -200,33 +171,38 @@ export function DataTable<TData, TValue>({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {table?.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
-            {table?.getRowModel().rows?.length ? (
-              table?.getRowModel().rows.map((row) => (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </TableCell>
+              </TableRow>
+            ) : data.length > 0 ? (
+              table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
-                  {row?.getVisibleCells().map((cell) => (
+                  {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell?.column.columnDef.cell, cell.getContext())}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -243,7 +219,7 @@ export function DataTable<TData, TValue>({
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+        {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
         <div className="space-x-2">
@@ -265,7 +241,7 @@ export function DataTable<TData, TValue>({
           </Button>
         </div>
       </div>
+
     </div>
   );
 }
-

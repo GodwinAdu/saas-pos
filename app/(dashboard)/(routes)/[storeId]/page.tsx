@@ -5,7 +5,9 @@ import { currentUser } from "@/lib/helpers/current-user";
 import { Loader2 } from "lucide-react";
 import { redirect } from "next/navigation";
 
-const page = async ({ params }: { params: { storeId: string } }) => {
+type Params = Promise<{ storeId: string }>
+const page = async ({ params }: { params: Params }) => {
+  const { storeId } = await params
   const { activeBranch } = useBranchStore.getState();
   const user = await currentUser();
 
@@ -44,9 +46,9 @@ const page = async ({ params }: { params: { storeId: string } }) => {
   }
 
   if (activeBranch && user.accessLocation.includes(activeBranch._id)) {
-    redirect(`/${params.storeId}/dashboard/${activeBranch._id}`);
+    redirect(`/${storeId}/dashboard/${activeBranch._id}`);
   } else {
-    redirect(`/${params.storeId}/dashboard/${user.accessLocation[0]}`);
+    redirect(`/${storeId}/dashboard/${user.accessLocation[0]}`);
   }
 
 

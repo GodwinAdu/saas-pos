@@ -23,7 +23,7 @@ export async function currentUserRole() {
 
         return userRole;
 
-    } catch (error: any) {
+    } catch (error) {
         console.log("Error happen while fetching role", error)
     }
 }

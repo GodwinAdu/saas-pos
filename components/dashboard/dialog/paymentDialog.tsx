@@ -5,7 +5,6 @@ import {
     DialogClose,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -32,7 +31,13 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { BanknoteIcon } from "lucide-react";
-import { PaystackButton } from "react-paystack";
+import dynamic from "next/dynamic";
+
+// Dynamically import PaystackButton (client-side only)
+const PaystackButton = dynamic(() => import("react-paystack").then(mod => mod.PaystackButton), {
+    ssr: false // Disable SSR for this component
+});
+
 
 
 const formSchema = z.object({
@@ -68,7 +73,7 @@ const periods = [
     { name: "Yearly (20% Discount)", value: 12 },
 ];
 
-export function PaymentDialog({store}:{store:IStore}) {
+export function PaymentDialog({ store }: { store: IStore }) {
     const [setupPrice, setSetupPrice] = useState(200);
     const [totalPrice, setTotalPrice] = useState(200);
 
@@ -79,6 +84,8 @@ export function PaymentDialog({store}:{store:IStore}) {
             numberOfBranches: store.numberOfBranches,
         },
     });
+    const branches = form.watch('numberOfBranches')
+    const period = form.watch("period")
 
     // Watch form changes and update prices
     useEffect(() => {
@@ -86,8 +93,8 @@ export function PaymentDialog({store}:{store:IStore}) {
         const period = form.watch("period");
         setSetupPrice(calculateSetupPrice(Number(branches)));
         setTotalPrice(calculateTotalPrice(Number(branches), Number(period.value)));
-    }, [form.watch("numberOfBranches"), form.watch("period")]);
-    
+    }, [branches, period, form]);
+
 
     const handlePaymentSuccess = () => {
         form.handleSubmit(onSubmit)();

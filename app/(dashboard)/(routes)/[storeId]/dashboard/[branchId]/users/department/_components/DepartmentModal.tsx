@@ -62,7 +62,8 @@ export function DepartmentModal() {
                 title: "Created successfully",
                 description: "New Department was added successfully...",
             });
-        } catch (error: unknown) {
+        } catch (error) {
+            console.error("Error occurred while creating department:", error);
             playErrorSound()
             toast({
                 title: "Something went wrong",

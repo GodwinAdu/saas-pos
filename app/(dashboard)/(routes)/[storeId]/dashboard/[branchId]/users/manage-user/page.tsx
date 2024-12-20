@@ -10,7 +10,6 @@ import { columns } from './_components/column'
 import Heading from '@/components/commons/Header'
 import { DataTable } from '@/components/table/data-table'
 import { fetchAllUsers } from '@/lib/actions/user.actions'
-import UserGrid from './_components/UserGrid'
 import { fetchAllDepartments } from '@/lib/actions/department.actions'
 
 const page = async () => {
@@ -40,7 +39,8 @@ const page = async () => {
       </div>
       <Separator />
       <div className="">
-        <UserGrid departments={departments} />
+        <DataTable searchKey='fullName' columns={columns} data={data} />
+        {/* <UserGrid departments={departments} /> */}
       </div>
     </>
   )
