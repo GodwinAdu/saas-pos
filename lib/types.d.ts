@@ -397,3 +397,8 @@ interface ISellingGroup extends Document {
     updatedAt: Date;
     _id: string;
 }
+
+
+
+type BranchIdParams = Promise<{ branchId: string }>
+type StoreIdParams = Promise<{ storeId: string }>

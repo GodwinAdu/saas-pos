@@ -3,9 +3,10 @@ import { Separator } from '@/components/ui/separator'
 import React from 'react'
 import BranchSettingsForm from './_components/BranchSettings'
 import { currentBranch } from '@/lib/helpers/current-branch'
-
-const page = async ({ params }: { params: { branchId: string } }) => {
-  const branch = await currentBranch(params.branchId as string)
+type Params = Promise<{ branchId: string }>
+const page = async ({ params }: { params: Params }) => {
+  const { branchId } = await params;
+  const branch = await currentBranch(branchId as string)
   return (
     <>
       <div className="flex justify-between items-center">

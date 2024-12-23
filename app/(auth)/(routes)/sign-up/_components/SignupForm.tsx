@@ -34,30 +34,10 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { PaystackButton } from "react-paystack";
 import { signUpUser } from "@/lib/helpers/login-user";
+import { stepOneSchema, stepTwoSchema } from "@/lib/validators/sign-up-schema";
 
-const stepOneSchema = z.object({
-    storeName: z.string().min(2, {
-        message: "Store name must be at least 2 characters.",
-    }),
-    storeEmail: z.string().min(2, {
-        message: "Store email is required.",
-    }),
-    numberOfBranches: z.coerce.string(),
-});
 
-const stepTwoSchema = z.object({
-    fullName: z.string().min(2, {
-        message: "Full name must be at least 2 characters.",
-    }),
-    email: z.string().email({
-        message: "Invalid email address.",
-    }),
-    password: z.string().min(8, {
-        message: "Password must be at least 8 characters.",
-    }),
-});
 
 const calculateSetupPrice = (branches: number) => {
     return (branches / 5) * 200;
@@ -72,7 +52,7 @@ const SignupForm = () => {
         resolver: zodResolver(stepOneSchema),
         defaultValues: {
             storeName: "",
-            storeEmail:"",
+            storeEmail: "",
             numberOfBranches: "5",
         },
     });
@@ -86,11 +66,13 @@ const SignupForm = () => {
         },
     });
 
+    const numberOfBranches = formStepOne.watch("numberOfBranches");
+
 
     useEffect(() => {
         const branches = formStepOne.watch("numberOfBranches");
         setSetupPrice(calculateSetupPrice(Number(branches)));
-    }, [formStepOne.watch("numberOfBranches")]);
+    }, [numberOfBranches, formStepOne]);
 
     const handleNext = () => {
         formStepOne.trigger().then((isValid) => {
@@ -114,10 +96,11 @@ const SignupForm = () => {
             toast({
                 title: "Registration Successful",
                 description: "Welcome to the store!",
-                variant:'success'
+                variant: 'success'
             });
             router.push("/sign-in");
         } catch (error) {
+            console.log('error', error)
             toast({
                 title: "Something went wrong",
                 description: "Please try again later",

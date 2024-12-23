@@ -5,8 +5,8 @@ import { currentUser } from "@/lib/helpers/current-user";
 import { Loader2 } from "lucide-react";
 import { redirect } from "next/navigation";
 
-type Params = Promise<{ storeId: string }>
-const page = async ({ params }: { params: Params }) => {
+
+const page = async ({ params }: { params: StoreIdParams   }) => {
   const { storeId } = await params
   const { activeBranch } = useBranchStore.getState();
   const user = await currentUser();

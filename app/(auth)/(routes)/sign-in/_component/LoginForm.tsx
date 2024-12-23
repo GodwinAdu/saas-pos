@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -19,19 +18,13 @@ import { useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
 import { logInUser } from "@/lib/helpers/login-user"
 import Link from "next/link"
-const formSchema = z.object({
-    email: z.string().min(2, {
-        message: "Username must be at least 2 characters.",
-    }),
-    password: z.string().min(2, {
-        message: "Password must be at least 2 characters.",
-    }),
-})
+import { LoginFormSchema } from "@/lib/validators/sign-up-schema"
+
 const LoginForm = () => {
     const router = useRouter()
     // 1. Define your form.
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<z.infer<typeof LoginFormSchema>>({
+        resolver: zodResolver(LoginFormSchema),
         defaultValues: {
             email: "",
             password: ""
@@ -41,7 +34,7 @@ const LoginForm = () => {
     const { isSubmitting } = form.formState
 
     // 2. Define a submit handler.
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof LoginFormSchema>) {
         try {
             const user = await logInUser(values)
 
@@ -55,6 +48,7 @@ const LoginForm = () => {
 
             router.push(`/${user.storeId}`);
         } catch (error) {
+            console.log('Error logging in user', error);
             toast({
                 title: "Something went wrong",
                 description: "Please try again later",

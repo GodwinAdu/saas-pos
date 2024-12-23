@@ -1,5 +1,4 @@
-"use server"
-
+'use server'
 import { cookies } from "next/headers";
 import User from "../models/user.models";
 import { connectToDB } from "../mongoose";
@@ -12,6 +11,7 @@ import Department from "../models/deparment.models";
 import { Types } from "mongoose";
 import History from "../models/history.models";
 import { getNextMonthDate } from "../utils";
+import { LoginFormSchema, stepOneSchema, stepTwoSchema } from '../validators/sign-up-schema';
 
 interface Props {
     email: string;
@@ -25,6 +25,15 @@ export async function logInUser(values: Props) {
         const { email, password } = values;
 
         if (!email || !password) throw new Error('Missing fields for login');
+
+        const validateFields = LoginFormSchema.safeParse({
+            email,
+            password
+        });
+
+        if (!validateFields.success) {
+            throw new Error('Invalid data for login');
+        }
 
         await connectToDB();
 
@@ -226,34 +235,48 @@ const defaultRolePermissions = {
 };
 
 
-
 export async function signUpUser(values: SignUpProps) {
     try {
         const { fullName, email, password, storeName, storeEmail, numberOfBranches } = values;
 
-        // Basic validation
+        // Basic validation for required fields
         if (!fullName || !email || !password || !storeName || !numberOfBranches) {
-            throw new Error("Missing required fields for sign-up");
+            throw new Error("Missing required fields for sign-up.");
+        }
+        const validateBusinessFields = stepOneSchema.safeParse({
+            storeName,
+            storeEmail,
+            numberOfBranches,
+        });
+
+        const validateUserFields = stepTwoSchema.safeParse({
+            fullName,
+            email,
+            password,
+        });
+
+        if (!validateBusinessFields.success || !validateUserFields.success) {
+            throw new Error("Invalid data for sign-up.");
         }
 
-        await connectToDB(); // Connect to DB if not already connected
+        await connectToDB(); // Ensure DB connection
 
         // Check for existing user
         const existingUser = await User.findOne({ email }).lean();
         if (existingUser) {
-            throw new Error("Email already in use");
+            throw new Error("Email is already in use.");
         }
 
         const username = generateUniqueUsername(fullName);
         const hashedPassword = await hash(password, 10);
 
-        // Pre-generate ObjectIDs for relationships
+        // Pre-generate ObjectIDs
         const storeId = new Types.ObjectId();
         const departmentId = new Types.ObjectId();
         const userId = new Types.ObjectId();
         const roleId = new Types.ObjectId();
 
-        // Prepare documents
+        // Create documents
         const newUser = new User({
             _id: userId,
             storeId,
@@ -306,24 +329,23 @@ export async function signUpUser(values: SignUpProps) {
             newRole.save(),
         ]);
 
+        // Record history
         await History.create({
-            storeId: newUser.storeId,
-            actionType: `USER_CREATED`, // Use a relevant action type
+            storeId: storeId,
+            actionType: `USER_CREATED`,
             details: {
-                itemId: newUser._id,
-                deletedAt: new Date(),
+                itemId: userId,
+                createdAt: new Date(),
             },
-            message: `${newUser.fullName} was signup in successfully`,
-            performedBy: newUser._id, // User who performed the action
-            entityId: newUser._id,  // The ID of the deleted unit
-            entityType: `User`,  // The type of the entity
+            message: `${fullName} signed up successfully.`,
+            performedBy: userId,
+            entityId: userId,
+            entityType: `User`,
         });
 
-
-        return JSON.parse(JSON.stringify(newUser)); // Optionally return the created user or any required info
-
+        return JSON.parse(JSON.stringify(newUser)); // Return created user info
     } catch (error) {
         console.error("Error signing up user:", error);
-        throw new Error("Failed to sign up user");
+        throw new Error("Failed to sign up user.");
     }
 }

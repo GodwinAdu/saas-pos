@@ -1,14 +1,8 @@
-import Footer from '@/components/commons/Footer';
-import Home from '@/components/commons/Home';
-import Navbar from '@/components/commons/Navbar';
-import useBranchStore from '@/hooks/use-branch-store';
-import { fetchRole } from '@/lib/actions/role.actions';
-import { currentUser } from '@/lib/helpers/current-user';
-import Image from 'next/image';
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import React from 'react';
 
+import Home from '@/components/commons/Home';
+import useBranchStore from '@/hooks/use-branch-store';
+import { currentUser } from '@/lib/helpers/current-user';
+import { redirect } from 'next/navigation';
 
 const Page = async () => {
   const user: IUser = await currentUser();

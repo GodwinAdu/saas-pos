@@ -6,12 +6,8 @@ import { currentBranch } from '@/lib/helpers/current-branch';
 import { fetchAllProducts } from '@/lib/actions/product.actions'
 import PosContent from '@/components/pos/pos-content'
 
-type Params = {
-  params: {
-    branchId: string,  // From the router params, e.g., '/branches/:branchId'
-  }
-}
-const page = async ({ params }: Params) => {
+
+const page = async ({ params }: { params: BranchIdParams }) => {
   const { branchId } = await params;
   const user = await currentUser();
   const branches = await fetchAllBranches()
