@@ -34,7 +34,7 @@ export function getNextDate(today: Date, period: number): Date {
 
   // Handle cases where adding months results in a day mismatch
   if (nextDate.getDate() !== today.getDate()) {
-      nextDate.setDate(0); // Adjust to the last day of the previous month if the day mismatches
+    nextDate.setDate(0); // Adjust to the last day of the previous month if the day mismatches
   }
 
   return nextDate;
@@ -44,20 +44,21 @@ export function getNextMonthDate(today: Date): Date {
   const nextMonth = new Date(today);
   nextMonth.setMonth(today.getMonth() + 1);
   if (nextMonth.getDate() !== today.getDate()) {
-      nextMonth.setDate(0); // Last day of the previous month if day mismatch
+    nextMonth.setDate(0); // Last day of the previous month if day mismatch
   }
   return nextMonth;
 }
 
 
-export function calculateTotalWithTax(amount:number, taxPercentage:number):number {
+export function calculateTotalWithTax(amount: number, taxPercentage: number): number {
   return amount * (1 + taxPercentage / 100);
 }
 
 
 export const findManualPrice = (prices: any[], unitId: string) => {
-    const priceObj = prices?.find(price => price.unitId._id === unitId);
-    return calculateTotalWithTax(priceObj?.price, priceObj?.tax)
+  console.log(prices, unitId)
+  const priceObj = prices?.find(price => price.unitId._id === unitId);
+  return calculateTotalWithTax(priceObj?.price, priceObj?.tax)
 };
 
 export const findAutomatedPrice = (
@@ -66,17 +67,17 @@ export const findAutomatedPrice = (
   selectedUnit: string,
   selectedValue: string // Pass this as a parameter
 ) => {
-  
+
   const retailCost = product?.retailPrice?.retailUnitCost;
 
   const retailMarkup = product?.retailPrice?.retailMarkupPercentage;
 
   const wholesaleCost = product?.wholesalePrice?.wholesaleUnitCost;
- 
+
   const wholesaleMarkup = product?.wholesalePrice?.wholesaleMarkupPercentage;
 
-  const findUnit = units.find((unit) => unit._id === selectedUnit);
-  
+  const findUnit = units?.find((unit) => unit._id === selectedUnit);
+
   if (!findUnit) {
     throw new Error('Selected unit not found');
   }

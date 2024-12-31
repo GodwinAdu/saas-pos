@@ -17,7 +17,8 @@ import SubscriptionForm from './SubscriptonForm'
 import { toast } from '@/hooks/use-toast'
 import { updateStore } from '@/lib/actions/store.actions'
 import { useRouter } from 'next/navigation'
-import SoundSettingForm from './soundSetting'
+import { playErrorSound, playSuccessSound } from '@/lib/audio'
+
 
 
 const storeFormSchema = z.object({
@@ -60,7 +61,6 @@ const storeFormSchema = z.object({
         subscriptionExpiry: z.coerce.date(),
         paymentStatus: z.string(),
     }),
-    sound: z.boolean(),
 })
 
 type StoreFormValues = z.infer<typeof storeFormSchema>
@@ -101,11 +101,10 @@ export default function StoreSettingsForm({ store }: { store: any }) {
                 value: 1,
             },
             subscriptionExpiry: new Date(),
-            paymentStatus: 'Demo',
+            paymentStatus: 'Free Tier',
         },
-        sound: true,
     }
-    
+
     const form = useForm<StoreFormValues>({
         resolver: zodResolver(storeFormSchema),
         defaultValues,
@@ -114,14 +113,17 @@ export default function StoreSettingsForm({ store }: { store: any }) {
     async function onSubmit(data: StoreFormValues) {
         setIsLoading(true)
         try {
-            await updateStore(storeId,data)
+            await updateStore(storeId, data)
+            playSuccessSound()
             router.refresh()
             toast({
                 title: "Settings updated successfully",
                 description: "Your store settings have been saved.",
+                variant: "success",
             })
         } catch (error) {
             console.log(error)
+            playErrorSound()
             toast({
                 title: "Error",
                 description: "An error occurred while saving your settings.",
@@ -142,7 +144,6 @@ export default function StoreSettingsForm({ store }: { store: any }) {
                         <TabsTrigger value="reporting">Reporting</TabsTrigger>
                         <TabsTrigger value="notifications">Notifications</TabsTrigger>
                         <TabsTrigger value="subscription">Subscription</TabsTrigger>
-                        <TabsTrigger value="sound">Sound</TabsTrigger>
                     </TabsList>
                     <TabsContent value="basic-info">
                         <Card>
@@ -196,17 +197,6 @@ export default function StoreSettingsForm({ store }: { store: any }) {
                             </CardHeader>
                             <CardContent>
                                 <SubscriptionForm control={form.control} />
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                    <TabsContent value="sound">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Sound Effect</CardTitle>
-                                <CardDescription>Manage Sound alert.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <SoundSettingForm control={form.control} />
                             </CardContent>
                         </Card>
                     </TabsContent>

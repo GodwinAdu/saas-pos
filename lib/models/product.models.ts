@@ -1,7 +1,7 @@
+import { Model, Schema, model, models } from "mongoose";
 
-import { Schema, model, models } from "mongoose";
 
-const ProductSchema = new Schema(
+const ProductSchema: Schema<IProduct> = new Schema(
   {
     name: {
       type: String,
@@ -151,8 +151,9 @@ const ProductSchema = new Schema(
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+type ProductModel = Model<IProduct>
 
-const Product = models.Product || model("Product", ProductSchema);
+const Product: ProductModel = models.Product || model<IProduct>("Product", ProductSchema);
 
 export default Product;
 

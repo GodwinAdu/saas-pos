@@ -65,9 +65,9 @@ const StoreSchema: Schema<IStore> = new Schema({
         ],
     },
     notifications: {
-        lowStockAlert: { type: Boolean, default: true },
+        lowStockAlert: { type: Boolean, default: false },
         overdueSubscriptionAlert: { type: Boolean, default: true },
-        emailNotifications: { type: Boolean, default: true },
+        emailNotifications: { type: Boolean, default: false },
     },
     subscriptionPlan: {
         period: {
@@ -85,7 +85,7 @@ const StoreSchema: Schema<IStore> = new Schema({
         },
         paymentStatus: {
             type: String, // e.g., "Paid", "Pending", "Overdue"
-            default: 'Demo'
+            default: 'Free Tier'
         },
     },
     branchIds: [{

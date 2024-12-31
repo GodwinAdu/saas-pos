@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogFooter, } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ShoppingCart, Plus, Minus, X,Search} from 'lucide-react'
+import { ShoppingCart, Plus, Minus, X, Search } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import TransactionHistoryModal from './TransactionModal'
@@ -28,6 +28,7 @@ import SuspendModal from './SuspendModal'
 import OrderModal from './OrderModal'
 import AddExpensesModal from './AddExpenses'
 import Navbar from './Navbar'
+import { sub } from 'date-fns'
 
 
 
@@ -41,8 +42,20 @@ interface Product {
     barcode: string
 }
 
-interface CartItem extends Product {
+interface CartItem {
+    id: number
+    name: string
+    price: number
+    image: string
+    inventory: number
+    category: string
+    barcode: string
     quantity: number
+    item: {
+        manualPrice: number
+        unit: string[]
+    }
+    unit: string
 }
 
 interface Customer {
@@ -71,7 +84,7 @@ const customers: Customer[] = [
     { id: 2, name: "Jane Smith", email: "jane@example.com", loyaltyPoints: 50, address: "456 Elm St, Othertown, USA", phone: "555-5678" },
 ]
 
-export default function PosContent({ user, branches, branch, products }: { user: IUser, branches: IBranch[], branch: IBranch, products: any[] }) {
+export default function PosContent({ user, branches, branch, products, suspends }: { user: IUser, branches: IBranch[], branch: IBranch, products: any[], suspends: any[] }) {
     const {
         cartItems,
         discountPercent,
@@ -111,14 +124,12 @@ export default function PosContent({ user, branches, branch, products }: { user:
 
 
     // for manual price
-    const subtotalManual = cartItems.reduce((sum, item) => sum + findManualPrice(item.item.manualPrice, item.unit as string) * item.quantity, 0);
-    const subtotalAutomated = cartItems.reduce((sum, item) => sum + findAutomatedPrice(item.item, item.item.unit, item.unit as string, selectedValue as string) * item.quantity, 0);
-    const discount = (branch.pricingType === 'manual' ? subtotalManual : subtotalAutomated) * (discountPercent / 100);
-    const total = (branch.pricingType === 'manual' ? subtotalManual : subtotalAutomated) - discount;
+    const subtotalManual = cartItems.reduce((sum, item) => sum + findManualPrice(item.item?.manualPrice, item?.unit as string) * item.quantity, 0);
+    const subtotalAutomated = cartItems.reduce((sum, item) => sum + findAutomatedPrice(item?.item, item?.item?.unit, item?.unit as string, selectedValue as string) * item.quantity, 0);
+    const subtotal = branch.pricingType === 'manual' ? subtotalManual : subtotalAutomated;
+    const discount = subtotal * (discountPercent / 100);
+    const total = subtotal - discount;
 
-
-
-    // for automated Price
 
 
 
@@ -159,7 +170,7 @@ export default function PosContent({ user, branches, branch, products }: { user:
         e.preventDefault()
         const product = products.find(p => p.barcode === barcodeInput)
         if (product) {
-            addToCart(product)
+            addToCart(branch, product, product.unit[0]._id, quantity)
             setBarcodeInput("")
         } else {
             toast({
@@ -175,7 +186,7 @@ export default function PosContent({ user, branches, branch, products }: { user:
     return (
         <div className="flex flex-col h-screen bg-gray-100">
 
-            <Navbar branches={branches} user={user} customers={customers} setSelectedCustomer={setSelectedCustomer} setIsTransactionHistoryOpen={setIsTransactionHistoryOpen} />
+            <Navbar products={suspends} branches={branches} user={user} customers={customers} setSelectedCustomer={setSelectedCustomer} setIsTransactionHistoryOpen={setIsTransactionHistoryOpen} />
             <main className="flex-grow flex flex-col md:flex-row overflow-hidden bg-background">
                 <div className="w-full md:w-2/3 p-4">
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -233,17 +244,16 @@ export default function PosContent({ user, branches, branch, products }: { user:
                                     {filteredProducts.map(product => (
                                         <Card key={product.id} className="overflow-hidden">
                                             <CardHeader className="p-0">
-
-                                                <Image width={100} height={100} src='/sardine.jpg' alt={product.name} className="w-full h-32 object-cover" />
+                                                <Image width={100} height={100} src={product.images[0] ?? '/sardine.jpg'} alt={product.name} className="w-full h-24 object-scale-down" />
                                             </CardHeader>
-                                            <CardContent className="p-4">
+                                            <CardContent className="p-2">
                                                 <h3 className="font-semibold text-sm mb-1">{product.name}</h3>
                                                 <Badge variant={product.stock > 0 ? "secondary" : "destructive"} className="mt-2">
                                                     {product.stock > 0 ? `In stock: ${product.stock}` : "Out of stock"}
                                                 </Badge>
                                             </CardContent>
                                             <CardFooter className="p-2">
-                                                <Button onClick={() => addToCart(branch, product, product.unit[0]._id, quantity)} className="w-full" disabled={product.stock === 0}>
+                                                <Button onClick={() => addToCart(branch, product, product.unit ? product.unit[0]._id : '', quantity)} className="w-full" disabled={product.stock === 0}>
                                                     <Plus className="h-4 w-4 mr-2" /> Add
                                                 </Button>
                                             </CardFooter>
@@ -252,14 +262,14 @@ export default function PosContent({ user, branches, branch, products }: { user:
                                 </div>
                             </ScrollArea>
                             <div className="pt-4 flex gap-5">
-                                <SuspendModal />
+                                <SuspendModal branch={branch} />
                                 <OrderModal />
                                 <AddExpensesModal />
                             </div>
                         </TabsContent>
                         <TabsContent value="categories">
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                {categories.map((category,index) => (
+                                {categories.map((category, index) => (
                                     <Card key={index} className="overflow-hidden">
                                         <CardHeader>
                                             <CardTitle>{category}</CardTitle>
@@ -307,8 +317,8 @@ export default function PosContent({ user, branches, branch, products }: { user:
                                                     <AvatarFallback>{item.name[0]}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <p className="font-medium">{item.name}</p>
-                                                    <p className="text-sm text-muted-foreground">${branch.pricingType === 'manual' ? findManualPrice(item.item.manualPrice, (selectedUnit as string || item?.unit as string)).toFixed(2) : findAutomatedPrice(item.item, item.item.unit, item.unit as string, selectedValue as string).toFixed(2)}</p>
+                                                    <p className="font-medium">{item?.name}</p>
+                                                    <p className="text-sm text-muted-foreground">&#x20B5;{branch.pricingType === 'manual' ? findManualPrice(item.item.manualPrice, (selectedUnit as string || item?.unit as string)).toFixed(2) : findAutomatedPrice( item?.item, item.item?.unit, item?.unit as string, selectedValue as string).toFixed(2)}</p>
                                                 </div>
                                             </div>
                                             <UnitSelect
@@ -353,7 +363,7 @@ export default function PosContent({ user, branches, branch, products }: { user:
                     <div className="space-y-4">
                         <div className="flex justify-between items-center">
                             <span className="font-semibold">Subtotal:</span>
-                            <span>${(branch.pricingType === 'manual' ? subtotalManual.toFixed(2) : subtotalAutomated.toFixed(2))}</span>
+                            <span>&#x20B5;{(branch.pricingType === 'manual' ? subtotalManual.toFixed(2) : subtotalAutomated.toFixed(2))}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                             <Label htmlFor="discount">Discount %:</Label>
@@ -364,11 +374,11 @@ export default function PosContent({ user, branches, branch, products }: { user:
                                 onChange={(e) => setDiscountPercent(Number(e.target.value))}
                                 className="w-20"
                             />
-                            <span className="text-sm text-muted-foreground">-${discount.toFixed(2)}</span>
+                            <span className="text-sm text-muted-foreground">-&#x20B5;{discount.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center font-bold">
                             <span>Total:</span>
-                            <span>${total.toFixed(2)}</span>
+                            <span>&#x20B5;{total.toFixed(2)}</span>
                         </div>
                         <Button className="w-full" onClick={() => setIsCheckoutDialogOpen(true)} disabled={cartItems.length === 0}>
                             Proceed to Checkout

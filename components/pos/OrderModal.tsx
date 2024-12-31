@@ -4,15 +4,13 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
 import { useCartStore } from "@/hooks/use-cart";
 import { toast } from "@/hooks/use-toast";
 import { playWarningSound } from "@/lib/audio";
-import { Pause, ShoppingCartIcon } from "lucide-react"
+import { ShoppingCartIcon } from "lucide-react"
 import { useState } from "react";
 
 const OrderModal = () => {
@@ -39,7 +37,7 @@ const OrderModal = () => {
                     <DialogHeader>
                         <DialogTitle>Edit Profile</DialogTitle>
                         <DialogDescription>
-                            Make changes to your profile here. Click save when you're done.
+                            Make changes to your profile here. Click save when you&apos;re done.
                         </DialogDescription>
                     </DialogHeader>
                     {/* Add additional content here */}

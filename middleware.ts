@@ -6,9 +6,6 @@ const SECRET_KEY = new TextEncoder().encode(process.env.TOKEN_SECRET_KEY);
 if (!SECRET_KEY) {
     throw new Error("Missing environment variable: TOKEN_SECRET_KEY");
 }
-if (!process.env.ARCJET_KEY) {
-    throw new Error("Missing environment variable: ARCJET_KEY");
-}
 
 const publicRoutes = ['/sign-in', '/sign-up', '/']; // Add other public routes here
 const accessOnlyPos = ['/pos']; // Specific routes with limited access
@@ -28,7 +25,6 @@ async function verifyToken(token: string): Promise<JWTPayload | null> {
 
 
 export async function middleware(request: NextRequest) {
-
 
     const { pathname } = request.nextUrl;
     const pathSegments = pathname.split('/');

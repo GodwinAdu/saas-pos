@@ -1,9 +1,7 @@
 import {
     Select,
     SelectContent,
-    SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
@@ -15,11 +13,14 @@ interface UnitSelectionProps {
 }
 
 const UnitSelect = ({ selectedUnit, units, onUnitChange }: UnitSelectionProps) => {
+    console.log(units,'units')
+    console.log(selectedUnit,'selectedUnit')
+    // console.log(onUnitChange,'onUnitChange')
     return (
         <Select
             onValueChange={(value) => onUnitChange(value)}
             value={selectedUnit} // Use the selected unit prop
-           
+
         >
             <SelectTrigger className="w-[100px]">
                 <SelectValue placeholder="Select unit" />

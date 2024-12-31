@@ -9,6 +9,7 @@ import UserDropdown from "../commons/user/user-dropdown";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import Calculator from "../commons/Calculater";
 import FullScreenButton from "../commons/FullScreenButton";
+import SettingComponent from "../pos/Settings";
 
 const Navbar = ({ user }: { user: IUser }) => {
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
@@ -58,9 +59,7 @@ const Navbar = ({ user }: { user: IUser }) => {
         <Button variant="outline" size="icon">
           <BarChart4 className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon">
-          <Settings className="h-4 w-4" />
-        </Button>
+        <SettingComponent />
 
         <UserDropdown
           email={user?.email}

@@ -9,7 +9,7 @@ interface CartItem {
     id: string;
     name: string;
     unit?: string;
-    item: any;
+    item: Product;
     quantity: number;
     inventory: number;
     image: string;
@@ -25,19 +25,28 @@ interface Branch {
 }
 
 interface Product {
-    id: string;
+    _id: string;
     name: string;
     stock: number;
     images?: string[];
+    unit: {
+        _id: string;
+        name: string;
+    }[];
     manualPrice: {
-        unitId: string;
+        unitId: {
+            _id: string;
+            name: string;
+        };
         price: number;
     }[];
     wholesalePrice?: {
         wholesaleSellingPrice: number;
+        wholesaleMarkupPercentage: number;
     };
     retailPrice?: {
         retailSellingPrice: number;
+        retailMarkupPercentage: number;
     };
 }
 
@@ -45,6 +54,7 @@ interface CartState {
     cartItems: CartItem[];
     discountPercent: number;
     addToCart: (branch: Branch, product: Product, selectedUnit: string, quantity?: number,) => void;
+    addMultipleToCart: (branch: Branch, products: { product: Product; unit: string; quantity: number }[]) => void;
     removeFromCart: (productId: string) => void;
     updateQuantity: (productId: string, quantity: number) => void;
     updateUnit: (productId: string, newUnit: string) => void;
@@ -185,6 +195,140 @@ export const useCartStore = create<CartState>()(
                         set({ cartItems: [...get().cartItems, newCartItem] });
                     }
                 }
+            },
+            addMultipleToCart: (branch, products) => {
+                products.forEach((product) => {
+                    console.log(products,'bulk add multiple')
+                    // Determine pricing based on branch settings
+                    if (branch.pricingType === 'manual') {
+                        if (product.productId.manualPrice[0].price === 0) {
+                            console.log(product.productId.manualPrice[0].price, 'price testing')
+                            playWarningSound();
+                            toast({
+                                title: 'Warning',
+                                description: 'Product has no prices defined for selected unit. please check your branch settings',
+                                variant: 'warning',
+                            })
+                            return;
+                        }
+                        playSuccessSound()
+                        const currentItems = get().cartItems
+                        const existingItem = currentItems.find((currenItem) => currenItem.item._id === product.productId._id && currenItem.unit === product.unit._id);
+
+                        if (existingItem) {
+                            const existingUnits = currentItems
+                                .filter(cartItem => cartItem.item._id === product.productId._id)
+                                .map(cartItem => cartItem.unit);
+
+                            let unitToAdd = product.unit._id;
+
+                            for (let i = 0; i < product.productId.manualPrice.length; i++) {
+                                if (!existingUnits.includes(product.productId.manualPrice[i].unitId._id)) {
+                                    unitToAdd = product.productId.manualPrice[i].unitId._id;
+                                    break;
+                                }
+                            }
+                            if (existingUnits.length >= product.productId.manualPrice.length) {
+                                const primaryUnitIndex = currentItems.findIndex(cartItem => cartItem.item._id === product.productId._id && cartItem.unit === product.productId.manualPrice[0].unitId._id);
+
+                                const newCartItems = currentItems.map((cartItem, index) =>
+                                    index === primaryUnitIndex
+                                        ? { ...cartItem, quantity: cartItem.quantity + product.quantity }
+                                        : cartItem
+                                );
+                                set({ cartItems: newCartItems });
+                            } else {
+                                const newCartItem = {
+                                    id: uuidv4(),
+                                    name: product.productId.name,
+                                    item: product.productId,
+                                    unit: unitToAdd,
+                                    quantity: product.quantity,
+                                    inventory: product.product.stock,
+                                    image: product.productId.images?.[0] || '', // Assuming images array
+                                };
+                                set({ cartItems: [...currentItems, newCartItem] });
+
+                            }
+                        } else {
+                            const newCartItem = {
+                                id: uuidv4(),
+                                name: product.productId.name,
+                                item: product.productId,
+                                unit: product.unit._id || product.productId.manualPrice[0].unitId._id,
+                                quantity: product.quantity,
+                                inventory: product.productId.stock,
+                                image: product.productId.images?.[0] || '', // Assuming images array
+                            };
+                            set({ cartItems: [...currentItems, newCartItem] });
+                        }
+
+                    } else if (branch.pricingType === 'automated') {
+                        if (product.productId.retailPrice?.retailMarkupPercentage === 0 || product.productId.wholesalePrice?.wholesaleMarkupPercentage === 0) {
+                            playWarningSound();
+                            toast({
+                                title: 'Warning',
+                                description: 'Product has no prices defined for selected unit. please check your branch settings',
+                                variant: 'warning',
+                            })
+                            return;
+                        }
+                        playSuccessSound()
+                        const currentItems = get().cartItems;
+                        console.log(currentItems, 'currentiq')
+                        const existingItem = currentItems.find((currenItem) => currenItem.item._id === product.productId._id && currenItem.unit === product.unit._id);
+
+                        if (existingItem) {
+
+                            const existingUnits = currentItems
+                                .filter(cartItem => cartItem.item._id === product.productId._id)
+                                .map(cartItem => cartItem.unit);
+
+                            let unitToAdd = product.unit;
+                            for (let i = 0; i < product.productId.unit.length; i++) {
+                                if (!existingUnits.includes(product.productId.unit[i]._id)) {
+                                    unitToAdd = product.productId.unit[i]._id;
+                                    break;
+                                }
+                            }
+                            if (existingUnits.length >= product.unit.length) {
+                                const primaryUnitIndex = currentItems.findIndex(cartItem => cartItem.item._id === product.productId._id && cartItem.unit === product.productId.unit[0]._id);
+
+                                const newCartItems = currentItems.map((cartItem, index) =>
+                                    index === primaryUnitIndex
+                                        ? { ...cartItem, quantity: cartItem.quantity + product.quantity }
+                                        : cartItem
+                                );
+                                set({ cartItems: newCartItems });
+                            } else {
+                                const newCartItem = {
+                                    id: uuidv4(),
+                                    name: product.productId.name,
+                                    item: product.productId,
+                                    unit: unitToAdd,
+                                    quantity: product.quantity,
+                                    inventory: product.productId.stock,
+                                    image: product.productId.images?.[0] || '', // Assuming images array
+                                };
+                                set({ cartItems: [...currentItems, newCartItem] });
+
+                            }
+
+                        } else {
+                            const newCartItem = {
+                                id: uuidv4(),
+                                name: product.productId.name,
+                                item: product.productId,
+                                unit: product.unit._id || product.productId.unit[0]._id,
+                                quantity: product.quantity,
+                                inventory: product.productId.stock,
+                                image: product.productId.images?.[0] || '', // Assuming images array
+                            };
+                            set({ cartItems: [...get().cartItems, newCartItem] });
+                        }
+                    }
+                })
+
             },
             updateUnit: (itemId: string, newUnit: string) => {
 

@@ -128,7 +128,6 @@ export default function BranchSettingsForm({ branch }: { branch: any }) {
             <TabsTrigger value="promotions">Promotions</TabsTrigger>
             <TabsTrigger value="pricing">Product Price & Stock</TabsTrigger>
             <TabsTrigger value="settings">Branch Settings</TabsTrigger>
-            <TabsTrigger value="sound">Sound Settings</TabsTrigger>
           </TabsList>
           <TabsContent value="promotions">
             <Card>
@@ -321,39 +320,6 @@ export default function BranchSettingsForm({ branch }: { branch: any }) {
                   )}
                 />
                 <OperatingHoursForm control={form.control} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="sound">
-            <Card>
-              <CardHeader>
-                <CardTitle>Sound Settings</CardTitle>
-                <CardDescription>Manage your sound alert settings.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="sound"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          Sound Effects
-                        </FormLabel>
-                        <FormDescription>
-                          Enable sound effects for notifications.
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
               </CardContent>
             </Card>
           </TabsContent>

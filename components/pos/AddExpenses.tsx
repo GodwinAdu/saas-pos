@@ -4,12 +4,11 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Pause, PlusIcon, ShoppingCartIcon } from "lucide-react"
+import { Pause, PlusIcon, } from "lucide-react"
 
 const AddExpensesModal = () => {
   return (
@@ -21,7 +20,7 @@ const AddExpensesModal = () => {
       <DialogHeader>
         <DialogTitle>Edit profile</DialogTitle>
         <DialogDescription>
-          Make changes to your profile here. Click save when youre done.
+          Make changes to your profile here. Click save when you&apos;re done.
         </DialogDescription>
       </DialogHeader>
      

@@ -239,7 +239,6 @@ interface IBranch extends Document {
         wholesale: boolean;
         retail: boolean;
     };
-    sound: boolean;
     createdBy?: ObjectId | null; // Reference to the User model who created the branch
     modifiedBy?: ObjectId | null; // Reference to the User model who modified the branch
     mod_flag?: boolean; // Modification flag (default: false)
@@ -397,6 +396,120 @@ interface ISellingGroup extends Document {
     updatedAt: Date;
     _id: string;
 }
+
+interface SeasonalPricing {
+    startDate?: Date;
+    endDate?: Date;
+    price?: number;
+}
+
+interface CustomerPricing {
+    customerId: string;
+    price: number;
+}
+
+interface VendorPrice {
+    unitId?: Types.ObjectId;
+    productPrice?: number;
+    productQuantity?: number;
+}
+
+interface ManualPrice {
+    tax?: number;
+    unitId?: Types.ObjectId;
+    price?: number;
+}
+
+interface RetailPrice {
+    retailUnitId?: Types.ObjectId;
+    retailMarkupPercentage?: number;
+    retailSellingPrice?: number;
+    retailMargin?: number;
+    retailUnitQuantity?: number;
+    retailUnitCost?: number;
+}
+
+interface WholesalePrice {
+    wholesaleUnitId?: Types.ObjectId;
+    wholesaleMarkupPercentage?: number;
+    wholesaleMargin?: number;
+    wholesaleUnitQuantity?: number;
+    wholesaleUnitCost?: number;
+    wholesaleSellingPrice?: number;
+}
+
+interface IProduct extends Document {
+    name: string;
+    brandId?: Types.ObjectId;
+    categoryId?: Types.ObjectId;
+    expiryDate?: Date;
+    barcode: string;
+    sku: string;
+    description?: string;
+    tags?: string[];
+    color?: string[];
+    size?: string[];
+    unit?: Types.ObjectId[];
+    seasonalPricing?: SeasonalPricing;
+    customerPricing?: CustomerPricing[];
+    vendorPrice?: VendorPrice;
+    manualPrice?: ManualPrice[];
+    retailPrice?: RetailPrice;
+    wholesalePrice?: WholesalePrice;
+    images?: string[];
+    stockCalculationMethod?: string;
+    stock?: number;
+    alertQuantity?: number;
+    salesCount?: number;
+    monthlySales?: Map<string, number>;
+    active?: boolean;
+    selling?: boolean;
+    createdBy?: Types.ObjectId;
+    modifiedBy?: Types.ObjectId;
+    mod_flag?: boolean;
+    del_flag?: boolean;
+    action_type?: string;
+    supplierId?: Types.ObjectId;
+    warehouseId?: Types.ObjectId;
+    lastRestocked?: Date;
+    lastModifiedAction?: string;
+    lastModifiedBy?: Types.ObjectId;
+    lastModifiedDate?: Date;
+}
+
+
+interface ITrash extends Document {
+    storeId: Types.ObjectId;
+    originalCollection: string;
+    document: any;
+    message?: string;
+    deletedBy?: Types.ObjectId;
+    deletedAt?: Date;
+    autoDelete?: boolean;
+}
+
+// suspend types
+interface Product {
+    productId: Types.ObjectId;
+    unit?: string;
+    quantity: number;
+    price: number;
+}
+
+interface ISuspend extends Document {
+    storeId: Types.ObjectId;
+    branchId: Types.ObjectId;
+    customerId: Types.ObjectId;
+    products: Product[];
+    description?: string;
+    date: Date;
+    createdBy?: Types.ObjectId;
+    modifiedBy?: Types.ObjectId;
+    mod_flag?: boolean;
+    del_flag?: boolean;
+    action_type?: string;
+}
+
 
 
 
