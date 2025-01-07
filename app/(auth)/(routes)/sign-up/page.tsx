@@ -17,9 +17,6 @@ const page = () => {
           <div>
             <SignupForm />
           </div>
-          <div className="text-xs text-center">
-            <p className='font-extrabold underline text-red-500'>Development Mode, <span className='text-green-600 '>V 0.0.1</span></p>
-          </div>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
             <Link href="/sign-in" className="underline">

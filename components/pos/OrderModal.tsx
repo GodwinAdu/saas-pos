@@ -33,7 +33,7 @@ const OrderModal = () => {
         <>
             <Button onClick={handleProceedClick} variant="outline"><ShoppingCartIcon /> Order</Button>
             <Dialog open={openModal} onOpenChange={setOpenModal}>
-                <DialogContent className="max-w-5xl h-[90%]">
+                <DialogContent className="max-w-5xl ">
                     <DialogHeader>
                         <DialogTitle>Edit Profile</DialogTitle>
                         <DialogDescription>

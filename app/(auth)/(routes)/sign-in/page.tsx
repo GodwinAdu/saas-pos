@@ -16,9 +16,6 @@ const page = () => {
             </p>
           </div>
           <LoginForm />
-          <div className="text-xs text-center">
-            <p className='font-extrabold underline text-red-500'>Development Mode, <span className='text-green-600 '>V 0.0.1</span></p>
-          </div>
           <div className="text-center text-sm">
             Don&apos;t have an account?{" "}
             <Link href="/sign-up" className="underline">

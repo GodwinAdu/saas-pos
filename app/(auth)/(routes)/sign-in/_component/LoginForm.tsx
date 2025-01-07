@@ -65,7 +65,15 @@ const LoginForm = () => {
                     name="email"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Enter Email</FormLabel>
+                            <div className="flex items-center">
+                                <FormLabel htmlFor="password">Email</FormLabel>
+                                <Link
+                                    href="/forget_password"
+                                    className="ml-auto text-sm underline-offset-2 hover:underline"
+                                >
+                                    <span className="text-xs text-blue-700">version 0.0.1</span>
+                                </Link>
+                            </div>
                             <FormControl>
                                 <Input type="email" placeholder="Eg. johndoe12@example.com" {...field} />
                             </FormControl>

@@ -36,6 +36,7 @@ import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { signUpUser } from "@/lib/helpers/login-user";
 import { stepOneSchema, stepTwoSchema } from "@/lib/validators/sign-up-schema";
+import Link from "next/link";
 
 
 
@@ -119,7 +120,15 @@ const SignupForm = () => {
                             name="storeName"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Store Name</FormLabel>
+                                    <div className="flex items-center">
+                                        <FormLabel htmlFor="storeName">Store Name</FormLabel>
+                                        <Link
+                                            href="#"
+                                            className="ml-auto text-sm underline-offset-2 hover:underline"
+                                        >
+                                            <span className="text-xs text-blue-700">version 0.0.1</span>
+                                        </Link>
+                                    </div>
                                     <FormControl>
                                         <Input placeholder="Eg. Awesome Store" {...field} />
                                     </FormControl>

@@ -1,6 +1,5 @@
 "use client"
 
-
 import React, { useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Button } from '../ui/button'
@@ -14,6 +13,7 @@ import { CreateCustomerDialog } from './CeateCustomerDialog'
 import SettingComponent from './Settings'
 import SuspendListModal from './SuspendListModal'
 import { useRouter } from 'next/navigation'
+import { Customer } from './Customer'
 // Define the props type
 interface Customer {
     id: number
@@ -38,13 +38,15 @@ const Navbar: React.FC<NavbarProps> = ({ customers, setSelectedCustomer, setIsTr
     const router = useRouter();
 
     return (
-        <header className="bg-background shadow-sm p-4">
+        <header className="bg-background border-b shadow-sm p-4">
             <div className="flex justify-between items-center">
                 <BranchSelect branches={branches} />
                 <div className="flex items-center space-x-4">
 
                     <CreateCustomerDialog />
-                    <Select onValueChange={(value) => setSelectedCustomer(customers?.find(c => c.id === parseInt(value)) || null)} >
+
+                    <Customer customers={customers} setSelectedCustomer={setSelectedCustomer} />
+                    {/* <Select onValueChange={(value) => setSelectedCustomer(customers?.find(c => c.id === parseInt(value)) || null)} >
                         <SelectTrigger className="w-[200px]">
                             <SelectValue placeholder="Select customer" />
                         </SelectTrigger>
@@ -55,7 +57,7 @@ const Navbar: React.FC<NavbarProps> = ({ customers, setSelectedCustomer, setIsTr
                                 </SelectItem>
                             ))}
                         </SelectContent>
-                    </Select>
+                    </Select> */}
                         <div className="relative">
                             <TooltipProvider>
                                 <Tooltip>
