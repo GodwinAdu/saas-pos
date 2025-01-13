@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
@@ -38,6 +38,7 @@ export default function ContactForm() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true)
         try {
+            console.log(values)
             //   await submitContactForm(values)
             toast({
                 title: "Message sent",
@@ -45,6 +46,7 @@ export default function ContactForm() {
             })
             form.reset()
         } catch (error) {
+            console.log(error)
             toast({
                 title: "Error",
                 description: "There was a problem sending your message. Please try again.",

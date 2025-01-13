@@ -8,7 +8,6 @@ import { fetchAllSellingGroups } from '@/lib/actions/selling-group.actions'
 
 const page = async () => {
   const data = await fetchAllSellingGroups() || [];
-  console.log(data,"data")
   return (
     <>
       <div className="flex justify-between items-center px-3">

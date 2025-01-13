@@ -9,11 +9,10 @@ import { fetchAllBranches } from '@/lib/actions/branch.actions'
 import { currentUser } from '@/lib/helpers/current-user'
 
 const page = async () => {
-  const user  = await currentUser() 
+  const user = await currentUser()
   const data = await fetchAllUnitsByBranchId() || [];
   const branches = await fetchAllBranches() || [];
 
-  console.log(data,'units')
   return (
     <>
       <div className="flex justify-between items-center px-3">

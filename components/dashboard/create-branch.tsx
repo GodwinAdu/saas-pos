@@ -4,7 +4,6 @@
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
 
 import {
     Dialog,
@@ -25,7 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { createBranch } from "@/lib/actions/branch.actions";
 import { Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -39,7 +38,6 @@ const formSchema = z.object({
 
 export const CreateBranchModal = () => {
 
-    const router = useRouter();
     const params = useParams();
 
     const storeId = params.storeId as string;
@@ -59,7 +57,7 @@ export const CreateBranchModal = () => {
         try {
 
             await createBranch(values, storeId)
-            
+
             form.reset();
 
             toast({

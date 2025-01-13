@@ -63,9 +63,8 @@ export function CreateCategory() {
                 title: "Created successfully",
                 description: "New Category was added successfully...",
             });
-        } catch (error: any) {
+        } catch {
             playErrorSound()
-            console.log("error happened while creating house", error);
             toast({
                 title: "Something went wrong",
                 description: "Please try again later...",

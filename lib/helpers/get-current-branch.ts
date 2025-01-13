@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 export async function CurrentBranchId() {
     try {
         const cookieStore =  await cookies()
-        const branchId = await cookieStore.get('branchId')?.value;
+        const branchId =  cookieStore.get('branchId')?.value;
         console.log(branchId,"branchId");
 
         return branchId;

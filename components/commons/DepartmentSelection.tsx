@@ -2,15 +2,13 @@
 import {
     Select,
     SelectContent,
-    SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
 
 interface DepartmentSelectionProps {
-    departments: any[],
+    departments: IDepartment[],
     selectedDepartment: (value: string) => void;
 }
 const DepartmentSelection = ({ selectedDepartment, departments }: DepartmentSelectionProps) => {

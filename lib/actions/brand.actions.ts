@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import Brand from "../models/brand.models";
 import { connectToDB } from "../mongoose";
-import Product from "../models/product.models";
 import { currentUser } from "../helpers/current-user";
 import { CurrentBranchId } from "../helpers/get-current-branch";
 import { deleteDocument } from "./trash.actons";
@@ -65,12 +64,13 @@ export async function createBrand(values: BrandProps) {
 export async function fetchAllBrands() {
     try {
         const user = await currentUser();
-        
-        const storeId = user.storeId as string
+        const branchId = await CurrentBranchId();
+
+        const storeId = user.storeId as string;
 
         await connectToDB();
 
-        const brands = await Brand.find({ storeId, active: true }).populate("createdBy", "fullName");
+        const brands = await Brand.find({ storeId, branchIds: { $in: [branchId] }, active: true }).populate("createdBy", "fullName");
 
         if (brands.length === 0) {
             return []
@@ -93,7 +93,7 @@ export async function fetchBrandWithBranchId() {
 
         await connectToDB();
 
-        const brands = await Brand.find({ storeId,branchIds: { $in: [branchId] }, active: true }).populate("createdBy", "fullName");
+        const brands = await Brand.find({ storeId, branchIds: { $in: [branchId] }, active: true }).populate("createdBy", "fullName");
 
         if (brands.length === 0) {
             return []
@@ -160,25 +160,25 @@ export async function updateBrand(id: string, values: Partial<BrandProps>, path:
 }
 
 
-export async function deleteBrand(id:string) {
+export async function deleteBrand(id: string) {
     try {
         const user = await currentUser();
-            const storeId = user.storeId as string;
-            const result = await deleteDocument({
-                actionType:'BRAND_DELETED',
-                documentId:id,
-                collectionName:'Brand',
-                userId: user?._id,
-                storeId,
-                trashMessage: `Brand with ID ${id} deleted by ${user.fullName}`,
-                historyMessage: `Brand with ID ${id} deleted by ${user.fullName}`
-            });
-        
-            console.log(`Brand with ID ${id} deleted by user ${user._id}`);
-            return JSON.parse(JSON.stringify(result));
-        } catch (error) {
-            console.error("Error deleting Brand:", error);
-            throw new Error('Failed to delete the Brand. Please try again.');
-        }
-    
+        const storeId = user.storeId as string;
+        const result = await deleteDocument({
+            actionType: 'BRAND_DELETED',
+            documentId: id,
+            collectionName: 'Brand',
+            userId: user?._id,
+            storeId,
+            trashMessage: `Brand with ID ${id} deleted by ${user.fullName}`,
+            historyMessage: `Brand with ID ${id} deleted by ${user.fullName}`
+        });
+
+        console.log(`Brand with ID ${id} deleted by user ${user._id}`);
+        return JSON.parse(JSON.stringify(result));
+    } catch (error) {
+        console.error("Error deleting Brand:", error);
+        throw new Error('Failed to delete the Brand. Please try again.');
+    }
+
 }

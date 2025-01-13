@@ -66,9 +66,8 @@ export function CreateUnit() {
                 title: "created successfully",
                 description: "New unit was added successfully...",
             });
-        } catch (error: any) {
+        } catch  {
             playErrorSound();
-            console.log("error happened while creating house", error);
             toast({
                 title: "Something went wrong",
                 description: "Please try again later...",

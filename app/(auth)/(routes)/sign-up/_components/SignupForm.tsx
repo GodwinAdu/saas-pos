@@ -37,17 +37,18 @@ import { useRouter } from "next/navigation";
 import { signUpUser } from "@/lib/helpers/login-user";
 import { stepOneSchema, stepTwoSchema } from "@/lib/validators/sign-up-schema";
 import Link from "next/link";
+import { getAppVersion } from "@/lib/version";
 
 
 
 const calculateSetupPrice = (branches: number) => {
-    return (branches / 5) * 200;
+    return (branches / 5) * 250;
 };
 
 const SignupForm = () => {
     const router = useRouter();
     const [step, setStep] = useState(1);
-    const [setupPrice, setSetupPrice] = useState(200);
+    const [setupPrice, setSetupPrice] = useState(250);
 
     const formStepOne = useForm<z.infer<typeof stepOneSchema>>({
         resolver: zodResolver(stepOneSchema),
@@ -91,7 +92,7 @@ const SignupForm = () => {
             };
 
             await signUpUser(formData)
-            console.log("Form submitted:", formData);
+
             formStepOne.reset();
             formStepTwo.reset();
             toast({
@@ -100,8 +101,8 @@ const SignupForm = () => {
                 variant: 'success'
             });
             router.push("/sign-in");
-        } catch (error) {
-            console.log('error', error)
+        } catch  {
+
             toast({
                 title: "Something went wrong",
                 description: "Please try again later",
@@ -126,7 +127,7 @@ const SignupForm = () => {
                                             href="#"
                                             className="ml-auto text-sm underline-offset-2 hover:underline"
                                         >
-                                            <span className="text-xs text-blue-700">version 0.0.1</span>
+                                            <span className="text-xs text-blue-700">Version {getAppVersion()}</span>
                                         </Link>
                                     </div>
                                     <FormControl>

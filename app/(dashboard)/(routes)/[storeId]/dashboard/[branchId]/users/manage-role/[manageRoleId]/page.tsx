@@ -10,32 +10,30 @@ import { fetchRoleById } from "@/lib/actions/role.actions";
 import Heading from "@/components/commons/Header";
 import { currentUser } from "@/lib/helpers/current-user";
 
-export const dynamic = "force-dynamic"
+type Props = Promise<{ id: string,storeId:string,branchId:string }>
+const page = async ({ params }: { params: Props }) => {
+  const user = await currentUser();
 
-const page = async ({ params }: { params: { storeId: string, branchId: string } }) => {
-    const user = await currentUser();
+  if (!user) {
+    redirect("/")
+  }
+  const { id,storeId,branchId } = await params;
 
-    if(!user){
-        redirect("/")
-    }
-    const id = params.branchId;
-    const pathId = params.adminId
 
-    console.log(id)
 
-    const initialData = await fetchRoleById({id}) || {}
-   
+  const initialData = await fetchRoleById({ id }) 
+
 
   return (
     <>
-       <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center">
         <Heading
           title="Role Details"
           description="Explore the role content"
         />
 
         <Link
-          href={`/${params.storeId}/dashboard/${params.branchId}/users/manage-role`}
+          href={`/${storeId}/dashboard/${branchId}/users/manage-role`}
           className={cn(buttonVariants())}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

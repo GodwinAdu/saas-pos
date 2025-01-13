@@ -28,7 +28,6 @@ import SuspendModal from './SuspendModal'
 import OrderModal from './OrderModal'
 import AddExpensesModal from './AddExpenses'
 import Navbar from './Navbar'
-import { sub } from 'date-fns'
 
 
 
@@ -209,7 +208,7 @@ export default function PosContent({ user, branches, branch, products, suspends 
                                         />
                                     </div>
                                 </div>
-                                {/* <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                                     <SelectTrigger className="w-[180px]">
                                         <SelectValue placeholder="Category" />
                                     </SelectTrigger>
@@ -220,12 +219,12 @@ export default function PosContent({ user, branches, branch, products, suspends 
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
-                                </Select> */}
+                                </Select>
                                 <Button variant="outline" onClick={() => setIsBarcodeMode(!isBarcodeMode)}>
                                     {isBarcodeMode ? "Manual" : "Barcode"}
                                 </Button>
                             </div>
-                            {isBarcodeMode ? (
+                            {/* {isBarcodeMode ? (
                                 <form onSubmit={handleBarcodeSubmit} className="mb-4">
                                     <div className="flex space-x-2">
                                         <Input
@@ -238,30 +237,38 @@ export default function PosContent({ user, branches, branch, products, suspends 
                                         <Button type="submit">Add</Button>
                                     </div>
                                 </form>
-                            ) : null}
+                            ) : null} */}
                             <ScrollArea className="h-[calc(100vh-280px)]">
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                    {filteredProducts.map(product => (
-                                        <Card key={product.id} className="overflow-hidden">
-                                            <CardHeader className="p-0">
-                                                <Image width={100} height={100} src={product.images[0] ?? '/sardine.jpg'} alt={product.name} className="w-full h-24 object-scale-down" />
-                                            </CardHeader>
-                                            <CardContent className="p-2">
-                                                <h3 className="font-semibold text-sm mb-1">{product.name}</h3>
-                                                <Badge variant={product.stock > 0 ? "secondary" : "destructive"} className="mt-2">
-                                                    {product.stock > 0 ? `In stock: ${product.stock}` : "Out of stock"}
-                                                </Badge>
-                                            </CardContent>
-                                            <CardFooter className="p-2">
-                                                <Button onClick={() => addToCart(branch, product, product.unit ? product.unit[0]._id : '', quantity)} className="w-full" disabled={product.stock === 0}>
-                                                    <Plus className="h-4 w-4 mr-2" /> Add
-                                                </Button>
-                                            </CardFooter>
-                                        </Card>
-                                    ))}
-                                </div>
+                                {filteredProducts.length !== 0 ? (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                        {filteredProducts.map(product => (
+                                            <Card key={product.id} className="overflow-hidden">
+                                                <CardHeader className="p-0">
+                                                    <Image width={100} height={100} src={product.images[0] ?? '/sardine.jpg'} alt={product.name} className="w-full h-24 object-scale-down" />
+                                                </CardHeader>
+                                                <CardContent className="p-2">
+                                                    <h3 className="font-semibold text-sm mb-1">{product.name}</h3>
+                                                    <Badge variant={product.stock > 0 ? "secondary" : "destructive"} className="mt-2">
+                                                        {product.stock > 0 ? `In stock: ${product.stock}` : "Out of stock"}
+                                                    </Badge>
+                                                </CardContent>
+                                                <CardFooter className="p-2">
+                                                    <Button onClick={() => addToCart(branch, product, product.unit ? product.unit[0]._id : '', quantity)} className="w-full" disabled={product.stock === 0}>
+                                                        <Plus className="h-4 w-4 mr-2" /> Add
+                                                    </Button>
+                                                </CardFooter>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center h-full">
+                                        <p className="text-center text-sm">No products found.</p>
+                                        <p className="text-center text-sm text-muted-foreground">Try adjusting your search or filter to find what you&apos;re looking for.</p>
+                                    </div>
+                                )}
+
                             </ScrollArea>
-                            <div className="pt-4 flex gap-5">
+                            <div className="py-4 flex gap-5">
                                 <SuspendModal branch={branch} />
                                 <OrderModal />
                                 <AddExpensesModal />
@@ -318,7 +325,7 @@ export default function PosContent({ user, branches, branch, products, suspends 
                                                 </Avatar>
                                                 <div>
                                                     <p className="font-medium">{item?.name}</p>
-                                                    <p className="text-sm text-muted-foreground">&#x20B5;{branch.pricingType === 'manual' ? findManualPrice(item.item.manualPrice, (selectedUnit as string || item?.unit as string)).toFixed(2) : findAutomatedPrice( item?.item, item.item?.unit, item?.unit as string, selectedValue as string).toFixed(2)}</p>
+                                                    <p className="text-sm text-muted-foreground">&#x20B5;{branch.pricingType === 'manual' ? findManualPrice(item.item.manualPrice, (selectedUnit as string || item?.unit as string)).toFixed(2) : findAutomatedPrice(item?.item, item.item?.unit, item?.unit as string, selectedValue as string).toFixed(2)}</p>
                                                 </div>
                                             </div>
                                             <UnitSelect

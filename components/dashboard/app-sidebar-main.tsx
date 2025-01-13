@@ -9,11 +9,11 @@ const AppSidebarMain = async () => {
 
     const branches = await fetchBranchesForUser() || [];
 
-    const userRole = await currentUserRole()
+    const userRole = await currentUserRole();
 
     return (
         <>
-            <AppSidebar role={userRole as IRole} store={store} branches={branches} />
+            <AppSidebar userRole={userRole as IRole} store={store} branches={branches} />
         </>
     )
 }

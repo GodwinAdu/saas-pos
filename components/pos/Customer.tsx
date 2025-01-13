@@ -18,10 +18,8 @@ import {
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
-    FormLabel,
     FormMessage,
 } from "@/components/ui/form"
 import {
@@ -29,7 +27,6 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { toast } from "@/hooks/use-toast"
 
 
 const FormSchema = z.object({
@@ -38,7 +35,17 @@ const FormSchema = z.object({
     }),
 })
 
-export function Customer({customers, setSelectedCustomer }) {
+interface Customer {
+    id: string;
+    name: string;
+}
+
+interface CustomerProps {
+    customers: Customer[];
+    setSelectedCustomer: (customer: Customer) => void;
+}
+
+export function Customer({ customers, setSelectedCustomer }: CustomerProps) {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
     })

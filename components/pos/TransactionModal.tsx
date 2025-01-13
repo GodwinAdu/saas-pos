@@ -2,7 +2,21 @@ import React from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 
-const TransactionHistoryModal = ({isTransactionHistoryOpen,setIsTransactionHistoryOpen,transactions}) => {
+interface Transaction {
+    id: string;
+    date: Date;
+    customer?: { name: string };
+    total: number;
+    paymentMethod: string;
+}
+
+interface TransactionHistoryModalProps {
+    isTransactionHistoryOpen: boolean;
+    setIsTransactionHistoryOpen: (open: boolean) => void;
+    transactions: Transaction[];
+}
+
+const TransactionHistoryModal: React.FC<TransactionHistoryModalProps> = ({isTransactionHistoryOpen, setIsTransactionHistoryOpen, transactions}) => {
     return (
         <Dialog open={isTransactionHistoryOpen} onOpenChange={setIsTransactionHistoryOpen}>
             <DialogContent className="max-w-4xl">

@@ -24,19 +24,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+
 
 const formSchema = z.object({
   name: z.string().min(1, {
     message: "Company name is required."
   }),
- 
+
 });
 
 export const StoreModal = () => {
   const [isMounted, setIsMounted] = useState(false);
 
-  const router = useRouter();
 
   useEffect(() => {
     setIsMounted(true);
@@ -53,8 +52,8 @@ export const StoreModal = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-     
-     
+
+      console.log(values)
       form.reset();
       // router.refresh();  // Commented out for testing
       window.location.reload()

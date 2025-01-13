@@ -9,7 +9,7 @@ import { redirect } from 'next/navigation'
 import React from 'react'
 import { fetchAllBrands } from '@/lib/actions/brand.actions'
 import { fetchAllCategories } from '@/lib/actions/category.actions'
-import ProductGrid from './_components/ProductGrid'
+import ProductTable from './_components/ProductTable'
 
 const page = async () => {
   // Fetch the current user's role
@@ -44,7 +44,7 @@ const page = async () => {
       </div>
       <Separator />
       <div className="py-4">
-        <ProductGrid brands={brands} categories={categories} />
+        <ProductTable brands={brands} categories={categories} />
       </div>
     </>
   )

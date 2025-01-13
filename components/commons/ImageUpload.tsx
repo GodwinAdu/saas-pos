@@ -10,22 +10,26 @@ import { ControllerRenderProps } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { toast } from "@/hooks/use-toast"
+import Image from "next/image"
 
 interface ImageUploaderProps extends ControllerRenderProps {
   label?: string
 }
 
-export function ImageUploader({ onChange, value, label }: ImageUploaderProps) {
+export function ImageUploader({ onChange, value, }: ImageUploaderProps) {
   const [files, setFiles] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
 
 
   const { startUpload, routeConfig } = useUploadThing("imageUploader", {
-    onUploadProgress: (progress) => {
+    onUploadProgress: (progress: number) => {
+      // Assuming you have a way to map progress to file names
+      // This is a placeholder implementation
+      const fileName = "placeholderFileName";
       setUploadProgress((prev) => ({
         ...prev,
-        [progress.fileName]: progress.progress,
-      }))
+        [fileName]: progress,
+      }));
     },
     onClientUploadComplete: (res) => {
       if (res) {
@@ -76,9 +80,8 @@ export function ImageUploader({ onChange, value, label }: ImageUploaderProps) {
       <CardContent className="p-4">
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer ${
-            isDragActive ? "border-primary bg-primary/10" : "border-gray-300"
-          }`}
+          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer ${isDragActive ? "border-primary bg-primary/10" : "border-gray-300"
+            }`}
         >
           <input {...getInputProps()} />
           <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
@@ -111,20 +114,32 @@ export function ImageUploader({ onChange, value, label }: ImageUploaderProps) {
         )}
         {value && value.length > 0 && (
           <div className="mt-4">
-            <h4 className="text-sm font-medium mb-2">Uploaded Files:</h4>
-            <ul className="space-y-2">
+            <h4 className="text-sm font-medium mb-4">Uploaded Images</h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {value.map((url: string, index: number) => (
-                <li key={index} className="flex items-center justify-between bg-gray-100 p-2 rounded">
-                  <div className="flex items-center">
-                    <File className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{url.split('/').pop()}</span>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => onChange(value.filter((_, i) => i !== index))}>
+                <div key={index} className="relative group rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                  {/* Display Image */}
+                  <Image
+                    src={url}
+                    alt={`Uploaded image ${index + 1}`}
+                    layout="responsive"
+                    width={150}
+                    height={150}
+                    objectFit="cover"
+                    className="rounded-lg"
+                  />
+                  {/* Remove Button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 bg-white/80 hover:bg-white text-red-600 p-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => onChange(value.filter((_: string, i: number) => i !== index))}
+                  >
                     <X className="h-4 w-4" />
                   </Button>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
       </CardContent>

@@ -1,6 +1,5 @@
 "use server"
 
-import { connect } from "http2";
 import { currentUser } from "../helpers/current-user";
 import History from "../models/history.models";
 import Variation from "../models/variation.models";
@@ -70,12 +69,13 @@ export async function createVariation(values: CreateVariationProps) {
 export async function fetchAllVariations() {
     try {
         const user = await currentUser();
+        const branchId = await CurrentBranchId()
 
         const storeId = user.storeId;
 
         await connectToDB();
 
-        const variations = await Variation.find({ storeId }).populate('createdBy', 'fullName').exec();
+        const variations = await Variation.find({ storeId, branchIds: { $in: branchId } }).populate('createdBy', 'fullName').exec();
 
         if (variations.length === 0) return [];
 
@@ -130,10 +130,10 @@ export async function fetchVariationById(variationId: string) {
 };
 
 
-export async function updateVariation(id: string, values: CreateVariationProps){
+export async function updateVariation(id: string, values: CreateVariationProps) {
     try {
-        
-        
+
+
     } catch (error) {
         console.error('Error updating variation by ID:', error);
         throw error;
@@ -146,7 +146,7 @@ export async function deleteVariation(id: string) {
         const user = await currentUser();
         const storeId = user.storeId;
         const result = await deleteDocument({
-            actionType:'VARIATION_DELETED',
+            actionType: 'VARIATION_DELETED',
             documentId: id,
             collectionName: 'Variation',
             userId: user?._id,

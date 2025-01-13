@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowRight, BarChart2, Clock, Cloud, Database, Lock, RefreshCcw, Zap, Users, BookOpen, DollarSign } from 'lucide-react'
-import Image from 'next/image'
+import { ArrowRight, BarChart2, Clock, Cloud, Database, Lock, RefreshCcw, Users, BookOpen, DollarSign } from 'lucide-react'
+
 
 export default function Home() {
     return (
@@ -48,10 +48,10 @@ export default function Home() {
                             </Button>
                         </Link>
                     </motion.div>
-                    
+
                 </div>
 
-              
+
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

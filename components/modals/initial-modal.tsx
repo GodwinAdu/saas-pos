@@ -59,7 +59,7 @@ export const InitialModal = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
 
-      const branch = await createBranch(values, storeId)
+      await createBranch(values, storeId)
       form.reset();
       router.refresh();
       // router.push(`/${storeId}/dashboard/${branch._id}`)
@@ -101,8 +101,7 @@ export const InitialModal = () => {
                       <Input
                         disabled={isLoading}
                         className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                        placeholder="Enter company
-                         name"
+                        placeholder="Enter company name"
                         {...field}
                       />
                     </FormControl>

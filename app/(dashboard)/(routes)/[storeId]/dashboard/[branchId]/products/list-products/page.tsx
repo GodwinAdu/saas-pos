@@ -1,15 +1,11 @@
 import Heading from '@/components/commons/Header'
-import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { currentUserRole } from '@/lib/helpers/get-user-role'
-import { cn } from '@/lib/utils'
-import { PlusCircle } from 'lucide-react'
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import React from 'react'
 import { fetchAllBrands } from '@/lib/actions/brand.actions'
 import { fetchAllCategories } from '@/lib/actions/category.actions'
-import ProductGrid from '../add-products/_components/ProductGrid'
+import ListProductTable from './_components/list-product-table'
 
 
 const page = async () => {
@@ -19,9 +15,6 @@ const page = async () => {
   if (!role) {
     redirect("/")
   }
-
-  // Destructure the 'addRole' permission from the user's role
-  const { addProduct } = role;
 
   const brands = await fetchAllBrands() || [];
 
@@ -33,11 +26,11 @@ const page = async () => {
         <Heading
           title="All Products List"
         />
-        
+
       </div>
       <Separator />
       <div className="py-4">
-        <ProductGrid brands={brands} categories={categories} />
+        <ListProductTable brands={brands} categories={categories} />
       </div>
     </>
   )

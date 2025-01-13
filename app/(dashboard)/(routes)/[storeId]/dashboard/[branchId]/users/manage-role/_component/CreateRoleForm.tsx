@@ -59,7 +59,6 @@ const CreateRoleForm = ({ type, initialData }: { type: "create" | "update", init
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof CreateRoleSchema>) {
     try {
-      console.log(values)
       if (type === "create") {
         await createRole(values   , path);
       }
@@ -78,8 +77,7 @@ const CreateRoleForm = ({ type, initialData }: { type: "create" | "update", init
         description: `A role was  ${type === "create" ? "created" : "updated"}  successfully...`,
       });
       router.push(`/${storeId}/dashboard/${branchId}/users/manage-role`);
-    } catch (error: any) {
-      console.log("something went wrong", error);
+    } catch  {
 
       toast({
         title: "Something went wrong",

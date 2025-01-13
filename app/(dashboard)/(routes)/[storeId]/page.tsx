@@ -1,65 +1,98 @@
+'use client'
+
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { InitialModal } from "@/components/modals/initial-modal";
 import useBranchStore from "@/hooks/use-branch-store";
 import { fetchRole } from "@/lib/actions/role.actions";
 import { currentUser } from "@/lib/helpers/current-user";
-import { Loader2 } from "lucide-react";
-import { redirect } from "next/navigation";
+import { DashboardLoader } from './_components/dashboard-loader';
+import { AccessDenied } from './_components/access-denied';
+import { ErrorBoundary } from './_components/error-boundary';
 
-
-const page = async ({ params }: { params: StoreIdParams   }) => {
-  const { storeId } = await params
-  const { activeBranch } = useBranchStore.getState();
-  const user = await currentUser();
-
-  if (!user) {
-    console.warn("No user found, redirecting to home.");
-    redirect("/"); // Redirect unauthenticated users
+const DashboardPage = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  interface User {
+    id: string;
+    role: string;
+    accessLocation: string[];
+    // Add other properties as needed
   }
 
-  let userRole;
-  try {
-    userRole = await fetchRole(user.role);
-    if (!userRole) {
-      console.error("User role not found, throwing error.");
-      throw new Error("User role not found");
-    }
-  } catch (error) {
-    console.error("Error fetching user role:", error);
-    redirect("/error"); // Redirect to an error page
+  const [user, setUser] = useState<User | null>(null);
+  interface UserRole {
+    displayName: string;
+    // Add other properties as needed
   }
 
-  if (user.accessLocation.length === 0) {
-    if (userRole.displayName === "admin") {
-      return <InitialModal />;
-    } else {
-      return (
-        <div className="flex h-full w-full items-center justify-center">
-          <div className="text-center space-y-4 p-4">
-            <h2 className="text-2xl font-semibold">Access Denied</h2>
-            <p className="text-muted-foreground">
-              You are not authorized to access this page. Contact your manager to create a branch and grant you access.
-            </p>
-          </div>
-        </div>
-      );
-    }
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const router = useRouter();
+  const params = useParams();
+  const { activeBranch } = useBranchStore();
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const currentUserData = await currentUser();
+        setUser(currentUserData);
+
+        if (!currentUserData) {
+          console.warn("No user found, redirecting to home.");
+          router.push('/');
+          return;
+        }
+
+        const userRoleData = await fetchRole(currentUserData.role);
+        setUserRole(userRoleData);
+
+        if (!userRoleData) {
+          throw new Error("User role not found");
+        }
+
+        if (currentUserData.accessLocation.length === 0) {
+          setIsLoading(false);
+          return;
+        }
+
+        if (activeBranch && currentUserData.accessLocation.includes(activeBranch._id)) {
+          window.location.href = `/${params.storeId}/dashboard/${activeBranch._id}`;
+        } else {
+          window.location.href = `/${params.storeId}/dashboard/${currentUserData.accessLocation[0]}`;
+        }
+      } catch (err) {
+        console.error("Error loading data:", err);
+        setError(err instanceof Error ? err : new Error('An unknown error occurred'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [params.storeId, activeBranch, router]);
+
+  if (isLoading) {
+    return <DashboardLoader />;
   }
 
-  if (activeBranch && user.accessLocation.includes(activeBranch._id)) {
-    redirect(`/${storeId}/dashboard/${activeBranch._id}`);
-  } else {
-    redirect(`/${storeId}/dashboard/${user.accessLocation[0]}`);
+  if (error) {
+    throw error; // This will be caught by the ErrorBoundary
   }
 
+  if (user && user.accessLocation.length === 0) {
+    return userRole && userRole.displayName === "admin" ? <InitialModal /> : <AccessDenied />;
+  }
 
-  return (
-    <div className="flex h-full w-full items-center justify-center">
-      <div className="text-center space-y-4">
-        <Loader2 className="h-10 w-10 animate-spin mx-auto" />
-        <p className="text-green-700">Loading your dashboard...</p>
-      </div>
-    </div>
-  );
+  // This return statement should never be reached due to the redirects,
+  // but we'll keep it as a fallback for TypeScript
+  return null;
 };
 
-export default page;
+const Page = () => (
+  <ErrorBoundary>
+    <DashboardPage />
+  </ErrorBoundary>
+);
+
+export default Page;
+

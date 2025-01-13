@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,10 +22,10 @@ interface TrashItem {
     autoDelete: boolean
 }
 
-export function TrashList({ trashes }: { trashes: any[] }) {
+export function TrashList({ trashes }: { trashes: TrashItem[] }) {
     const [filter, setFilter] = useState('')
     const [sortBy, setSortBy] = useState<keyof TrashItem>('deletedAt')
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+    const [sortOrder] = useState<'asc' | 'desc'>('desc')
     const [isRestoreLoading, setIsRestoreLoading] = useState<boolean>(false)
     const [isDeleteLoading, setIsDeleteLoading] = useState<boolean>(false)
 
@@ -57,7 +57,7 @@ export function TrashList({ trashes }: { trashes: any[] }) {
                 description: "Trash item restored successfully",
             });
 
-        } catch (error) {
+        } catch {
             playErrorSound();
             toast({
                 title: "Error restoring",
@@ -82,7 +82,7 @@ export function TrashList({ trashes }: { trashes: any[] }) {
                 description: "Trash item deleted successfully",
             });
 
-        } catch (error) {
+        } catch {
             playErrorSound();
             toast({
                 title: "Error deleting",
@@ -172,7 +172,7 @@ export function TrashList({ trashes }: { trashes: any[] }) {
             {sortedItems.length === 0 && (
                 <div className="text-center py-4 text-muted-foreground">
                     <p className="font-semibold text-lg">No more trash to load.</p>
-                    <p className="text-sm">It looks like you've reached the end. Everything's cleaned up!</p>
+                    <p className="text-sm">It looks like you&apos;ve reached the end. Everything&apos;s cleaned up!</p>
                 </div>
             )}
         </div>

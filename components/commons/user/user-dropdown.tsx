@@ -10,12 +10,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Bell, Flame, ChevronDown, ListTodo, BookMarked, Trophy, PieChart, Coins, Beaker, Receipt, Layout, Settings, Moon, LogOut } from 'lucide-react'
+import { Bell, ChevronDown, ListTodo, BookMarked, Trophy, PieChart, Coins, Beaker, Receipt, Layout, Settings, Moon, LogOut } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import { toast } from '@/hooks/use-toast'
 import { logoutUser } from '@/lib/helpers/logout-user'
 import { useRouter } from 'next/navigation'
-
+import { LucideIcon } from 'lucide-react';
 interface UserDropdownProps {
   username: string
   avatarUrl: string
@@ -38,7 +38,7 @@ export default function UserDropdown({ username, avatarUrl, email, notificationC
         variant:'success'
       })
 
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error logging out',
         description: 'Failed to log out. Please try again.',
@@ -114,7 +114,8 @@ export default function UserDropdown({ username, avatarUrl, email, notificationC
   )
 }
 
-function FeatureButton({ icon: Icon, label }: { icon: any; label: string }) {
+
+function FeatureButton({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
   return (
     <button className="flex flex-col items-center justify-center p-3 rounded-lg  transition-colors text-sm">
       <Icon className="h-5 w-5 mb-1" />
@@ -123,7 +124,9 @@ function FeatureButton({ icon: Icon, label }: { icon: any; label: string }) {
   )
 }
 
-function MenuItem({ icon: Icon, label, hasChevron, onClick }: { icon: any; label: string; hasChevron?: boolean, onClick?: () => void }) {
+
+
+function MenuItem({ icon: Icon, label, hasChevron, onClick }: { icon: LucideIcon; label: string; hasChevron?: boolean, onClick?: () => void }) {
   return (
     <DropdownMenuItem className="flex items-center px-2 py-2  rounded-md cursor-pointer" onClick={onClick}>
       <Icon className="h-5 w-5 mr-3" />

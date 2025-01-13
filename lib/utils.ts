@@ -55,15 +55,26 @@ export function calculateTotalWithTax(amount: number, taxPercentage: number): nu
 }
 
 
-export const findManualPrice = (prices: any[], unitId: string) => {
+interface Price {
+  unitId: { _id: string };
+  price: number;
+  tax: number;
+}
+
+// calculate manual price for branch products
+export const findManualPrice = (prices: Price[], unitId: string) => {
   console.log(prices, unitId)
   const priceObj = prices?.find(price => price.unitId._id === unitId);
-  return calculateTotalWithTax(priceObj?.price, priceObj?.tax)
+  return calculateTotalWithTax(priceObj?.price ?? 0, priceObj?.tax ?? 0)
 };
 
+// calculate automated price for branch products
 export const findAutomatedPrice = (
-  product: any,
-  units: any[],
+  product: {
+    retailPrice?: { retailUnitCost: number; retailMarkupPercentage: number };
+    wholesalePrice?: { wholesaleUnitCost: number; wholesaleMarkupPercentage: number };
+  },
+  units: { _id: string; quantity: number }[],
   selectedUnit: string,
   selectedValue: string // Pass this as a parameter
 ) => {
@@ -84,13 +95,11 @@ export const findAutomatedPrice = (
 
   if (selectedValue === 'retail') {
     const totalRetailCost =
-      retailCost * findUnit?.quantity * (1 + retailMarkup / 100);
+      (retailCost ?? 0) * findUnit?.quantity * (1 + (retailMarkup ?? 0) / 100);
     return totalRetailCost;
   } else if (selectedValue === 'wholesale') {
     const totalWholesaleCost =
-      wholesaleCost * findUnit?.quantity * (1 + wholesaleMarkup / 100);
+      (wholesaleCost ?? 0) * findUnit?.quantity * (1 + (wholesaleMarkup ?? 0) / 100);
     return totalWholesaleCost;
   }
-
-  throw new Error('Invalid selectedValue');
 };

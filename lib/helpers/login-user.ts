@@ -94,7 +94,6 @@ interface SignUpProps {
 
 // Role permissions configuration (could be moved to a separate config file)
 const defaultRolePermissions = {
-
     name: "Administrator",
     displayName: "admin",
     description: `The administrator`,

@@ -71,114 +71,118 @@ export function HistoryList() {
 
     const fetchHistories = async () => {
         if (loading || !hasMore) return;
-    
+
         setLoading(true);
-    
+
         try {
-          const limit = 10; // Fetch 10 items at a time
-          const data = await fetchAllHistories(lastId, limit);
-    
-          if (data.length === 0) {
-            setHasMore(false);
-            return;
-          }
-    
-          // Remove duplicates
-          const newHistories = data.filter(
-            (history) => !histories.some((h) => h._id === history._id)
-          );
-    
-          if (newHistories.length > 0) {
-            setHistories((prev) => [...prev, ...newHistories]);
-            setLastId(newHistories[newHistories.length - 1]._id);
-          } else {
-            setHasMore(false);
-          }
-        } catch (error) {
-          console.error("Error fetching histories:", error);
+            const limit = 10; // Fetch 10 items at a time
+            const data = await fetchAllHistories(lastId, limit);
+
+            if (data.length === 0) {
+                setHasMore(false);
+                return;
+            }
+
+            // Remove duplicates
+            const newHistories = data.filter(
+                (history: HistoryItem) => !histories.some((h) => h._id === history._id)
+            );
+
+            if (newHistories.length > 0) {
+                setHistories((prev) => [...prev, ...newHistories]);
+                setLastId(newHistories[newHistories.length - 1]._id);
+            } else {
+                setHasMore(false);
+            }
+        } catch {
+            toast({
+                title: "Error!",
+                description: "Failed to fetch histories. Please try again later.",
+                variant: "destructive",
+            })
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
-      };
-    
-      useEffect(() => {
+    };
+
+    useEffect(() => {
         fetchHistories();
-      }, []);
-    
-      const handleScroll = () => {
+    }, []);
+
+    const handleScroll = () => {
         if (
-          window.innerHeight + document.documentElement.scrollTop >=
+            window.innerHeight + document.documentElement.scrollTop >=
             document.documentElement.offsetHeight - 100 &&
-          hasMore &&
-          !loading
+            hasMore &&
+            !loading
         ) {
-          fetchHistories();
+            fetchHistories();
         }
-      };
-    
-      useEffect(() => {
+    };
+
+    useEffect(() => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-      }, [hasMore, loading]);
-    
-      const lastHistoryRef = (node: HTMLDivElement) => {
+    }, [hasMore, loading]);
+
+    const lastHistoryRef = (node: HTMLTableRowElement) => {
         if (loading) return;
-    
+
         if (observer.current) observer.current.disconnect();
-    
+
         observer.current = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting && hasMore) {
-            fetchHistories();
-          }
+            if (entries[0].isIntersecting && hasMore) {
+                fetchHistories();
+            }
         });
-    
+
         if (node) observer.current.observe(node);
-      };
-    
-      const applyFiltersAndSort = () => {
+    };
+
+    const applyFiltersAndSort = () => {
         let filtered = [...histories]; // Create a shallow copy of histories
-    
+
         if (filter) {
-          filtered = filtered.filter((history) =>
-            history.message.toLowerCase().includes(filter.toLowerCase())
-          );
+            filtered = filtered.filter((history) =>
+                history.message.toLowerCase().includes(filter.toLowerCase())
+            );
         }
-    
+
         if (actionTypeFilter) {
-          filtered = filtered.filter((history) =>
-            history.actionType.includes(actionTypeFilter)
-          );
+            filtered = filtered.filter((history) =>
+                history.actionType.includes(actionTypeFilter)
+            );
         }
-    
+
         if (dateFilter) {
-          filtered = filtered.filter((history) =>
-            moment(history.timestamp).isSame(dateFilter, 'day')
-          );
+            filtered = filtered.filter((history) =>
+                moment(history.timestamp).isSame(dateFilter, 'day')
+            );
         }
-    
+
         // Remove duplicates based on _id
         filtered = filtered.filter((history, index, self) =>
-          index === self.findIndex((t) => t._id === history._id)
+            index === self.findIndex((t) => t._id === history._id)
         );
-    
-        filtered.sort((a, b) => {
-          const aValue = a[sortBy];
-          const bValue = b[sortBy];
-    
-          if (sortOrder === "asc") {
-            return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-          } else {
-            return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-          }
-        });
-    
-        return filtered;
-      };
-    
-      const filteredAndSortedHistories = applyFiltersAndSort();
-    
 
-      console.log(filteredAndSortedHistories,"filteredHistories")
+        filtered.sort((a, b) => {
+            const aValue = a[sortBy];
+            const bValue = b[sortBy];
+
+            if (sortOrder === "asc") {
+                return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+            } else {
+                return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+            }
+        });
+
+        return filtered;
+    };
+
+    const filteredAndSortedHistories = applyFiltersAndSort();
+
+
+    console.log(filteredAndSortedHistories, "filteredHistories")
 
     const handleDelete = async (id: string) => {
         try {
@@ -192,7 +196,7 @@ export function HistoryList() {
             });
 
 
-        } catch (error) {
+        } catch {
             playErrorSound();
             toast({
                 title: "Error deleting history",

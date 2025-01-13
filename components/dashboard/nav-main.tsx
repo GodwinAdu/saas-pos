@@ -1,16 +1,8 @@
 "use client"
 
 import {
-  BookOpen,
-  Bot,
-  Frame,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
   Users,
   ChevronRight,
-  type LucideIcon,
   ShoppingBag,
   Coins,
   HandCoins,
@@ -45,9 +37,75 @@ interface NavItem {
   title: string;
   url: string;
   icon?: React.ComponentType;
-  roleField?: string;
+  roleField?: keyof IRole;
   isActive?: boolean;
   items?: NavItem[];
+}
+
+interface IRole {
+  user?: boolean;
+  manageRole?: boolean;
+  manageUser?: boolean;
+  product?: boolean;
+  listProduct?: boolean;
+  manageProduct?: boolean;
+  manageUnit?: boolean;
+  manageCategory?: boolean;
+  managePrintLabel?: boolean;
+  manageVariation?: boolean;
+  manageImportProduct?: boolean;
+  manageSellingGroupPrice?: boolean;
+  manageWarrant?: boolean;
+  sales?: boolean;
+  manageAllSales?: boolean;
+  manageSales?: boolean;
+  manageOrder?: boolean;
+  listOrder?: boolean;
+  listSellReturn?: boolean;
+  manageShipment?: boolean;
+  manageDiscount?: boolean;
+  importSales?: boolean;
+  purchase?: boolean;
+  listPurchase?: boolean;
+  managePurchase?: boolean;
+  listPurchaseReturn?: boolean;
+  importPurchase?: boolean;
+  stockTransfer?: boolean;
+  listStockTransfer?: boolean;
+  manageStockTransfer?: boolean;
+  stockAdjustment?: boolean;
+  listStockAdjustment?: boolean;
+  manageStockAdjustment?: boolean;
+  expenses?: boolean;
+  manageExpensesCategory?: boolean;
+  manageExpenses?: boolean;
+  listExpenses?: boolean;
+  paymentAccount?: boolean;
+  manageListAccount?: boolean;
+  balanceSheet?: boolean;
+  trialBalance?: boolean;
+  cashFlow?: boolean;
+  paymentAccountReport?: boolean;
+  report?: boolean;
+  profitLostReport?: boolean;
+  itemsReport?: boolean;
+  registerReport?: boolean;
+  expensesReport?: boolean;
+  productSellReport?: boolean;
+  productPurchaseReport?: boolean;
+  sellReturnReport?: boolean;
+  purchaseReturnReport?: boolean;
+  trendingProductReport?: boolean;
+  purchaseSaleReport?: boolean;
+  stockAdjustmentReport?: boolean;
+  stockTransferReport?: boolean;
+  stockExpiryReport?: boolean;
+  stockReport?: boolean;
+  customerGroupReport?: boolean;
+  customerSupplierReport?: boolean;
+  taxReport?: boolean;
+  saleRepresentativeReport?: boolean;
+  contact?: boolean;
 }
 
 interface NavMainProps {
@@ -55,6 +113,7 @@ interface NavMainProps {
 }
 
 export function NavMain({ role }: NavMainProps) {
+  console.log(role,'roles')
 
   const params = useParams();
   const pathname = usePathname();
@@ -81,7 +140,7 @@ export function NavMain({ role }: NavMainProps) {
       items: [
         {
           title: "Departments",
-           url: `/${storeId}/dashboard/${branchId}/users/department`,
+          url: `/${storeId}/dashboard/${branchId}/users/department`,
           roleField: "manageRole"
         },
         {
@@ -93,7 +152,7 @@ export function NavMain({ role }: NavMainProps) {
           title: "Manage User",
           url: `/${storeId}/dashboard/${branchId}/users/manage-user`,
           roleField: "manageUser"
-        }, 
+        },
       ],
     },
     {
@@ -244,12 +303,12 @@ export function NavMain({ role }: NavMainProps) {
       items: [
         {
           title: "List Stock Transfers",
-          url: `/${storeId}/dashboard/${branchId}/stock-transfers/add-stock-transfers`,
+          url: `/${storeId}/dashboard/${branchId}/stock-transfers/list-stock-transfers`,
           roleField: "listStockTransfer"
         },
         {
           title: "Add Stock Transfer",
-          url: `/${storeId}/dashboard/${branchId}/stock-transfers/list-stock-transfer`,
+          url: `/${storeId}/dashboard/${branchId}/stock-transfers/add-stock-transfers`,
           roleField: "manageStockTransfer"
         }
       ],
@@ -440,7 +499,7 @@ export function NavMain({ role }: NavMainProps) {
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {navMain
-          .filter(item => !item.roleField || role[item.roleField])
+          .filter(item => !item?.roleField || role[item?.roleField])
           .map(item => (
             <Collapsible
               key={item.title}
@@ -465,7 +524,7 @@ export function NavMain({ role }: NavMainProps) {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     {item.items
-                      ?.filter(subItem => !subItem.roleField || role[subItem.roleField])
+                      ?.filter(subItem => !subItem?.roleField || role[subItem?.roleField])
                       .map(subItem => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton

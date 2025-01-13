@@ -4,12 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -17,7 +16,6 @@ import {
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -76,9 +74,8 @@ export function BrandModal({ branches, user }: { branches: IBranch[], user: IUse
                 description: "New brand was added successfully...",
                 variant:'success'
             });
-        } catch (error: any) {
+        } catch{
             playErrorSound()
-            console.log("error happened while creating house", error);
             toast({
                 title: "Something went wrong",
                 description: "Please try again later...",

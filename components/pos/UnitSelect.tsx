@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/select";
 
 interface UnitSelectionProps {
-    units: any[];
+    units: IUnit[];
     selectedUnit: string; // Add this prop
     onUnitChange: (value: string) => void; // Rename the prop for better clarity
 }

@@ -13,7 +13,7 @@ export default function TodayTransactions() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Today's Transactions</CardTitle>
+        <CardTitle>Today&apos;s Transactions</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>

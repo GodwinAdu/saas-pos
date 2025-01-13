@@ -64,9 +64,8 @@ export function CreateBrand() {
                 description: "New brand was added successfully...",
                 variant: "success",
             });
-        } catch (error: any) {
+        } catch  {
             playErrorSound()
-            console.log("error happened while creating house", error);
             toast({
                 title: "Something went wrong",
                 description: "Please try again later...",

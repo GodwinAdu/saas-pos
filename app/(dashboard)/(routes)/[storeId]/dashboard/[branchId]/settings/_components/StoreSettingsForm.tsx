@@ -18,6 +18,7 @@ import { toast } from '@/hooks/use-toast'
 import { updateStore } from '@/lib/actions/store.actions'
 import { useRouter } from 'next/navigation'
 import { playErrorSound, playSuccessSound } from '@/lib/audio'
+import AiIntegrationForm from './ai-integration'
 
 
 
@@ -66,7 +67,7 @@ const storeFormSchema = z.object({
 type StoreFormValues = z.infer<typeof storeFormSchema>
 
 
-export default function StoreSettingsForm({ store }: { store: any }) {
+export default function StoreSettingsForm({ store }: { store: IStore }) {
     const [isLoading, setIsLoading] = useState(false)
 
     const router = useRouter();
@@ -121,8 +122,7 @@ export default function StoreSettingsForm({ store }: { store: any }) {
                 description: "Your store settings have been saved.",
                 variant: "success",
             })
-        } catch (error) {
-            console.log(error)
+        } catch {
             playErrorSound()
             toast({
                 title: "Error",
@@ -144,6 +144,7 @@ export default function StoreSettingsForm({ store }: { store: any }) {
                         <TabsTrigger value="reporting">Reporting</TabsTrigger>
                         <TabsTrigger value="notifications">Notifications</TabsTrigger>
                         <TabsTrigger value="subscription">Subscription</TabsTrigger>
+                        <TabsTrigger value="ai-integration">AI Integration</TabsTrigger>
                     </TabsList>
                     <TabsContent value="basic-info">
                         <Card>
@@ -197,6 +198,17 @@ export default function StoreSettingsForm({ store }: { store: any }) {
                             </CardHeader>
                             <CardContent>
                                 <SubscriptionForm control={form.control} />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="ai-integration">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>AI Integration</CardTitle>
+                                <CardDescription>Manage your AI Settings.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <AiIntegrationForm control={form.control} />
                             </CardContent>
                         </Card>
                     </TabsContent>

@@ -439,8 +439,11 @@ interface WholesalePrice {
 }
 
 interface IProduct extends Document {
+    _id:string;
     name: string;
-    brandId?: Types.ObjectId;
+    brandId: Types.ObjectId;
+    storeId: Types.ObjectId;
+    branchIds: Types.ObjectId;
     categoryId?: Types.ObjectId;
     expiryDate?: Date;
     barcode: string;
@@ -470,6 +473,8 @@ interface IProduct extends Document {
     del_flag?: boolean;
     action_type?: string;
     supplierId?: Types.ObjectId;
+    warrantId?: Types.ObjectId;
+    variations?: Types.ObjectId;
     warehouseId?: Types.ObjectId;
     lastRestocked?: Date;
     lastModifiedAction?: string;
@@ -481,7 +486,7 @@ interface IProduct extends Document {
 interface ITrash extends Document {
     storeId: Types.ObjectId;
     originalCollection: string;
-    document: any;
+    document: Record<string, unknown>;
     message?: string;
     deletedBy?: Types.ObjectId;
     deletedAt?: Date;

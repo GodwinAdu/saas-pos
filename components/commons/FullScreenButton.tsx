@@ -32,24 +32,30 @@ export default function FullScreenButton() {
 
         if (body.requestFullscreen) {
             body.requestFullscreen();
-        } else if ((body as any).mozRequestFullScreen) {
-            (body as any).mozRequestFullScreen(); // Firefox
-        } else if ((body as any).webkitRequestFullscreen) {
-            (body as any).webkitRequestFullscreen(); // Chrome, Safari, Opera
-        } else if ((body as any).msRequestFullscreen) {
-            (body as any).msRequestFullscreen(); // IE/Edge
+        } else if ((body as HTMLElement & { mozRequestFullScreen?: () => Promise<void> }).mozRequestFullScreen) {
+            if ((body as HTMLElement & { mozRequestFullScreen?: () => Promise<void> }).mozRequestFullScreen) {
+                if ((body as HTMLElement & { mozRequestFullScreen?: () => Promise<void> }).mozRequestFullScreen) {
+                    (body as HTMLElement & { mozRequestFullScreen?: () => Promise<void> }).mozRequestFullScreen?.(); // Firefox
+                }
+            }
+        } else if ((body as HTMLElement & { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen) {
+            if ((body as HTMLElement & { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen) {
+                (body as HTMLElement & { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen?.(); // Chrome, Safari, Opera
+            }
+        } else if ((body as HTMLElement & { msRequestFullscreen?: () => Promise<void> }).msRequestFullscreen) {
+            (body as HTMLElement & { msRequestFullscreen?: () => Promise<void> }).msRequestFullscreen?.(); // IE/Edge
         }
     };
 
     const exitFullScreen = () => {
         if (document.exitFullscreen) {
             document.exitFullscreen();
-        } else if ((document as any).mozCancelFullScreen) {
-            (document as any).mozCancelFullScreen(); // Firefox
-        } else if ((document as any).webkitExitFullscreen) {
-            (document as any).webkitExitFullscreen(); // Chrome, Safari, Opera
-        } else if ((document as any).msExitFullscreen) {
-            (document as any).msExitFullscreen(); // IE/Edge
+        } else if ((document as Document & { mozCancelFullScreen?: () => Promise<void> }).mozCancelFullScreen) {
+            (document as Document & { mozCancelFullScreen?: () => Promise<void> }).mozCancelFullScreen?.(); // Firefox
+        } else if ((document as Document & { webkitExitFullscreen?: () => Promise<void> }).webkitExitFullscreen) {
+            (document as Document & { webkitExitFullscreen?: () => Promise<void> }).webkitExitFullscreen?.(); // Chrome, Safari, Opera
+        } else if ((document as Document & { msExitFullscreen?: () => Promise<void> }).msExitFullscreen) {
+            (document as Document & { msExitFullscreen?: () => Promise<void> }).msExitFullscreen?.(); // IE/Edge
         }
     };
 

@@ -2,15 +2,13 @@
 import {
     Select,
     SelectContent,
-    SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
 
 interface BrandSelectionProps {
-    brands: any[],
+    brands: IBrand[],
     SelectedBrand: (value: string) => void;
 }
 const BrandSelection = ({ SelectedBrand, brands }: BrandSelectionProps) => {

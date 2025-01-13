@@ -6,7 +6,6 @@ import {
   ChevronsUpDown,
   DockIcon,
   House,
-  SendHorizonal,
   Settings,
 } from "lucide-react"
 
@@ -30,7 +29,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import moment from "moment"
 import { useParams } from "next/navigation"
 import { dayLeft } from "@/lib/utils"
 import Link from "next/link"

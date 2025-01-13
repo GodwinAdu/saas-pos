@@ -9,17 +9,16 @@ import { currentUser } from "@/lib/helpers/current-user";
 export default async function RootLayout({
     children
 }: Readonly<{
-   
     children: React.ReactNode;
 }>) {
     const user = await currentUser() ?? null;
-   
+
     return (
 
         <SidebarProvider>
             <AppSidebarMain />
             <SidebarInset>
-               <Navbar user={user} />   
+                <Navbar user={user} />
                 <div className="py-4 px-4">
                     {children}
                 </div>

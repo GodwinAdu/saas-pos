@@ -1,5 +1,6 @@
 "use server"
 
+import { currentBranch } from "../helpers/current-branch";
 import { currentUser } from "../helpers/current-user";
 import History from "../models/history.models";
 import Warrant from "../models/warrant.models";
@@ -47,9 +48,8 @@ export async function createWarrant(values: CreateWarrantProps) {
             newWarrant.save(),
             newHistory.save()
         ])
-    
+
     } catch (error) {
-        console.error('Error creating warrant:', error);
         throw error;
     }
 
@@ -59,12 +59,13 @@ export async function createWarrant(values: CreateWarrantProps) {
 export async function fetchAllWarrants() {
     try {
         const user = await currentUser();
+
         const storeId = user.storeId as string;
         // Connect to MongoDB
         await connectToDB();
 
         // Fetch all warrants associated with the current store
-        const warrants = await Warrant.find({ storeId }).populate('createdBy','fullName').exec();
+        const warrants = await Warrant.find({ storeId }).populate('createdBy', 'fullName').exec();
 
         if (warrants.length === 0) {
             return [];
@@ -103,7 +104,6 @@ export async function fetchWarrantById(warrantId: string) {
 export async function updateWarrant(warrantId: string) {
     try {
         const user = await currentUser();
-        const storeId = user.storeId as string;
         // Connect to MongoDB
         await connectToDB();
 
@@ -128,7 +128,7 @@ export async function deleteWarrant(id: string) {
         const user = await currentUser();
         const storeId = user.storeId as string;
         const result = await deleteDocument({
-            actionType:"WARRANT_DELETED",
+            actionType: "WARRANT_DELETED",
             documentId: id,
             collectionName: 'Warrant',
             userId: user?._id,

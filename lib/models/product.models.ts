@@ -8,6 +8,16 @@ const ProductSchema: Schema<IProduct> = new Schema(
       required: true,
       minlength: [2, "Name must be at least 2 characters."],
     },
+    storeId: {
+      type: Schema.Types.ObjectId,
+      ref: "store",
+      required: true
+    },
+    branchIds: {
+      type: [Schema.Types.ObjectId],
+      ref: "branch",
+      required: true
+    },
     brandId: { type: Schema.Types.ObjectId, ref: "Brand" },
     categoryId: { type: Schema.Types.ObjectId, ref: "Category" },
     expiryDate: { type: Date },
@@ -131,23 +141,31 @@ const ProductSchema: Schema<IProduct> = new Schema(
     stockCalculationMethod: {
       type: String,
     },
+    warrantId: {
+      type: Schema.Types.ObjectId,
+      ref: "Warrant"
+    },
+    variations: {
+      type: Schema.Types.ObjectId,
+      ref: "Variation"
+    },
     stock: { type: Number, default: 0, min: 0 },
     alertQuantity: { type: Number },
     salesCount: { type: Number, default: 0 },
     monthlySales: { type: Map, of: Number, default: {} },
     active: { type: Boolean, default: true },
     selling: { type: Boolean, default: true },
-    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
-    modifiedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
-    mod_flag: { type: Boolean, default: false },
-    del_flag: { type: Boolean, default: false },
-    action_type: { type: String },
     supplierId: { type: Schema.Types.ObjectId, ref: "Supplier" },
     warehouseId: { type: Schema.Types.ObjectId, ref: "Warehouse" },
     lastRestocked: { type: Date },
     lastModifiedAction: { type: String, default: "Created" },
     lastModifiedBy: { type: Schema.Types.ObjectId, ref: "User" },
     lastModifiedDate: { type: Date, default: Date.now },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+    modifiedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    mod_flag: { type: Boolean, default: false },
+    del_flag: { type: Boolean, default: false },
+    action_type: { type: String },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

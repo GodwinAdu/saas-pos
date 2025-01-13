@@ -10,7 +10,7 @@ import {
 import { addMonths } from "date-fns";
 import { CalendarDays } from "lucide-react";
 import moment from "moment";
-import { SetStateAction, useState } from "react";
+import {  useState } from "react";
 
 interface MonthSelectionProps {
     selectedMonth: (value: Date) => void;

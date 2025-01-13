@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 
 interface MultiSelectProps {
   placeholder: string;
-  data: any[];
+  data: { _id: string; name: string }[];
   value: string[];
   onChange: (value: string) => void;
   onRemove: (value: string) => void;
@@ -22,11 +22,11 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   const [inputValue, setInputValue] = useState("");
   const [open, setOpen] = useState(false);
 
-  let selected: any[] = [];
-  if (value.length > 0 && data) {
+  let selected: { _id: string; name: string }[] = [];
+  if (value?.length > 0 && data) {
     selected = value
       .map((id) => data.find((unit) => unit?._id === id))
-      .filter((unit) => unit) as any[];
+      .filter((unit): unit is { _id: string; name: string } => !!unit);
   }
 
   const selectables = data?.filter(

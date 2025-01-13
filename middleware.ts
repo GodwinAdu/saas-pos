@@ -28,14 +28,27 @@ export async function middleware(request: NextRequest) {
 
     const { pathname } = request.nextUrl;
     const pathSegments = pathname.split('/');
+    const posSegments = pathname.split('/');
 
     const token = request.cookies.get('token')?.value;
     const currentBranchId = pathSegments[3];
+    const currentPosBranchId = posSegments[2];
     const cookieBranchId = request.cookies.get('branchId')?.value;
+    const cookiesPosBranchId = request.cookies.get('posBranchId')?.value;
 
     if (currentBranchId && currentBranchId !== cookieBranchId) {
         const response = NextResponse.next();
         response.cookies.set('branchId', currentBranchId, {
+            path: '/',
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+        });
+        return response;
+    }
+
+    if (pathname.includes('/pos') && currentPosBranchId && currentPosBranchId !== cookiesPosBranchId) {
+        const response = NextResponse.next();
+        response.cookies.set('posBranchId', currentPosBranchId, {
             path: '/',
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',

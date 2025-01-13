@@ -4,8 +4,6 @@ import { revalidatePath } from "next/cache";
 import { currentUser } from "../helpers/current-user";
 import Category from "../models/category.models";
 import { connectToDB } from "../mongoose";
-
-import Product from "../models/product.models";
 import { CurrentBranchId } from "../helpers/get-current-branch";
 import { deleteDocument } from "./trash.actons";
 
@@ -64,6 +62,7 @@ export async function createCategory(values: CategoryProps) {
 export async function fetchAllCategories() {
     try {
         const user = await currentUser();
+        const branchId = await CurrentBranchId();
 
         const storeId = user.storeId as string;
 
@@ -71,6 +70,7 @@ export async function fetchAllCategories() {
 
         const categories = await Category.find({
             storeId,
+            branchIds: { $in: branchId },
             active: true,
         }).populate("createdBy", "fullName");
 
@@ -83,7 +83,7 @@ export async function fetchAllCategories() {
         throw error
     }
 }
-export async function fetchAllCategoriesWithBranchId(){
+export async function fetchAllCategoriesWithBranchId() {
     try {
         const user = await currentUser();
 
@@ -157,25 +157,25 @@ export async function updateCategory(id: string, values: Partial<CategoryProps>,
 
 
 
-export async function deleteCategory(id:string) {
+export async function deleteCategory(id: string) {
     try {
         const user = await currentUser();
-            const storeId = user.storeId as string;
-            const result = await deleteDocument({
-                actionType:'CATEGORY_DELETED',
-                documentId:id,
-                collectionName:'Category',
-                userId: user?._id,
-                storeId,
-                trashMessage: `Category with ID ${id} deleted by ${user.fullName}`,
-                historyMessage: `Category with ID ${id} deleted by ${user.fullName}`
-            });
-        
-            console.log(`Category with ID ${id} deleted by user ${user._id}`);
-            return JSON.parse(JSON.stringify(result));
-        } catch (error) {
-            console.error("Error deleting category:", error);
-            throw new Error('Failed to delete the category. Please try again.');
-        }
-    
+        const storeId = user.storeId as string;
+        const result = await deleteDocument({
+            actionType: 'CATEGORY_DELETED',
+            documentId: id,
+            collectionName: 'Category',
+            userId: user?._id,
+            storeId,
+            trashMessage: `Category with ID ${id} deleted by ${user.fullName}`,
+            historyMessage: `Category with ID ${id} deleted by ${user.fullName}`
+        });
+
+        console.log(`Category with ID ${id} deleted by user ${user._id}`);
+        return JSON.parse(JSON.stringify(result));
+    } catch (error) {
+        console.error("Error deleting category:", error);
+        throw new Error('Failed to delete the category. Please try again.');
+    }
+
 }

@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Button } from '../ui/button'
 import {  CalculatorIcon, FileText, SkipBack } from 'lucide-react'
 import UserDropdown from '../commons/user/user-dropdown'

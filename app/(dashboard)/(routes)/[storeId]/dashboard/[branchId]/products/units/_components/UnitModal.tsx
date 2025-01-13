@@ -78,9 +78,8 @@ export function UnitModal({ branches,user }: { branches: IBranch[],user:IUser })
                 description: "New unit was added successfully...",
                 variant: "success",
             });
-        } catch (error: any) {
+        } catch {
             playErrorSound()
-            console.log("error happened while creating unit", error);
             toast({
                 title: "Something went wrong",
                 description: "Please try again later...",

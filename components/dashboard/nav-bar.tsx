@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
-import { BarChart4, CalculatorIcon, Package, Settings, Users } from "lucide-react";
+import { BarChart4, CalculatorIcon, Package, Users } from "lucide-react";
 import UserDropdown from "../commons/user/user-dropdown";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import Calculator from "../commons/Calculater";

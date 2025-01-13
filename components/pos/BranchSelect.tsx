@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronsUpDown, School, ShoppingCart } from "lucide-react";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,15 +10,13 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useParams, useRouter } from "next/navigation"; // For dynamic navigation
-import { useEffect } from "react";
+import { useRouter } from "next/navigation"; // For dynamic navigation
 import useBranchStore from "@/hooks/use-branch-store";
 import { Button } from "../ui/button";
 
 
 export function BranchSelect({ branches }: { branches: IBranch[] }) {
   const router = useRouter();
-  const params = useParams();
 
 
 

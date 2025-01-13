@@ -19,6 +19,7 @@ import { toast } from "@/hooks/use-toast"
 import { logInUser } from "@/lib/helpers/login-user"
 import Link from "next/link"
 import { LoginFormSchema } from "@/lib/validators/sign-up-schema"
+import { getAppVersion } from "@/lib/version"
 
 const LoginForm = () => {
     const router = useRouter()
@@ -47,8 +48,7 @@ const LoginForm = () => {
             })
 
             router.push(`/${user.storeId}`);
-        } catch (error) {
-            console.log('Error logging in user', error);
+        } catch {
             toast({
                 title: "Something went wrong",
                 description: "Please try again later",
@@ -71,7 +71,7 @@ const LoginForm = () => {
                                     href="/forget_password"
                                     className="ml-auto text-sm underline-offset-2 hover:underline"
                                 >
-                                    <span className="text-xs text-blue-700">version 0.0.1</span>
+                                    <span className="text-xs text-blue-700">Version {getAppVersion()}</span>
                                 </Link>
                             </div>
                             <FormControl>

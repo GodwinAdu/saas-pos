@@ -18,7 +18,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useParams, useRouter } from "next/navigation"; // For dynamic navigation
-import { useEffect } from "react";
 import useBranchStore from "@/hooks/use-branch-store";
 import { CreateBranchModal } from "./create-branch";
 

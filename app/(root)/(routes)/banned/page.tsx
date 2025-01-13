@@ -17,22 +17,24 @@ export default function BannedPage() {
           <p className="text-center text-gray-600">
             We&apos;re sorry, but your account has been banned from our platform.
           </p>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <h3 className="font-semibold text-red-800 mb-2">Possible reasons for account ban:</h3>
-            <ul className="list-disc list-inside text-red-700 space-y-1">
-              <li>Violation of our terms of service</li>
-              <li>Engaging in abusive or harmful behavior</li>
-              <li>Multiple reports from other users</li>
-              <li>Suspicious or fraudulent activity</li>
-            </ul>
-          </div>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="font-semibold text-blue-800 mb-2">What you can do:</h3>
-            <ul className="list-disc list-inside text-blue-700 space-y-1">
-              <li>Review our terms of service</li>
-              <li>Contact our support team for more information</li>
-              <li>Appeal the ban if you believe it&apos;s a mistake</li>
-            </ul>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <h3 className="font-semibold text-red-800 mb-2">Possible reasons for account ban:</h3>
+              <ul className="list-disc list-inside text-red-700 space-y-1">
+                <li>Violation of our terms of service</li>
+                <li>Engaging in abusive or harmful behavior</li>
+                <li>Multiple reports from other users</li>
+                <li>Suspicious or fraudulent activity</li>
+              </ul>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-semibold text-blue-800 mb-2">What you can do:</h3>
+              <ul className="list-disc list-inside text-blue-700 space-y-1">
+                <li>Review our terms of service</li>
+                <li>Contact our support team for more information</li>
+                <li>Appeal the ban if you believe it&apos;s a mistake</li>
+              </ul>
+            </div>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">

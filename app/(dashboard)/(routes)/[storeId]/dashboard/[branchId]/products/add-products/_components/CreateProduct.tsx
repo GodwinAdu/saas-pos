@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { format } from 'date-fns'
 import { CalendarIcon, } from 'lucide-react'
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -24,6 +25,7 @@ import { cn } from '@/lib/utils'
 import { createProduct } from '@/lib/actions/product.actions'
 import { playErrorSound, playSuccessSound } from '@/lib/audio'
 import { ImageUploader } from '@/components/commons/ImageUpload'
+import { usePathname, useRouter } from 'next/navigation'
 
 
 
@@ -34,10 +36,13 @@ const productSchema = z.object({
     expiryDate: z.date().optional(),
     barcode: z.string(),
     sku: z.string(),
+    warrantId: z.string().optional(),
+    variation: z.string().optional(),
     description: z.string().optional(),
     tags: z.array(z.string()).optional(),
     colors: z.array(z.string()).optional(),
     sizes: z.array(z.string()).optional(),
+    branchIds: z.array(z.string()),
     vendorPrice: z.object({
         unitId: z.string(),
         productPrice: z.coerce.number(),
@@ -72,39 +77,59 @@ const productSchema = z.object({
     stockCalculationMethod: z.string(),
     images: z.array(z.string().url()).min(1, {
         message: "At least one image is required.",
-      }),
+    }),
 })
 
 type ProductFormValues = z.infer<typeof productSchema>
 
 interface ProductProps {
     type: 'create' | 'update';
+    warrants: IWarrant[];
+    variations: IVariation[];
     initialData?: ProductFormValues;
-    categories: any[];
-    brands: any[];
-    units: any[];
+    categories: ICategory[];
+    brands: IBrand[];
+    units: IUnit[];
     branch: IBranch,
+    branches: IBranch[],
+    user: IUser
 }
 
-export default function CreateProductForm({ branch, units, type, categories, brands, initialData }: ProductProps) {
+export default function CreateProductForm({
+    user,
+    warrants,
+    variations,
+    branches,
+    branch,
+    units,
+    type,
+    categories,
+    brands,
+    initialData,
+}: ProductProps) {
 
     const [wholesaleSellingPrice, setWholesaleSellingPrice] = useState<number>(0)
     const [retailSellingPrice, setRetailSellingPrice] = useState<number>(0)
-    const [productUnits, setProductUnits] = useState<any[] | []>([])
+    const [productUnits, setProductUnits] = useState<IUnit[] | []>([])
     const [calculateStock, setCalculateStock] = useState(0);
     const [costPerUnit, setCostPerUnit] = useState(0);
     const [pricePerUnit, setPricePerUnit] = useState(0);
     const [wholesaleMargin, setWholesaleMargin] = useState(0);
-
+    const [selectedBranches, setSelectedBranches] = useState<IBranch[]>([]);
     const [retailMargin, setRetailMargin] = useState(0);
+
+    const router = useRouter();
+    const path = usePathname();
+
 
 
     const form = useForm<ProductFormValues>({
         resolver: zodResolver(productSchema),
-        defaultValues: {
+        defaultValues: initialData ?? {
             name: '',
             barcode: '',
             sku: '',
+            branchIds: [],
             manualPrice: productUnits.map((unit) => ({
                 unitId: unit._id, // Map the unitId directly
                 tax: 0,
@@ -134,7 +159,7 @@ export default function CreateProductForm({ branch, units, type, categories, bra
             sizes: [],
             stockCalculationMethod: '',
             selling: false,
-            images:[]
+            images: []
         },
     })
 
@@ -146,6 +171,15 @@ export default function CreateProductForm({ branch, units, type, categories, bra
     const productQuantity = form.watch('vendorPrice.productQuantity')
     const vendorUnit = form.watch('vendorPrice.unitId');
     const productPrice = form.watch("vendorPrice.productPrice");
+
+
+
+    useEffect(() => {
+        const matchBranches = branches.filter((branch) =>
+            user.accessLocation.includes(branch._id)
+        );
+        setSelectedBranches(matchBranches);
+    }, [branches, user]);
     const selling = form.watch('selling')
 
     useEffect(() => {
@@ -219,7 +253,6 @@ export default function CreateProductForm({ branch, units, type, categories, bra
         if (stockMethod && productQuantity && productUnits?.length) {
             try {
                 const result = automaticStock(productUnits, productQuantity, stockMethod, vendorUnit);
-                console.log("Calculated Stock:", result);
                 // Use the result (e.g., update state)
             } catch (error) {
                 console.error("Error in automaticStock:", error);
@@ -231,14 +264,16 @@ export default function CreateProductForm({ branch, units, type, categories, bra
 
 
 
-    const { control, watch, setValue, getValues } = form;
+    // const { control, watch, setValue, getValues } = form;
 
 
-    const onSubmit = async (values: ProductFormValues) => {
+    const onSubmit = async (values: ProductFormValues, path: string) => {
         setIsSubmitting(true)
         try {
             await createProduct(values)
             playSuccessSound();
+
+            router.push(`/6769def86a8adf1810a37dec/dashboard/6769df1b6a8adf1810a37e06/products/add-products/`)
 
             toast({
                 title: "Product created",
@@ -525,6 +560,35 @@ export default function CreateProductForm({ branch, units, type, categories, bra
                                                         ])
                                                     }
                                                 />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="branchIds"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Add Branches</FormLabel>
+                                            <FormControl>
+                                                {selectedBranches && selectedBranches.length > 0 ? (
+                                                    <MultiSelect
+                                                        placeholder="Select Units"
+                                                        data={selectedBranches}
+                                                        value={field.value}
+                                                        onChange={(_id) =>
+                                                            field.onChange([...field.value, _id])
+                                                        }
+                                                        onRemove={(idToRemove) =>
+                                                            field.onChange([
+                                                                ...field.value.filter(
+                                                                    (id) => id !== idToRemove
+                                                                ),
+                                                            ])
+                                                        }
+                                                    />
+                                                ) : null}
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -1054,6 +1118,64 @@ export default function CreateProductForm({ branch, units, type, categories, bra
                                             <FormControl>
                                                 <Input type="number" placeholder="Enter  level" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
                                             </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="warrantId"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Product Warrant(Optional)</FormLabel>
+                                            <Select
+                                                onValueChange={(value) => {
+                                                    field.onChange(value);
+                                                }}
+                                                defaultValue={field.value}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select warrant" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {warrants?.map((warrant) => (
+                                                        <SelectItem key={warrant._id} value={warrant._id}>
+                                                            {warrant.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="variation"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Product Variation(Optional)</FormLabel>
+                                            <Select
+                                                onValueChange={(value) => {
+                                                    field.onChange(value);
+                                                }}
+                                                defaultValue={field.value}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select Variation" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {variations?.map((variation) => (
+                                                        <SelectItem key={variation._id} value={variation._id}>
+                                                            {variation.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
                                             <FormMessage />
                                         </FormItem>
                                     )}

@@ -2,15 +2,13 @@
 import {
     Select,
     SelectContent,
-    SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
 
 interface CategorySelectionProps {
-    categories: any[],
+    categories: ICategory[],
     SelectedCategory: (value: string) => void;
 }
 const CategorySelection = ({ SelectedCategory, categories }: CategorySelectionProps) => {

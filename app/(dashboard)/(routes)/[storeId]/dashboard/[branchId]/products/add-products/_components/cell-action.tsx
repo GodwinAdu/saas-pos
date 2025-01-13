@@ -49,7 +49,7 @@ export const CellAction: React.FC<CellActionProps> = ({
                 description: "You've delete User successfully",
                 variant: "success",
             });
-        } catch (error: any) {
+        } catch{
             playErrorSound()
             toast({
                 title: "Something Went Wrong",
@@ -83,7 +83,7 @@ export const CellAction: React.FC<CellActionProps> = ({
                         <>
                             {role?.editCategory && (
                                 <Link
-                                    href={`/${params.storeId}/dashboard/${params.branchId}/products/brands/${data?._id}`}
+                                    href={`/${params.storeId}/dashboard/${params.branchId}/products/add-products/${data?._id}`}
                                 >
                                     <DropdownMenuItem>
                                         <Edit className="mr-2 h-4 w-4" /> Update
