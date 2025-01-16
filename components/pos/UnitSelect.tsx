@@ -13,9 +13,6 @@ interface UnitSelectionProps {
 }
 
 const UnitSelect = ({ selectedUnit, units, onUnitChange }: UnitSelectionProps) => {
-    console.log(units,'units')
-    console.log(selectedUnit,'selectedUnit')
-    // console.log(onUnitChange,'onUnitChange')
     return (
         <Select
             onValueChange={(value) => onUnitChange(value)}

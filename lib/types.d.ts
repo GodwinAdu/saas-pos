@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 
 // Define the IRole interface
 interface IRole extends Document {
@@ -218,6 +219,8 @@ interface IBranch extends Document {
     _id: string;
     storeId: ObjectId; // Reference to the Store model
     name: string;      // Name of the branch
+    location: string; // Location of the branch
+    contact: string; // Contact
     promotions: {
         promoCode: string;
         discountRate: number;
@@ -438,12 +441,30 @@ interface WholesalePrice {
     wholesaleSellingPrice?: number;
 }
 
+interface IAccount {
+    _id: string;
+    name: string;
+    storeId: Types.ObjectId;
+    branchIds: Types.ObjectId[];
+    balance: number;
+    expenses: Types.ObjectId[];
+    sales: Types.ObjectId[];
+    active: boolean;
+    createdBy?: Types.ObjectId;
+    modifiedBy?: Types.ObjectId;
+    mod_flag?: boolean;
+    del_flag?: boolean;
+    action_type?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
 interface IProduct extends Document {
-    _id:string;
+    _id: string;
     name: string;
     brandId: Types.ObjectId;
     storeId: Types.ObjectId;
-    branchIds: Types.ObjectId;
+    branchIds: Types.ObjectId[];
     categoryId?: Types.ObjectId;
     expiryDate?: Date;
     barcode: string;
@@ -508,6 +529,23 @@ interface ISuspend extends Document {
     products: Product[];
     description?: string;
     date: Date;
+    createdBy?: Types.ObjectId;
+    modifiedBy?: Types.ObjectId;
+    mod_flag?: boolean;
+    del_flag?: boolean;
+    action_type?: string;
+}
+
+interface ICustomer extends Document {
+    _id: string;
+    storeId: Types.ObjectId;
+    branchId: Types.ObjectId;
+    fullName: string;
+    email: string;
+    contact: string;
+    address: string;
+    dob: Date;
+    active: boolean;
     createdBy?: Types.ObjectId;
     modifiedBy?: Types.ObjectId;
     mod_flag?: boolean;

@@ -431,7 +431,7 @@ export function NavMain({ role }: NavMainProps) {
         }, {
           title: "Purchase & Sale Report",
           url: `/${storeId}/dashboard/${branchId}/report/purchase-sale-report`,
-          roleField: "purchaseSaleReport"
+          // roleField: ""
         }, {
           title: "Stock Adjustment Report",
           url: `/${storeId}/dashboard/${branchId}/report/stock-adjustment-report`,

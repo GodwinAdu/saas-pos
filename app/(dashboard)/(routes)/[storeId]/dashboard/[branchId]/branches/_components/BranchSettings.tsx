@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { useForm, } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Button } from '@/components/ui/button'
@@ -17,13 +16,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { updateBranch } from '@/lib/actions/branch.actions'
 import { useRouter } from 'next/navigation'
 import { playErrorSound, playSuccessSound } from '@/lib/audio'
-import { Switch } from '@/components/ui/switch'
+
 
 
 const branchFormSchema = z.object({
   name: z.string().min(2, {
     message: "Branch name must be at least 2 characters.",
   }),
+  location: z.string(),
+  contact: z.string(),
   promotions: z.array(z.object({
     promoCode: z.string().nullable(),
     discountRate: z.number().min(0).max(100).nullable(),
@@ -45,18 +46,20 @@ const branchFormSchema = z.object({
       closingTime: z.string(),
     })),
   }),
-  sound:z.boolean()
+  sound: z.boolean()
 })
 
 type BranchFormValues = z.infer<typeof branchFormSchema>
 
 
-export default function BranchSettingsForm({ branch }: { branch: any }) {
+export default function BranchSettingsForm({ branch }: { branch: IBranch }) {
 
   const router = useRouter();
   const branchId = branch._id;
   const defaultValues: Partial<BranchFormValues> = branch ?? {
     name: "",
+    location: "",
+    contact: "",
     promotions: [],
     branchSettings: {
       allowCustomReceipts: false,
@@ -82,6 +85,7 @@ export default function BranchSettingsForm({ branch }: { branch: any }) {
 
   async function onSubmit(data: BranchFormValues) {
     try {
+      console.log(data);
       await updateBranch(branchId, data)
 
       router.refresh();
@@ -106,22 +110,50 @@ export default function BranchSettingsForm({ branch }: { branch: any }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Branch Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter branch name" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is the name of your branch location.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Branch Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter branch name" {...field} />
+                </FormControl>
+                <FormDescription>
+                  This is the name of your branch location.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Location</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter location" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="contact"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contact</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter Contact" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <Tabs defaultValue="promotions" className="w-full">
           <TabsList>

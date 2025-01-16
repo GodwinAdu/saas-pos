@@ -12,6 +12,12 @@ const BranchSchema: Schema<IBranch> = new Schema({
     type: String,
     required: true,
   },
+  location: {
+    type: String
+  },
+  contact: {
+    type: String,
+  },
   promotions: [
     {
       promoCode: { type: String, default: null },

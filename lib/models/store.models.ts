@@ -9,6 +9,11 @@ const StoreSchema: Schema<IStore> = new Schema({
         type: String,
         default: null,
     },
+    ownwer:{
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
     storeEmail: {
         type: String,
         required: true,

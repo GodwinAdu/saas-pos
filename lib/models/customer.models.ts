@@ -1,7 +1,8 @@
-import { model, models, Schema } from "mongoose";
+import { Model, model, models, Schema } from "mongoose";
+import { ICustomer } from "../types";
 
 
-const CustomerSchema = new Schema({
+const CustomerSchema: Schema<ICustomer> = new Schema({
     storeId: {
         type: Schema.Types.ObjectId,
         ref: "Store",
@@ -28,6 +29,7 @@ const CustomerSchema = new Schema({
         type: String,
         required: true,
     },
+    dob: { type: String },
     active: {
         type: Boolean,
         default: true,
@@ -57,8 +59,9 @@ const CustomerSchema = new Schema({
     timestamps: true,
     versionKey: false,
 });
+type CustomerModel = Model<ICustomer>
 
-const Customer = models.Customer || model('Customer', CustomerSchema);
+const Customer: CustomerModel = models.Customer || model<ICustomer>('Customer', CustomerSchema);
 
 export default Customer;
 

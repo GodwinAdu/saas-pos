@@ -1,18 +1,18 @@
-import { model, models, Schema } from "mongoose";
+import { Model, model, models, Schema } from "mongoose";
 
 
-const AccountSchema = new Schema({
-    storeId:{
+const AccountSchema: Schema<IAccount> = new Schema({
+    storeId: {
         type: Schema.Types.ObjectId,
         ref: "Store",
         required: true,
     },
-    branchId: [{
+    branchIds: [{
         type: Schema.Types.ObjectId,
         ref: "Branch",
         required: true,
     }],
-    accountName: {
+    name: {
         type: String,
         required: true,
         trim: true,
@@ -22,7 +22,7 @@ const AccountSchema = new Schema({
         default: 0,
         min: 0,  // Assuming balance should not be negative
     },
-    deposits: [
+    sales: [
         {
             type: Schema.Types.ObjectId,
             ref: 'Sale',
@@ -34,6 +34,7 @@ const AccountSchema = new Schema({
             ref: 'Expense',
         }
     ],
+    active:{type:Boolean,default:false},
     createdBy: {
         type: Schema.Types.ObjectId,
         ref: "User",
@@ -55,9 +56,11 @@ const AccountSchema = new Schema({
         type: String,
     }
 }, {
-    timestamps: true 
+    timestamps: true,
+    versionKey: false,
 });
+type AccountModel = Model<IAccount>
 
-const Account = models.Account || model("Account", AccountSchema);
+const Account: AccountModel = models.Account || model<IAccount>("Account", AccountSchema);
 
 export default Account;

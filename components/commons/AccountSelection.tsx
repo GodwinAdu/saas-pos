@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select"
 
 interface ClassSelectionProps {
-    accounts: any[],
+    accounts: IAccount[],
     selectedAccount: (value: string) => void;
 }
 const AccountSelection = ({ selectedAccount, accounts }: ClassSelectionProps) => {
@@ -19,12 +19,12 @@ const AccountSelection = ({ selectedAccount, accounts }: ClassSelectionProps) =>
                 onValueChange={(value) => selectedAccount(value)}
             >
                 <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder={accounts[0]?.accountName} />
+                    <SelectValue placeholder={accounts[0]?.name} />
                 </SelectTrigger>
                 <SelectContent>
                     {accounts?.map((account) => (
                         <SelectItem key={account._id} value={account._id}>
-                            {account.accountName}
+                            {account.name}
                         </SelectItem>
                     ))}
                 </SelectContent>

@@ -5,52 +5,19 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowRight, BarChart2, Clock, Cloud, Database, Lock, RefreshCcw, Users, BookOpen, DollarSign } from 'lucide-react'
+import Hero from './hero/Hero'
 
 
 export default function Home() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 relative overflow-hidden">
+            <Hero />
             <div className="container mx-auto px-6 ">
                 {/* Animated Background Shapes */}
                 <div className="absolute inset-0">
                     <div className="absolute top-10 left-10 w-48 h-48 bg-white bg-opacity-20 rounded-full blur-3xl animate-pulse"></div>
                     <div className="absolute bottom-20 right-20 w-72 h-72 bg-yellow-400 bg-opacity-10 rounded-full blur-3xl animate-pulse"></div>
                 </div>
-
-                {/* Hero Content */}
-                <div className="relative z-10 container mx-auto px-6 py-12 text-center text-white">
-                    <motion.h1
-                        className="text-6xl font-extrabold leading-tight mb-6"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                    >
-                        Welcome to <span className="text-black font-extrabold"><span className="text-green-700">POS</span>ify</span>
-                    </motion.h1>
-                    <motion.p
-                        className="text-xl mb-8 max-w-3xl mx-auto"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2, duration: 0.6 }}
-                    >
-                        Effortlessly manage sales, inventory, and customer data with the most intuitive and reliable POS system designed for modern businesses.
-                    </motion.p>
-                    <motion.div
-                        className="flex justify-center gap-4"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4, duration: 0.6 }}
-                    >
-                        <Link href="/sign-up">
-                            <Button size="lg" className="bg-white text-indigo-600 hover:bg-indigo-100">
-                                Get Started
-                                <ArrowRight className="ml-2 h-5 w-5" />
-                            </Button>
-                        </Link>
-                    </motion.div>
-
-                </div>
-
 
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
