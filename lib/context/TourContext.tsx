@@ -4,7 +4,6 @@ import React, { createContext, useContext, useReducer, ReactNode, useCallback, u
 import { Step } from 'react-joyride';
 import { create } from 'zustand';
 
-// Zustand Store
 interface TourStore {
     completed: boolean;
     setCompleted: (completed: boolean) => void;
