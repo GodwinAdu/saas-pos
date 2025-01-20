@@ -3,6 +3,7 @@ import { Separator } from '@/components/ui/separator'
 import React from 'react'
 import StoreSettingsForm from './_components/StoreSettingsForm'
 import { fetchStoreById } from '@/lib/actions/store.actions'
+import { IStore, StoreIdParams } from '@/lib/types'
 
 const page = async ({ params }: { params: StoreIdParams }) => {
 

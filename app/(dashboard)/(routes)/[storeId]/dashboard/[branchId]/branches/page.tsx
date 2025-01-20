@@ -3,6 +3,9 @@ import { Separator } from '@/components/ui/separator'
 import React from 'react'
 import BranchSettingsForm from './_components/BranchSettings'
 import { currentBranch } from '@/lib/helpers/current-branch'
+import BranchSettings from '@/components/branch-settings/branch-settings'
+import { BranchIdParams } from '@/lib/types'
+import Branch from '../../../../../../../lib/models/branch.models';
 
 const page = async ({ params }: { params: BranchIdParams }) => {
   const { branchId } = await params;
@@ -16,7 +19,8 @@ const page = async ({ params }: { params: BranchIdParams }) => {
       </div>
       <Separator />
       <div className="py-4">
-        <BranchSettingsForm branch={branch} />
+        <BranchSettings branch={branch} />
+        {/* <BranchSettingsForm branch={branch} /> */}
       </div>
     </>
   )

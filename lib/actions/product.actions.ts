@@ -7,7 +7,6 @@ import Product from "../models/product.models";
 import Unit from "../models/unit.models";
 import User from "../models/user.models";
 import { connectToDB } from "../mongoose";
-
 import mongoose from "mongoose";
 
 function isValidObjectId(id: string | null | undefined): boolean {
@@ -127,8 +126,29 @@ export async function fetchAllProducts() {
         throw error;
     }
 }
+export async function fetchProductInfinity(page: number, limit: number = 20) {
+    try {
+        await connectToDB();
 
-export async function fetchAllProductsForPos() {
+        const products = await Product.find()
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .exec();
+
+        const total = await Product.countDocuments();
+
+        return {
+            products: JSON.parse(JSON.stringify(products)),
+            total
+        };
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        return { products: [], total: 0 }; // Return an empty array and zero total in case of error
+    }
+}
+
+
+export async function fetchAllProductsForPos(page: number, limit: number = 50) {
     try {
         const user = await currentUser();
         const branchId = await CurrentPosBranchId();
@@ -137,6 +157,8 @@ export async function fetchAllProductsForPos() {
         await connectToDB();
 
         const products = await Product.find({ storeId, branchIds: { $in: [branchId] } })
+            .skip((page - 1) * limit)
+            .limit(limit)
             .populate([
                 {
                     path: 'unit',
@@ -166,11 +188,13 @@ export async function fetchAllProductsForPos() {
             ])
             .exec();
 
-
-        console.log(products, "server")
+            const total = await Product.countDocuments();
         if (products.length === 0) return [];
 
-        return JSON.parse(JSON.stringify(products))
+        return {
+            products: JSON.parse(JSON.stringify(products)),
+            total
+        };
 
     } catch (error) {
         console.error("Error fetching all products:", error);

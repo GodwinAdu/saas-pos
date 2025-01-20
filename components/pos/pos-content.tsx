@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogFooter, } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ShoppingCart, Plus, Minus, X, Search } from 'lucide-react'
+import { ShoppingCart, Plus, Minus, X, Search, Loader2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import TransactionHistoryModal from './TransactionModal'
@@ -28,6 +28,12 @@ import SuspendModal from './SuspendModal'
 import OrderModal from './OrderModal'
 import AddExpensesModal from './AddExpenses'
 import Navbar from './Navbar'
+import BrandSelection from '../commons/BrandSelection'
+import CategorySelection from '../commons/CategorySelection'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
+import { Switch } from '../ui/switch'
+import { IBranch, IBrand, ICategory, IUser } from '@/lib/types'
+import { fetchAllProductsForPos } from '@/lib/actions/product.actions'
 
 
 
@@ -39,6 +45,7 @@ interface Product {
     inventory: number
     category: string
     barcode: string
+    _id: string
 }
 
 interface CartItem {
@@ -83,7 +90,7 @@ const customers: Customer[] = [
     { id: 2, name: "Jane Smith", email: "jane@example.com", loyaltyPoints: 50, address: "456 Elm St, Othertown, USA", phone: "555-5678" },
 ]
 
-export default function PosContent({ user, branches, branch, products, suspends }: { user: IUser, branches: IBranch[], branch: IBranch, products: any[], suspends: any[] }) {
+export default function PosContent({ brands, categories, user, branches, branch, suspends }: { brands: IBrand[], categories: ICategory[], user: IUser, branches: IBranch[], branch: IBranch, suspends: any[] }) {
     const {
         cartItems,
         discountPercent,
@@ -97,9 +104,8 @@ export default function PosContent({ user, branches, branch, products, suspends 
     const { selectedValue } = useSelectSellingGroup()
 
 
-    const [activeTab, setActiveTab] = useState("products")
-    const [searchTerm, setSearchTerm] = useState("")
-    const [selectedCategory, setSelectedCategory] = useState("All")
+    const [selectedBrand, setSelectedBrand] = useState<string>("");
+    const [selectedCategory, setSelectedCategory] = useState<string>("");
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
     const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false)
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'cash' | 'gift' | 'qr'>('card')
@@ -111,15 +117,83 @@ export default function PosContent({ user, branches, branch, products, suspends 
     const [quantity, setQuantity] = useState(1)
     const [selectedUnit, setSelectedUnit] = useState('')
     const [showReceipt, setShowReceipt] = useState(false)
-
+    const [products, setProducts] = useState<Product[] | []>([]);
+    const [checking, setChecking] = useState<boolean>(() => {
+        const savedChecking = localStorage.getItem('checking');
+        return savedChecking ? JSON.parse(savedChecking) : false;
+    });
+    const [searchTerm, setSearchTerm] = useState('')
+    const [page, setPage] = useState<number>(1);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [hasMore, setHasMore] = useState<boolean>(true);
+    const observer = useRef<IntersectionObserver | null>(null);
+    const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
     const invoiceRef = useRef<HTMLDivElement>(null)
 
-    const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (selectedCategory === "All" || product.category === selectedCategory)
-    )
+    // const filteredProducts = products.filter(product =>
+    //     product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    // )
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+    };
+    const handleSwitchChange = (checked: boolean) => {
+        setChecking(checked);
+        if (typeof window !== "undefined") {
+            localStorage.setItem('checking', JSON.stringify(checked));
+        }
+    };
+    const limit = 100;
+    const productSet = useRef<Set<string>>(new Set()); // Track unique product IDs
 
+    const filterProducts = useCallback((query: string) => {
+        if (query.trim().length >= 2) {
+            const filtered = products.filter(product =>
+                product.name.toLowerCase().includes(query.trim().toLowerCase())
+            );
+            setFilteredProducts(filtered);
+        } else {
+            setFilteredProducts(products);
+        }
+    }, [products]);
+
+    useEffect(() => {
+        filterProducts(searchTerm);
+    }, [searchTerm, filterProducts]);
+
+    const lastProductElementRef = useCallback((node: HTMLDivElement) => {
+        if (loading) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage((prevPage) => prevPage + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loading, hasMore]);
+
+    const fetchProducts = async () => {
+        setLoading(true);
+        try {
+            const response = await fetchAllProductsForPos(page, limit) as { products: Product[]; total: number };
+            const newProducts = response.products?.filter((product: Product) => !productSet.current.has(product._id)) || [];
+
+            // Add new product IDs to the set
+            newProducts?.forEach((product: Product) => productSet.current.add(product._id));
+
+            setProducts((prevProducts) => [...prevProducts, ...newProducts]);
+            setFilteredProducts((prevProducts) => [...prevProducts, ...newProducts]);
+            setHasMore(newProducts?.length > 0);
+        } catch (error) {
+            console.error("Error fetching products:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchProducts();
+    }, [page]);
 
 
     // for manual price
@@ -180,117 +254,102 @@ export default function PosContent({ user, branches, branch, products, suspends 
         }
     }
 
-    const categories = ["All", ...Array.from(new Set(products?.map(p => p.category)))]
-
     return (
         <div className="flex flex-col h-screen bg-gray-100">
 
             <Navbar products={suspends} branches={branches} user={user} customers={customers} setSelectedCustomer={setSelectedCustomer} setIsTransactionHistoryOpen={setIsTransactionHistoryOpen} />
             <main className="flex-grow flex flex-col md:flex-row overflow-hidden bg-background">
-                <div className="w-full md:w-2/3 p-4">
-                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="products">Products</TabsTrigger>
-                            <TabsTrigger value="categories">Categories</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="products" className="mt-4">
-                            <div className="flex space-x-2 mb-4">
-                                <div className="flex-grow">
-                                    <Label htmlFor="search" className="sr-only">Search Products</Label>
-                                    <div className="relative">
-                                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            id="search"
-                                            placeholder="Search products..."
-                                            className="pl-8"
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                        />
+                <div className="w-full md:w-2/3 p-4 ">
+                    <div className="max-w-xl mx-auto  p-2 sticky top-0 z-30">
+                        <div className="flex gap-4 items-center">
+                            {checking ? (
+                                <div className="w-full flex gap-4">
+                                    <div>
+                                        <BrandSelection SelectedBrand={(value) => setSelectedBrand(value)} brands={brands} />
+                                    </div>
+                                    <div>
+                                        <CategorySelection SelectedCategory={(value) => setSelectedCategory(value)} categories={categories} />
                                     </div>
                                 </div>
-                                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {categories.map((category,index) => (
-                                            <SelectItem key={index} value={category}>
-                                                {category}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <Button variant="outline" onClick={() => setIsBarcodeMode(!isBarcodeMode)}>
-                                    {isBarcodeMode ? "Manual" : "Barcode"}
-                                </Button>
+                            ) : (
+                                <div className="w-full">
+                                    <Input
+                                        type="text"
+                                        id="search"
+                                        placeholder="Search product by name/sku/barcode"
+                                        value={searchTerm}
+                                        onChange={handleSearchChange}
+                                    />
+                                </div>
+                            )}
+                            <div>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className="bg-white p-1 shadow-lg rounded-md items-center text-center">
+                                                <Switch checked={checking} onCheckedChange={handleSwitchChange} />
+                                            </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Filter Products by Brand name and Category</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             </div>
-                            {/* {isBarcodeMode ? (
-                                <form onSubmit={handleBarcodeSubmit} className="mb-4">
-                                    <div className="flex space-x-2">
-                                        <Input
-                                            type="text"
-                                            placeholder="Scan barcode..."
-                                            value={barcodeInput}
-                                            onChange={(e) => setBarcodeInput(e.target.value)}
-                                            className="flex-grow"
-                                        />
-                                        <Button type="submit">Add</Button>
-                                    </div>
-                                </form>
-                            ) : null} */}
-                            <ScrollArea className="h-[calc(100vh-280px)]">
-                                {filteredProducts.length !== 0 ? (
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                        {filteredProducts.map(product => (
-                                            <Card key={product.id} className="overflow-hidden">
-                                                <CardHeader className="p-0">
-                                                    <Image width={100} height={100} src={product.images[0] ?? '/sardine.jpg'} alt={product.name} className="w-full h-24 object-scale-down" />
-                                                </CardHeader>
-                                                <CardContent className="p-2">
-                                                    <h3 className="font-semibold text-sm mb-1">{product.name}</h3>
-                                                    <Badge variant={product.stock > 0 ? "secondary" : "destructive"} className="mt-2">
-                                                        {product.stock > 0 ? `In stock: ${product.stock}` : "Out of stock"}
-                                                    </Badge>
-                                                </CardContent>
-                                                <CardFooter className="p-2">
-                                                    <Button onClick={() => addToCart(branch, product, product.unit ? product.unit[0]._id : '', quantity)} className="w-full" disabled={product.stock === 0}>
-                                                        <Plus className="h-4 w-4 mr-2" /> Add
-                                                    </Button>
-                                                </CardFooter>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center h-full">
-                                        <p className="text-center text-sm">No products found.</p>
-                                        <p className="text-center text-sm text-muted-foreground">Try adjusting your search or filter to find what you&apos;re looking for.</p>
-                                    </div>
-                                )}
+                        </div>
+                    </div>
 
-                            </ScrollArea>
-                            <div className="py-4 flex gap-5">
-                                <SuspendModal branch={branch} />
-                                <OrderModal />
-                                <AddExpensesModal />
-                            </div>
-                        </TabsContent>
-                        <TabsContent value="categories">
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                {categories.map((category, index) => (
-                                    <Card key={index} className="overflow-hidden">
-                                        <CardHeader>
-                                            <CardTitle>{category}</CardTitle>
+                    <ScrollArea className="h-[calc(100vh-200px)]">
+                        {filteredProducts.length !== 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                {filteredProducts.map(product => (
+                                    <Card key={product.id} className="overflow-hidden">
+                                        <CardHeader className="p-0">
+                                            <Image width={100} height={100} src={product.images[0] ?? '/sardine.jpg'} alt={product.name} className="w-full h-24 object-scale-down" />
                                         </CardHeader>
-                                        <CardContent>
-                                            <p className="text-sm text-muted-foreground" >
-                                                {products.filter(p => p.category === category).length} products
-                                            </p>
+                                        <CardContent className="p-2">
+                                            <h3 className="font-semibold text-sm mb-1">{product.name}</h3>
+                                            <Badge variant={product.stock > 0 ? "secondary" : "destructive"} className="mt-2">
+                                                {product.stock > 0 ? `In stock: ${product.stock}` : "Out of stock"}
+                                            </Badge>
                                         </CardContent>
+                                        <CardFooter className="p-2">
+                                            <Button onClick={() => addToCart(branch, product, product.unit ? product.unit[0]._id : '', quantity)} className="w-full" disabled={product.stock === 0}>
+                                                <Plus className="h-4 w-4 mr-2" /> Add
+                                            </Button>
+                                        </CardFooter>
                                     </Card>
                                 ))}
                             </div>
-                        </TabsContent>
-                    </Tabs>
+                        ) : (
+                            !loading &&
+                            <div className="flex flex-col items-center justify-center h-[calc(100vh-500px)]  ">
+                                <p className="text-center text-sm">No products found.</p>
+                                <p className="text-center text-sm text-muted-foreground">Try adjusting your search or filter to find what you&apos;re looking for.</p>
+                            </div>
+                        )}
+                        {loading &&
+                            <div
+                                className="flex flex-col items-center justify-center min-h-[calc(100vh-500px)] space-y-3 bg-gray-50"
+                                aria-busy="true"
+                                aria-live="polite"
+                            >
+                                <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                                <p className="text-base font-semibold text-gray-700">
+                                    Loading products...
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Please wait while we load your content.
+                                </p>
+                            </div>
+
+                        }
+                    </ScrollArea>
+                    <div className="flex gap-5">
+                        <SuspendModal branch={branch} />
+                        <OrderModal />
+                        <AddExpensesModal />
+                    </div>
                 </div>
 
                 <div className="w-full md:w-1/3 bg-background p-4 shadow-lg overflow-hidden flex flex-col">

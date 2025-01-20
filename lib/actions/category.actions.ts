@@ -6,6 +6,7 @@ import Category from "../models/category.models";
 import { connectToDB } from "../mongoose";
 import { CurrentBranchId } from "../helpers/get-current-branch";
 import { deleteDocument } from "./trash.actons";
+import { CurrentPosBranchId } from "../helpers/get-current-branchId-pos";
 
 
 
@@ -63,6 +64,30 @@ export async function fetchAllCategories() {
     try {
         const user = await currentUser();
         const branchId = await CurrentBranchId();
+
+        const storeId = user.storeId as string;
+
+        await connectToDB();
+
+        const categories = await Category.find({
+            storeId,
+            branchIds: { $in: branchId },
+            active: true,
+        }).populate("createdBy", "fullName");
+
+        if (categories.length === 0) {
+            return []
+        }
+        return JSON.parse(JSON.stringify(categories));
+    } catch (error) {
+        console.log("Error fetching categories ", error)
+        throw error
+    }
+}
+export async function fetchAllCategoriesForPos() {
+    try {
+        const user = await currentUser();
+        const branchId = await CurrentPosBranchId();
 
         const storeId = user.storeId as string;
 

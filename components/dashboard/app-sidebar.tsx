@@ -11,6 +11,8 @@ import {
 import { TeamSwitcher } from "./team-switcher"
 import { NavUser } from "./nav-user"
 import SideContent from "./sidebar"
+import { IRole, IStore } from "@/lib/types"
+import { IBranch } from "@/lib/models/branch.models"
 
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {

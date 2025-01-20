@@ -6,6 +6,7 @@ import { connectToDB } from "../mongoose";
 import { currentUser } from "../helpers/current-user";
 import { CurrentBranchId } from "../helpers/get-current-branch";
 import { deleteDocument } from "./trash.actons";
+import { CurrentPosBranchId } from "../helpers/get-current-branchId-pos";
 
 
 
@@ -65,6 +66,28 @@ export async function fetchAllBrands() {
     try {
         const user = await currentUser();
         const branchId = await CurrentBranchId();
+
+        const storeId = user.storeId as string;
+
+        await connectToDB();
+
+        const brands = await Brand.find({ storeId, branchIds: { $in: [branchId] }, active: true }).populate("createdBy", "fullName");
+
+        if (brands.length === 0) {
+            return []
+        };
+
+        return JSON.parse(JSON.stringify(brands));
+
+    } catch (error) {
+        console.log("Error fetching all brand ", error)
+        throw error
+    }
+}
+export async function fetchAllBrandsForPos() {
+    try {
+        const user = await currentUser();
+        const branchId = await CurrentPosBranchId();
 
         const storeId = user.storeId as string;
 

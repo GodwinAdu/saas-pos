@@ -1,5 +1,3 @@
-
-
 "use client"
 
 import {
@@ -35,6 +33,8 @@ import Link from "next/link"
 import { ModeToggle } from "../commons/theme/ModeToggle"
 import { PaymentDialog } from "./dialog/paymentDialog"
 import { RatingDialog } from "./dialog/RatingDialog"
+import { IStore } from "@/lib/types"
+import { useTourControl } from "@/hooks/use-tour-control"
 
 export function NavUser({ store }: { store: IStore }) {
   const { isMobile } = useSidebar()
@@ -42,18 +42,22 @@ export function NavUser({ store }: { store: IStore }) {
 
   const storeId = params.storeId as string;
   const branchId = params.branchId as string;
-
-  console.log(storeId, "store")
-  console.log(branchId, "branch")
+  useTourControl([
+    {
+      target: '.store-avatar',
+      content: 'tesfksjf sf sfs lfsjflks jfsljfslkfs ',
+      disableBeacon: true,
+    },
+  ])
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger className="store-avatar" asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className=" data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src='' alt={store.name} />

@@ -3,6 +3,7 @@ import { AppSidebar } from './app-sidebar'
 import { getStore } from '@/lib/actions/store.actions'
 import { fetchBranchesForUser } from '@/lib/actions/branch.actions';
 import { currentUserRole } from '@/lib/helpers/get-user-role';
+import { IRole } from '@/lib/types';
 
 const AppSidebarMain = async () => {
     const store = await getStore();

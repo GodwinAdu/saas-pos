@@ -42,20 +42,23 @@ import { getAppVersion } from "@/lib/version";
 
 
 const calculateSetupPrice = (branches: number) => {
-    return (branches / 5) * 250;
+    if(branches === 1) {
+        return 200;
+    }
+    return (branches / 5) * 400;
 };
 
 const SignupForm = () => {
     const router = useRouter();
     const [step, setStep] = useState(1);
-    const [setupPrice, setSetupPrice] = useState(250);
+    const [setupPrice, setSetupPrice] = useState(400);
 
     const formStepOne = useForm<z.infer<typeof stepOneSchema>>({
         resolver: zodResolver(stepOneSchema),
         defaultValues: {
             storeName: "",
             storeEmail: "",
-            numberOfBranches: "5",
+            numberOfBranches: "1",
         },
     });
 
@@ -166,7 +169,7 @@ const SignupForm = () => {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {[5, 10, 15, 20, 25, 30].map((num) => (
+                                            {[1, 5, 10, 15, 20, 25, 30].map((num) => (
                                                 <SelectItem key={num} value={String(num)}>
                                                     {num}
                                                 </SelectItem>

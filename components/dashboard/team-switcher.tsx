@@ -20,12 +20,21 @@ import {
 import { useParams, useRouter } from "next/navigation"; // For dynamic navigation
 import useBranchStore from "@/hooks/use-branch-store";
 import { CreateBranchModal } from "./create-branch";
+import { IBranch } from "@/lib/models/branch.models";
+import { useTourControl } from "@/hooks/use-tour-control";
 
 export function TeamSwitcher({ branches }: { branches: IBranch[] }) {
   const { isMobile } = useSidebar();
   const router = useRouter();
   const params = useParams();
 
+  useTourControl([
+    {
+      target: '.team-switcher',
+      content: 'Hello this is where to switch between branches ',
+      disableBeacon: true,
+    },
+  ])
 
 
 
@@ -38,11 +47,12 @@ export function TeamSwitcher({ branches }: { branches: IBranch[] }) {
     router.push(`/${params.storeId}/dashboard/${branch._id}`)
   };
 
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger className="team-switcher" asChild>
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"

@@ -10,9 +10,23 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/
 import Calculator from "../commons/Calculater";
 import FullScreenButton from "../commons/FullScreenButton";
 import SettingComponent from "../pos/Settings";
+import { IUser } from "@/lib/types";
+import { useTourControl } from "@/hooks/use-tour-control";
 
 const Navbar = ({ user }: { user: IUser }) => {
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+
+  useTourControl([
+    {
+      target: '.button-step',
+      content: 'Here you can see your key metrics',
+      disableBeacon: true,
+    },
+    {
+      target: '.button-2',
+      content: 'This chart shows your progress over time',
+    },
+  ])
 
   return (
     <header
@@ -23,7 +37,7 @@ const Navbar = ({ user }: { user: IUser }) => {
         <Separator orientation="vertical" className="mr-2 h-4" />
       </div>
 
-      <div className="flex gap-4 ml-auto items-center pr-3">
+      <div  className=".dashboard-stats flex gap-4 ml-auto items-center pr-3">
         <FullScreenButton />
         <div className="relative">
           <TooltipProvider>
@@ -50,10 +64,10 @@ const Navbar = ({ user }: { user: IUser }) => {
             </div>
           )}
         </div>
-        <Button variant="outline" size="icon">
+        <Button className="button-step" variant="outline" size="icon">
           <Users className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon">
+        <Button className="button-2" variant="outline" size="icon">
           <Package className="h-4 w-4" />
         </Button>
         <Button variant="outline" size="icon">

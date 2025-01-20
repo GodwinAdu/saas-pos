@@ -206,18 +206,3 @@ export async function updateBranch(id: string, values: any) {
 }
 
 
-export async function getBranchSound(branchId: string) {
-    try {
-        await connectToDB();
-        
-        const branch = await Branch.findById(branchId).select('sound');
-    
-        if (!branch || !branch.sound) {
-            return null;
-        }
-        return JSON.parse(JSON.stringify(branch.sound));
-    } catch (error) {
-        console.error('Failed to fetch branch sound setting:', error);
-        throw error;
-    }
-}

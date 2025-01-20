@@ -34,15 +34,19 @@ const StoreSchema: Schema<IStore> = new Schema({
         default: 0,
     },
     autoDeleteTrash: { type: Boolean, default: true }, // User's global trash preference
-    paymentKeys: {
-        paystackPublicKey: {
+    twilo: {
+        accountSid: {
             type: String,
             default: null,
         },
-        paystackSecretKey: {
+        authToken: {
             type: String,
             default: null,
         },
+        phone:{
+            type: String,
+            default: null,
+        }
     },
     gmailKeys: {
         username: {

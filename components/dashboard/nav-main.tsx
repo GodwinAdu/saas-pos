@@ -496,7 +496,7 @@ export function NavMain({ role }: NavMainProps) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Nav links</SidebarGroupLabel>
       <SidebarMenu>
         {navMain
           .filter(item => !item?.roleField || role[item?.roleField])

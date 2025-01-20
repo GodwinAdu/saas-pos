@@ -1,29 +1,33 @@
-
 import AppSidebarMain from "@/components/dashboard/app-sidebar-main";
 import Navbar from "@/components/dashboard/nav-bar";
 import {
     SidebarInset,
     SidebarProvider,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 import { currentUser } from "@/lib/helpers/current-user";
+import { TourProvider } from "@/lib/context/TourContext";
+import TourLayout from "@/components/TourLayout";
+
 export default async function RootLayout({
-    children
+    children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const user = await currentUser() ?? null;
+    const user = (await currentUser()) ?? null;
 
     return (
-
-        <SidebarProvider>
-            <AppSidebarMain />
-            <SidebarInset>
-                <Navbar user={user} />
-                <div className="py-4 px-4">
-                    {children}
-                </div>
-            </SidebarInset>
-        </SidebarProvider>
-
+        <TourProvider>
+            <TourLayout>
+                <SidebarProvider>
+                    <AppSidebarMain />
+                    <SidebarInset>
+                        <Navbar user={user} />
+                        <div id="main-content" className="py-4 px-4">
+                            {children}
+                        </div>
+                    </SidebarInset>
+                </SidebarProvider>
+            </TourLayout>
+        </TourProvider>
     );
 }
