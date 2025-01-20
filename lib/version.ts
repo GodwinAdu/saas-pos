@@ -1,5 +1,5 @@
 import { version } from "@/package.json";
 
-export function getAppVersion() {
+export default function getAppVersion() {
     return version;
 }

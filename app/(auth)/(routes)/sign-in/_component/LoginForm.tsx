@@ -19,7 +19,7 @@ import { toast } from "@/hooks/use-toast"
 import { logInUser } from "@/lib/helpers/login-user"
 import Link from "next/link"
 import { LoginFormSchema } from "@/lib/validators/sign-up-schema"
-import { getAppVersion } from "@/lib/version"
+import  getAppVersion  from "@/lib/version"
 
 const LoginForm = () => {
     const router = useRouter()

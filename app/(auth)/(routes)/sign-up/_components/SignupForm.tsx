@@ -37,12 +37,12 @@ import { useRouter } from "next/navigation";
 import { signUpUser } from "@/lib/helpers/login-user";
 import { stepOneSchema, stepTwoSchema } from "@/lib/validators/sign-up-schema";
 import Link from "next/link";
-import { getAppVersion } from "@/lib/version";
+import getAppVersion from "@/lib/version";
 
 
 
 const calculateSetupPrice = (branches: number) => {
-    if(branches === 1) {
+    if (branches === 1) {
         return 200;
     }
     return (branches / 5) * 400;
@@ -104,7 +104,7 @@ const SignupForm = () => {
                 variant: 'success'
             });
             router.push("/sign-in");
-        } catch  {
+        } catch {
 
             toast({
                 title: "Something went wrong",
