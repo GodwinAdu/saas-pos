@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { playSuccessSound, playWarningSound } from '@/lib/audio';
 import { toast } from './use-toast';
 
+
 interface CartItem {
     id: string;
     name: string;
@@ -17,11 +18,13 @@ interface CartItem {
 
 interface Branch {
     _id: string;
-    pricingType: 'manual' | 'automated';
-    pricingGroups: {
-        wholesale: boolean;
-        retail: boolean;
-    };
+    inventorySettings: {
+        pricingType: 'manual' | 'automated';
+        pricingGroups: {
+            wholesale: boolean;
+            retail: boolean;
+        };
+    }
 }
 
 interface Product {
@@ -69,7 +72,7 @@ export const useCartStore = create<CartState>()(
             discountPercent: 0,
             addToCart: (branch, product, selectedUnit, quantity = 1) => {
                 // Determine pricing based on branch settings
-                if (branch.pricingType === 'manual') {
+                if (branch.inventorySettings.pricingType === 'manual') {
                     if (product.manualPrice[0].price === 0) {
                         playWarningSound();
                         toast({
@@ -131,7 +134,7 @@ export const useCartStore = create<CartState>()(
                         set({ cartItems: [...currentItems, newCartItem] });
                     }
 
-                } else if (branch.pricingType === 'automated') {
+                } else if (branch.inventorySettings.pricingType === 'automated') {
                     if (product.retailPrice?.retailMarkupPercentage === 0 || product.wholesalePrice?.wholesaleMarkupPercentage === 0) {
                         playWarningSound();
                         toast({
@@ -198,9 +201,9 @@ export const useCartStore = create<CartState>()(
             },
             addMultipleToCart: (branch, products) => {
                 products.forEach((product) => {
-                    console.log(products,'bulk add multiple')
+                    console.log(products, 'bulk add multiple')
                     // Determine pricing based on branch settings
-                    if (branch.pricingType === 'manual') {
+                    if (branch.inventorySettings.pricingType === 'manual') {
                         if (product.productId.manualPrice[0].price === 0) {
                             console.log(product.productId.manualPrice[0].price, 'price testing')
                             playWarningSound();
@@ -263,7 +266,7 @@ export const useCartStore = create<CartState>()(
                             set({ cartItems: [...currentItems, newCartItem] });
                         }
 
-                    } else if (branch.pricingType === 'automated') {
+                    } else if (branch.inventorySettings.pricingType === 'automated') {
                         if (product.productId.retailPrice?.retailMarkupPercentage === 0 || product.productId.wholesalePrice?.wholesaleMarkupPercentage === 0) {
                             playWarningSound();
                             toast({

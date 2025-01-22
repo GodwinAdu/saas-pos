@@ -1,44 +1,32 @@
 import Heading from '@/components/commons/Header'
-import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { currentUserRole } from '@/lib/helpers/get-user-role'
-import { cn } from '@/lib/utils'
-import { PlusCircle } from 'lucide-react'
-import Link from 'next/link'
-import { redirect } from 'next/navigation'
+import { currentBranch } from '@/lib/helpers/current-branch';
+import { currentUser } from '@/lib/helpers/current-user';
 import React from 'react'
+import { fetchAllAccounts } from '@/lib/actions/account.acctions';
+import CreateSaleForm from './_components/create-sale-form';
 
-const page = async () => {
-    // Fetch the current user's role
-    const role = await currentUserRole();
-    // Redirect to the homepage if the user has no role
-    if (!role) {
-        redirect("/")
-    }
 
-    // Destructure the 'addRole' permission from the user's role
-    const { addSales } = role;
+
+const page = async ({ params }: { params: BranchIdParams }) => {
+
+    const { branchId } = await params;
+    const user = await currentUser();
+    const branch = await currentBranch(branchId);
+    const accounts = await fetchAllAccounts();
+
     return (
-        <>
-            <div className="flex justify-between items-center">
+        <div className='space-y-2'>
+            <div className="">
                 <Heading
-                    title="All Sales"
+                    title="Add New Sale"
                 />
-                {addSales && (
-                    <Link
-                        href={`add-sales/create`}
-                        className={cn(buttonVariants())}
-                    >
-                        <PlusCircle className="w-4 h-4 mr-2" />
-                        New Sale
-                    </Link>
-                )}
             </div>
             <Separator />
             <div className="py-4">
-                {/* <ProductTable brands={brands} categories={categories} /> */}
+                <CreateSaleForm branch={branch} accounts={accounts} />
             </div>
-        </>
+        </div>
     )
 }
 

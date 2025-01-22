@@ -1,5 +1,4 @@
 import { Schema, model, models, Model } from "mongoose";
-import { IRole } from "../types";
 
 // Define the Role schema
 const RoleSchema: Schema<IRole> = new Schema({

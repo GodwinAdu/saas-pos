@@ -4,19 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useFieldArray, useForm } from "react-hook-form"
 import * as z from "zod"
 import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Trash2, Plus, CreditCard, Loader2 } from 'lucide-react'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Trash2, Plus, Loader2 } from 'lucide-react'
+
 import {
   Form,
   FormControl,
@@ -33,14 +25,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Slider } from "@/components/ui/slider"
 import { toast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { playErrorSound, playSuccessSound } from "@/lib/audio"
-import { updateBranch } from "@/lib/actions/branch.actions"
+import { updateStore } from "@/lib/actions/store.actions"
 
 const paymentMethodSchema = z.object({
   name: z.string(),
@@ -76,11 +66,11 @@ const paymentSettingsSchema = z.object({
 type PaymentSettingsValues = z.infer<typeof paymentSettingsSchema>
 
 
-export default function PaymentSettings({ branch }) {
+export default function PaymentSettings({ store }) {
   const router = useRouter();
-  const branchId = branch._id;
+  const storeId = store._id;
 
-  const defaultValues: Partial<PaymentSettingsValues> = branch ?? {
+  const defaultValues: Partial<PaymentSettingsValues> = store ?? {
     paymentSettings: {
       paymentMethods: [],
       paymentProcessors: [
@@ -127,7 +117,7 @@ export default function PaymentSettings({ branch }) {
 
   async function onSubmit(data: PaymentSettingsValues) {
     try {
-      await updateBranch(branchId, data)
+      await updateStore(storeId, data)
       playSuccessSound();
       router.refresh();
       toast({

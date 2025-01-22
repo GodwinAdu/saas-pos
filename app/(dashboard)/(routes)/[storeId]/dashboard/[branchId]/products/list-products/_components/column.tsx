@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { CellAction } from "./cell-action";
 
+
 export const columns: ColumnDef<IProduct>[] = [
     {
         accessorKey: "name",

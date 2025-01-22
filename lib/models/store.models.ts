@@ -1,4 +1,75 @@
-import { Model, model, models, Schema } from "mongoose";
+import { Model, model, models, Schema, Document } from "mongoose";
+
+interface IStore extends Document {
+    name: string;
+    avatar?: string;
+    owner: Schema.Types.ObjectId;
+    storeEmail: string;
+    storePhone?: string;
+    storeAddress?: string;
+    numberOfBranches?: number;
+    autoDeleteTrash?: boolean;
+    twilo?: {
+        accountSid?: string;
+        authToken?: string;
+        phone?: string;
+    };
+    gmailKeys?: {
+        username?: string;
+        secretKey?: string;
+    };
+    reporting?: {
+        enabledReports?: string[];
+        schedule?: {
+            reportType?: string;
+            frequency?: string;
+            lastGenerated?: Date;
+        }[];
+    };
+    notifications?: {
+        lowStockAlert?: boolean;
+        overdueSubscriptionAlert?: boolean;
+        emailNotifications?: boolean;
+    };
+    subscriptionPlan?: {
+        period?: {
+            name?: string;
+            value?: number;
+        };
+        subscriptionExpiry?: Date;
+        paymentStatus?: string;
+    };
+    paymentSettings?: {
+        paymentMethods?: {
+            name?: string;
+            enabled?: boolean;
+            processingFee?: number;
+            minimumAmount?: number;
+        }[];
+        paymentProcessors?: {
+            name?: string;
+            apiKey?: string;
+            secretKey?: string;
+            enabled?: boolean;
+        }[];
+        defaultCurrency?: string;
+        acceptedCurrencies?: string[];
+        minimumOrderAmount?: number;
+        maximumOrderAmount?: number;
+        partialPayments?: boolean;
+        installmentPayments?: boolean;
+        installmentOptions?: {
+            months?: number;
+            interestRate?: number;
+        }[];
+    };
+    branchIds?: Schema.Types.ObjectId[];
+    createdBy?: Schema.Types.ObjectId;
+    modifiedBy?: Schema.Types.ObjectId;
+    mod_flag?: boolean;
+    del_flag?: boolean;
+    action_type?: string;
+}
 
 const StoreSchema: Schema<IStore> = new Schema({
     name: {
@@ -9,7 +80,7 @@ const StoreSchema: Schema<IStore> = new Schema({
         type: String,
         default: null,
     },
-    ownwer:{
+    owner: {
         type: Schema.Types.ObjectId,
         ref: "User",
         required: true,
@@ -43,7 +114,7 @@ const StoreSchema: Schema<IStore> = new Schema({
             type: String,
             default: null,
         },
-        phone:{
+        phone: {
             type: String,
             default: null,
         }
@@ -96,6 +167,173 @@ const StoreSchema: Schema<IStore> = new Schema({
             type: String, // e.g., "Paid", "Pending", "Overdue"
             default: 'Free Tier'
         },
+    },
+    paymentSettings: {
+        paymentMethods: [
+            {
+                name: {
+                    type: String,
+                    default: "Cash",
+                },
+                enabled: {
+                    type: Boolean,
+                    default: true,
+                },
+                processingFee: {
+                    type: Number,
+                    default: 0,
+                },
+                minimumAmount: {
+                    type: Number,
+                    default: 0,
+                },
+            },
+            {
+                name: {
+                    type: String,
+                    default: "Card",
+                },
+                enabled: {
+                    type: Boolean,
+                    default: true,
+                },
+                processingFee: {
+                    type: Number,
+                    default: 0,
+                },
+                minimumAmount: {
+                    type: Number,
+                    default: 0,
+                },
+            },
+            {
+                name: {
+                    type: String,
+                    default: "Gift Card",
+                },
+                enabled: {
+                    type: Boolean,
+                    default: true,
+                },
+                processingFee: {
+                    type: Number,
+                    default: 0,
+                },
+                minimumAmount: {
+                    type: Number,
+                    default: 0,
+                },
+            },
+            {
+                name: {
+                    type: String,
+                    default: "Paystack OR",
+                },
+                enabled: {
+                    type: Boolean,
+                    default: true,
+                },
+                processingFee: {
+                    type: Number,
+                    default: 0,
+                },
+                minimumAmount: {
+                    type: Number,
+                    default: 0,
+                },
+            },
+            {
+                name: {
+                    type: String,
+                    default: "Paystack Link",
+                },
+                enabled: {
+                    type: Boolean,
+                    default: true,
+                },
+                processingFee: {
+                    type: Number,
+                    default: 0,
+                },
+                minimumAmount: {
+                    type: Number,
+                    default: 0,
+                },
+            },
+            {
+                name: {
+                    type: String,
+                    default: "MoMo",
+                },
+                enabled: {
+                    type: Boolean,
+                    default: true,
+                },
+                processingFee: {
+                    type: Number,
+                    default: 0,
+                },
+                minimumAmount: {
+                    type: Number,
+                    default: 0,
+                },
+            },
+        ],
+        paymentProcessors: [
+            {
+                name: {
+                    type: String,
+                    default: "Paystack"
+                },
+                apiKey: {
+                    type: String,
+                    default: "",
+                },
+                secretKey: {
+                    type: String,
+                    default: "",
+                },
+                enabled: {
+                    type: Boolean,
+                    default: false,
+                },
+            },
+
+        ],
+        defaultCurrency: {
+            type: String,
+            default: "GHS",
+        },
+        acceptedCurrencies: {
+            type: [String],
+            default: ["GHS"],
+        },
+        minimumOrderAmount: {
+            type: Number,
+            default: 0,
+        },
+        maximumOrderAmount: {
+            type: Number,
+            default: 10000,
+        },
+        partialPayments: {
+            type: Boolean,
+            default: false,
+        },
+        installmentPayments: {
+            type: Boolean,
+            default: false,
+        },
+        installmentOptions: [
+            {
+                months: {
+                    type: Number,
+                },
+                interestRate: {
+                    type: Number,
+                },
+            },
+        ],
     },
     branchIds: [{
         type: Schema.Types.ObjectId,

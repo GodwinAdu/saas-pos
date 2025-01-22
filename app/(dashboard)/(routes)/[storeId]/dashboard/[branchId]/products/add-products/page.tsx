@@ -1,50 +1,47 @@
 import Heading from '@/components/commons/Header'
-import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { currentUserRole } from '@/lib/helpers/get-user-role'
-import { cn } from '@/lib/utils'
-import { PlusCircle } from 'lucide-react'
-import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import React from 'react'
+import { fetchAllUnits } from '@/lib/actions/unit.actions'
 import { fetchAllBrands } from '@/lib/actions/brand.actions'
 import { fetchAllCategories } from '@/lib/actions/category.actions'
-import ProductTable from './_components/ProductTable'
+import { currentBranch } from '@/lib/helpers/current-branch'
+import { fetchAllBranches } from '@/lib/actions/branch.actions'
+import { currentUser } from '@/lib/helpers/current-user'
+import { fetchAllWarrants } from '@/lib/actions/warrant.actions'
+import { fetchAllVariations } from '@/lib/actions/variation.actions'
+import CreateProductForm from './_components/CreateProduct'
 
-const page = async () => {
-  // Fetch the current user's role
-  const role = await currentUserRole();
-  // Redirect to the homepage if the user has no role
-  if (!role) {
-    redirect("/")
-  }
+const page = async ({ params }: { params: BranchIdParams }) => {
 
-  // Destructure the 'addRole' permission from the user's role
-  const { addProduct } = role;
-
+  const { branchId } = await params;
+  const user = await currentUser();
+  const units = await fetchAllUnits() || [];
   const brands = await fetchAllBrands() || [];
-
   const categories = await fetchAllCategories() || [];
-
+  const branch = await currentBranch(branchId);
+  const branches = await fetchAllBranches() || [];
+  const warrants = await fetchAllWarrants() || [];
+  const variations = await fetchAllVariations() || [];
   return (
     <>
-      <div className="flex justify-between items-center">
+      <div className="">
         <Heading
-          title="All Products"
+          title="Add New Product"
         />
-        {addProduct && (
-          <Link
-            href={`add-products/create`}
-            className={cn(buttonVariants())}
-          >
-            <PlusCircle className="w-4 h-4 mr-2" />
-            New Product
-          </Link>
-        )}
       </div>
       <Separator />
-      <div className="py-4">
-        <ProductTable brands={brands} categories={categories} />
+      <div className="">
+        <CreateProductForm
+          user={user}
+          warrants={warrants}
+          variations={variations}
+          branches={branches}
+          branch={branch}
+          brands={brands}
+          categories={categories}
+          units={units}
+          type='create'
+        />
       </div>
     </>
   )

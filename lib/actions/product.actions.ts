@@ -206,6 +206,7 @@ export async function fetchAllProductsForPos(page: number, limit: number = 50) {
 export async function fetchAllProductById(productId: string) {
     try {
         const user = await currentUser();
+        if(!user) throw new Error('Unauthenticated')
 
 
         await connectToDB();
@@ -220,5 +221,58 @@ export async function fetchAllProductById(productId: string) {
     } catch (error) {
         throw error
 
+    }
+}
+
+export async function quickSearchProduct(searchTerm: string) {
+    try {
+        await connectToDB();
+
+        const regex = new RegExp(`^${searchTerm}`, 'i'); // Case-insensitive match from the beginning
+
+        const product = await Product.findOne({
+            $or: [
+                { name: regex },
+                { sku: regex },
+                { barcode: regex }
+            ]
+        }) .populate([
+            {
+                path: 'unit',
+                model: Unit,
+                options: { strictPopulate: false },
+            },
+            {
+                path: 'vendorPrice.unitId',
+                model: Unit,
+                options: { strictPopulate: false },
+            },
+            {
+                path: 'manualPrice.unitId',
+                model: Unit,
+                options: { strictPopulate: false },
+            },
+            {
+                path: 'retailPrice.retailUnitId',
+                model: Unit,
+                options: { strictPopulate: false },
+            },
+            {
+                path: 'wholesalePrice.wholesaleUnitId',
+                model: Unit,
+                options: { strictPopulate: false },
+            },
+        ])
+        .exec();
+;
+
+        if (!product) {
+            return []
+        }
+
+        return JSON.parse(JSON.stringify(product));
+    } catch (error) {
+        console.log("Error fetching product by name, SKU, or barcode", error);
+        throw error;
     }
 }

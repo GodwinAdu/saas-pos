@@ -7,8 +7,8 @@ import ConfigurationForm from './ConfiguratonForm'
 import NotificationsForm from './NotificationForm'
 import SubscriptionForm from './SubscriptonForm'
 import AiIntegrationForm from './ai-integration'
-import { IStore } from '@/lib/types'
 import DangerZone from './DangerZone'
+import PaymentSettings from './payment-settings'
 
 
 
@@ -21,6 +21,7 @@ export default function StoreSettingsForm({ store }: { store: IStore }) {
             <TabsList className="">
                 <TabsTrigger value="basic-info">Basic Info</TabsTrigger>
                 <TabsTrigger value="configuration-settings">Configuration</TabsTrigger>
+                <TabsTrigger value="payment">Payment</TabsTrigger>
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
                 <TabsTrigger value="subscription">Subscription</TabsTrigger>
                 <TabsTrigger value="ai-integration">AI Integration</TabsTrigger>
@@ -47,6 +48,9 @@ export default function StoreSettingsForm({ store }: { store: IStore }) {
                         <ConfigurationForm store={store} />
                     </CardContent>
                 </Card>
+            </TabsContent>
+            <TabsContent value="payment">
+                <PaymentSettings store={store} />
             </TabsContent>
             <TabsContent value="notifications">
                 <Card>

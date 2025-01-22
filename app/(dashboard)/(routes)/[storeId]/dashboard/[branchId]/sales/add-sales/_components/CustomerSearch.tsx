@@ -3,12 +3,11 @@
 import { useState, useEffect, useRef, KeyboardEvent } from 'react'
 import { useDebounce } from 'use-debounce'
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { PlusCircle, Search, X } from 'lucide-react'
+import {  Search, X } from 'lucide-react'
 import { CustomerSearchResults } from './CustomerSearchResult'
 import { Customer, searchCustomers } from '@/lib/actions/search-customer'
-import { Button } from '@/components/ui/button'
 import { CustomerDialog } from './CustomerDialog'
 
 export function CustomerSearch() {

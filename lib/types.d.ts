@@ -1,6 +1,4 @@
-import { Types } from "mongoose";
 
-// Define the IRole interface
 interface IRole extends Document {
     _id: string;
     storeId: ObjectId;

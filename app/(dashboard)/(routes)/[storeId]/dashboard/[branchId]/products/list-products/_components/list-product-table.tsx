@@ -10,6 +10,7 @@ import { useEffect, useState } from "react"
 import { columns } from "./column"
 import { fetchAllProducts } from "@/lib/actions/product.actions"
 
+
 interface Props {
     categories: ICategory[],
     brands: IBrand[]

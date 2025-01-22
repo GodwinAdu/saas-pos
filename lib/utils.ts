@@ -68,6 +68,18 @@ export const findManualPrice = (prices: Price[], unitId: string) => {
   return calculateTotalWithTax(priceObj?.price ?? 0, priceObj?.tax ?? 0)
 };
 
+export const findManualPurchasePrice = (
+  units: { _id: string; quantity: number }[],
+  selectedUnit: string,
+  quantity: number,
+  price: number
+) => {
+  const findUnit = units?.find((unit) => unit._id === selectedUnit);
+  const total = findUnit && findUnit?.quantity * price
+  const grandTotal =  quantity * total!
+  return grandTotal.toFixed(2)
+}
+
 // calculate automated price for branch products
 export const findAutomatedPrice = (
   product: {
@@ -103,3 +115,13 @@ export const findAutomatedPrice = (
     return totalWholesaleCost;
   }
 };
+
+
+export function debounce<T extends (...args: string[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
+  let timeout: ReturnType<typeof setTimeout>;
+
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>): void { // Explicitly type 'this' as 'ThisParameterType<T>'
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}

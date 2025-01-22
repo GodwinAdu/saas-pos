@@ -1,48 +1,53 @@
 "use client"
 
-import React, {  MouseEventHandler } from "react";
+
 import {
     AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-
-} from "@/components/ui/alert-dialog";
-import { Button } from "../ui/button";
-
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Trash } from "lucide-react"
+import { useState } from "react"
 
 type DeleteDialogProps = {
-    id: string;
-    title: string;
-    description: string;
-    isDeleteDialogOpen: boolean;
-    onCancel: MouseEventHandler<HTMLButtonElement>;
-    onContinue: (data: string) => void;
-};
+    id: string
+    title: string
+    description: string
+    onContinue: (data: string) => void
+}
 
-export function DeleteDialog({
-    id,
-    title,
-    description,
-    isDeleteDialogOpen,
-    onCancel,
-    onContinue,
-}: DeleteDialogProps) {
+export function DeleteDialog({ id, title, description, onContinue }: DeleteDialogProps) {
+    const [open, setOpen] = useState(false)
+
+    const handleContinue = () => {
+        onContinue(id)
+        setOpen(false)
+    }
+
     return (
-        <AlertDialog open={isDeleteDialogOpen}>
+        <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialogTrigger  asChild>
+                <button className="flex gap-2 hover:text-black w-full text-white">
+                    <Trash className="mr-2 h-4 w-4" />  Delete
+                </button>
+            </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>{title}</AlertDialogTitle>
                     <AlertDialogDescription>{description}</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
-                    <Button variant="destructive" size="sm" onClick={() => onContinue(id)}>Continue</Button>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="bg-red-500 hover:bg-red-800" onClick={handleContinue}>Continue</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
-    );
+    )
 }
 

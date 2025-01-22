@@ -236,16 +236,6 @@ export function NavMain({ role }: NavMainProps) {
           roleField: "manageOrder"
         },
         {
-          title: "Add Orders",
-          url: `/${storeId}/dashboard/${branchId}/sales/add-order`,
-          roleField: "manageOrder"
-        },
-        {
-          title: "List Orders",
-          url: `/${storeId}/dashboard/${branchId}/sales/list-orders`,
-          roleField: "listOrder"
-        },
-        {
           title: "List Sell Return",
           url: `/${storeId}/dashboard/${branchId}/sales/list-sell-return`,
           roleField: "listSellReturn"

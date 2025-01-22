@@ -30,20 +30,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
-import { cn } from "@/lib/utils"
+import { cn, findAutomatedPrice, findManualPrice } from "@/lib/utils"
 import { format } from "date-fns"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { ProductSearch } from "./ProductSearch"
+import { useCartStockTransferStore } from "@/hooks/use-cart-stock-transfer"
+import { IBranch } from "@/lib/models/branch.models"
+import { useSelectSellingGroup } from "@/hooks/use-select-selling-group"
 
 const formSchema = z.object({
   date: z.date(),
@@ -57,16 +53,19 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
-interface Product {
-  id: string
-  name: string
-  quantity: number
-  unitPrice: number
-  subtotal: number
-}
+type Price = {
+  unitId: {
+    _id: string;
+    name: string;
+  };
+  price: number;
+  tax: number;
+}[]
 
-export default function StockTransferForm() {
-  const [products, setProducts] = useState<Product[]>([])
+
+export default function StockTransferForm({ branch }: { branch: IBranch }) {
+  const { cartItems } = useCartStockTransferStore();
+  const { selectedValue } = useSelectSellingGroup()
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -78,10 +77,31 @@ export default function StockTransferForm() {
     },
   })
 
-  const totalAmount = products.reduce((sum, product) => sum + product.subtotal, 0)
+  const subtotal = cartItems.reduce((sum, item) => {
+    const price =
+      branch.inventorySettings.pricingType === "manual"
+        ? findManualPrice(item.item?.manualPrice as Price, item?.unit as string)
+        : findAutomatedPrice(
+          {
+            ...item?.item,
+            retailPrice: {
+              retailUnitCost: item?.item?.retailPrice?.retailSellingPrice || 0,
+              retailMarkupPercentage: item?.item?.retailPrice?.retailMarkupPercentage || 0,
+            },
+            wholesalePrice: {
+              wholesaleUnitCost: item?.item?.wholesalePrice?.wholesaleSellingPrice || 0,
+              wholesaleMarkupPercentage: item?.item?.wholesalePrice?.wholesaleMarkupPercentage || 0,
+            },
+          },
+          item?.item?.unit as unknown as { _id: string; quantity: number; }[],
+          item?.unit as string,
+          selectedValue as string,
+        )
+    return sum + (price ?? 0) * item.quantity
+  }, 0)
 
   function onSubmit(data: FormValues) {
-    console.log(data)
+    console.log(data,'data')
   }
 
   return (
@@ -210,55 +230,14 @@ export default function StockTransferForm() {
               />
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Search Products</h3>
-              <div className="relative">
-                <SearchIcon className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search products for stock adjustment"
-                  className="pl-8"
-                />
-              </div>
-
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Quantity</TableHead>
-                    <TableHead>Unit Price</TableHead>
-                    <TableHead>Subtotal</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {products.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell>{product.name}</TableCell>
-                      <TableCell>{product.quantity}</TableCell>
-                      <TableCell>${product.unitPrice.toFixed(2)}</TableCell>
-                      <TableCell>${product.subtotal.toFixed(2)}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() =>
-                            setProducts(products.filter((p) => p.id !== product.id))
-                          }
-                        >
-                          <Trash2Icon className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">
-                  Total Amount: ${totalAmount.toFixed(2)}
-                </p>
-              </div>
-            </div>
+            <Card>
+              <CardContent className="space-y-4">
+                <ProductSearch branch={branch} />
+                <div className="flex justify-end">
+                  <p className="text-lg font-semibold">Total Amount: {subtotal.toFixed(2)}</p>
+                </div>
+              </CardContent>
+            </Card>
 
             <div className="grid grid-cols-2 gap-4">
               <FormField

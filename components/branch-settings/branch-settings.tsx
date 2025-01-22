@@ -10,7 +10,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import GeneralSettings from './general-settings'
 import InventorySettings from './inventory-settings'
 import SalesSettings from './sales-settings'
-import PaymentSettings from './payment-settings'
 import ReportingSettings from './reporting-settings'
 import { InvoiceSettings } from './invoice-settings'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -88,7 +87,6 @@ export default function BranchSettings({ branch }: { branch: IBranch }) {
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="inventory">Inventory</TabsTrigger>
               <TabsTrigger value="sales">Sales</TabsTrigger>
-              <TabsTrigger value="payment">Payment</TabsTrigger>
               <TabsTrigger value="reporting">Reporting</TabsTrigger>
               <TabsTrigger value="invoice">Invoice</TabsTrigger>
               <TabsTrigger value="danger" className="bg-red-500 text-white">Danger Zone</TabsTrigger>
@@ -109,9 +107,6 @@ export default function BranchSettings({ branch }: { branch: IBranch }) {
                 </TabsContent>
                 <TabsContent value="sales">
                   <SalesSettings branch={branch} />
-                </TabsContent>
-                <TabsContent value="payment">
-                  <PaymentSettings branch={branch} />
                 </TabsContent>
                 <TabsContent value="reporting">
                   <ReportingSettings branch={branch} />
