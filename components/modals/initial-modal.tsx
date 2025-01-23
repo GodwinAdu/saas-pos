@@ -59,10 +59,10 @@ export const InitialModal = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
 
-      await createBranch(values, storeId)
+      const branch = await createBranch(values, storeId)
       form.reset();
       router.refresh();
-      // router.push(`/${storeId}/dashboard/${branch._id}`)
+      window.location.assign(`/${storeId}/dashboard/${branch._id}`)
     } catch (error) {
       console.log(error);
     }

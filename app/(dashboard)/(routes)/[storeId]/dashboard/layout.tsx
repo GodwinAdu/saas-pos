@@ -7,6 +7,7 @@ import {
 import { currentUser } from "@/lib/helpers/current-user";
 import { TourProvider } from "@/lib/context/TourContext";
 import TourLayout from "@/components/TourLayout";
+import { UseCheckStoreExpired } from "@/hooks/use-check-store-expired";
 
 export default async function RootLayout({
     children,
@@ -24,6 +25,7 @@ export default async function RootLayout({
                         <Navbar user={user} />
                         <div id="main-content" className="py-4 px-4">
                             {children}
+                            <UseCheckStoreExpired />
                         </div>
                     </SidebarInset>
                 </SidebarProvider>

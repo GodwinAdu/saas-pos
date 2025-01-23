@@ -63,6 +63,7 @@ interface IStore extends Document {
             interestRate?: number;
         }[];
     };
+    banned: boolean;
     branchIds?: Schema.Types.ObjectId[];
     createdBy?: Schema.Types.ObjectId;
     modifiedBy?: Schema.Types.ObjectId;
@@ -164,7 +165,7 @@ const StoreSchema: Schema<IStore> = new Schema({
             type: Date,
         },
         paymentStatus: {
-            type: String, // e.g., "Paid", "Pending", "Overdue"
+            type: String, 
             default: 'Free Tier'
         },
     },
@@ -340,6 +341,10 @@ const StoreSchema: Schema<IStore> = new Schema({
         ref: "Branch",
         default: null,
     }],
+    banned:{
+        type: Boolean,
+        default: false
+    },
     createdBy: {
         type: Schema.Types.ObjectId,
         ref: "User",

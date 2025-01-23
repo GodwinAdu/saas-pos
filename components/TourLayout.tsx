@@ -9,7 +9,7 @@ interface TourLayoutProps {
 }
 
 const TourLayout: React.FC<TourLayoutProps> = ({ children }) => {
-    const { state, setRun, resetTour } = useTour();
+    const { state, setRun} = useTour();
 
     useEffect(() => {
         // Check localStorage for the completed status

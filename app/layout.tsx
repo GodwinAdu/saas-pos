@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import Loader from "@/components/commons/loader/loader";
 import { Toaster } from "@/components/ui/toaster";
+import { UseCheckStoreExpired } from "@/hooks/use-check-store-expired";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Loader />
+          {/* <UseCheckStoreExpired /> */}
           {children}
           <Toaster />
         </ThemeProvider>

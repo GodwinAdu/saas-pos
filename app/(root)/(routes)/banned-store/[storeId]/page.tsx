@@ -1,9 +1,13 @@
-import { AlertTriangle, Mail, ArrowRight, DollarSign } from 'lucide-react';
+import { AlertTriangle, Mail, ArrowRight } from 'lucide-react';
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { BannedPaymentDialog, PaymentDialog } from '../_components/payment-dialog';
+import { fetchStoreById } from '@/lib/actions/store.actions';
 
-export default function BannedStorePage() {
+export default async function BannedStorePage({ params }: { params: StoreIdParams }) {
+    const { storeId } = await params;
+    const store = await fetchStoreById(storeId);
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
             <Card className="max-w-2xl w-full">
@@ -38,19 +42,12 @@ export default function BannedStorePage() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-2">
-                    <Button className="w-full" variant="outline">
-                        <Mail className="mr-2 h-4 w-4" /> Contact Support
-                    </Button>
-                    <Link href="/appeal" className="w-full">
+                    <Link href="/contact" className="w-full">
                         <Button className="w-full">
-                            Appeal Suspension <ArrowRight className="ml-2 h-4 w-4" />
+                        <Mail className="mr-2 h-4 w-4" /> Contact Support
                         </Button>
                     </Link>
-                    <Link href="/subscribe" className="w-full">
-                        <Button className="w-full bg-green-600 text-white hover:bg-green-700">
-                            Pay Subscription to Continue <DollarSign className="ml-2 h-4 w-4" />
-                        </Button>
-                    </Link>
+                    <BannedPaymentDialog store={store} />
                 </CardFooter>
             </Card>
         </div>

@@ -12,10 +12,22 @@ import TodayTransactions from '@/components/commons/dashboard/today-transaction'
 import TopSellingProducts from '@/components/commons/dashboard/top-selling-products'
 import TransactionHistory from '@/components/commons/dashboard/transaction-history'
 import TrashItemsCount from '@/components/commons/dashboard/trash-item-count'
+import { fetchStoreById } from '@/lib/actions/store.actions'
+import { redirect } from 'next/navigation'
 
 
-const page = async () => {
+const page = async ({ params }: { params: StoreIdParams }) => {
+  const { storeId } = await params;
 
+  const store = await fetchStoreById(storeId);
+
+  if (!store) {
+    redirect('/')
+  }
+
+  if (store.banned) {
+    redirect(`/banned-store/${storeId}`)
+  }
 
   return (
     <main className="flex-1 p-6 space-y-6">

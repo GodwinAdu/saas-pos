@@ -59,10 +59,16 @@ const storeFormSchema = z.object({
     paymentStatus: z.string(),
   }),
 })
-export default function ReportingForm({ store }) {
+type StoreFormValues = z.infer<typeof storeFormSchema>;
+
+interface ReportingFormProps {
+  store: Partial<StoreFormValues>;
+}
+
+export default function ReportingForm({ store }: ReportingFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const storeId = store._id
+  const storeId = store._id as string
   const defaultValues: Partial<StoreFormValues> = store ?? {
     name: "",
     avatar: null,
@@ -102,10 +108,10 @@ export default function ReportingForm({ store }) {
     defaultValues,
   });
   const { control } = form;
-  const { fields: scheduleFields, append: appendSchedule, remove: removeSchedule, move: moveSchedule } = useFieldArray({
+  const { fields: scheduleFields, append: appendSchedule, remove: removeSchedule, } = useFieldArray({
     control,
     name: "reporting.schedule",
-  })
+  }),
 
   async function onSubmit(data: StoreFormValues) {
     setIsLoading(true)

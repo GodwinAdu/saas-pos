@@ -38,6 +38,7 @@ import { signUpUser } from "@/lib/helpers/login-user";
 import { stepOneSchema, stepTwoSchema } from "@/lib/validators/sign-up-schema";
 import Link from "next/link";
 import getAppVersion from "@/lib/version";
+import { Loader2 } from "lucide-react";
 
 
 
@@ -45,13 +46,14 @@ const calculateSetupPrice = (branches: number) => {
     if (branches === 1) {
         return 200;
     }
-    return (branches / 5) * 400;
+    return (branches / 5) * 500;
 };
 
 const SignupForm = () => {
     const router = useRouter();
     const [step, setStep] = useState(1);
-    const [setupPrice, setSetupPrice] = useState(400);
+    const [setupPrice, setSetupPrice] = useState(500);
+    const [isLoading,setIsLoading] = useState(false);
 
     const formStepOne = useForm<z.infer<typeof stepOneSchema>>({
         resolver: zodResolver(stepOneSchema),
@@ -89,6 +91,7 @@ const SignupForm = () => {
 
     const onSubmitStepTwo = async (values: z.infer<typeof stepTwoSchema>) => {
         try {
+            setIsLoading(true);
             const formData = {
                 ...formStepOne.getValues(),
                 ...values,
@@ -111,6 +114,8 @@ const SignupForm = () => {
                 description: "Please try again later",
                 variant: "destructive",
             });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -239,7 +244,10 @@ const SignupForm = () => {
                             </Button>
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button>Sign Up</Button>
+                                    <Button disabled={isLoading}>
+                                        {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                                        {isLoading ? "Please wait ..." : "Sign up"}
+                                    </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>

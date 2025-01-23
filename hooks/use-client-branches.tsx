@@ -1,7 +1,6 @@
 "use client"
 
 import { fetchBranchesForUser } from "@/lib/actions/branch.actions";
-import { currentUserRole } from "@/lib/helpers/get-user-role";
 import { useEffect, useState } from "react";
 
 const useClientBranches = () => {
@@ -20,7 +19,7 @@ const useClientBranches = () => {
   }, []);
 
   return { branches, isLoading };
-  
+
 };
 
 export default useClientBranches;

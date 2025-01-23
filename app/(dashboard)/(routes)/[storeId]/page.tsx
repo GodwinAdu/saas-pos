@@ -9,38 +9,46 @@ import { currentUser } from "@/lib/helpers/current-user";
 import { DashboardLoader } from './_components/dashboard-loader';
 import { AccessDenied } from './_components/access-denied';
 import { ErrorBoundary } from './_components/error-boundary';
+import { fetchStoreById } from '@/lib/actions/store.actions';
+interface UserRole {
+  displayName: string;
+  // Add other properties as needed
+}
+
+interface User {
+  id: string;
+  role: string;
+  accessLocation: string[];
+  // Add other properties as needed
+}
 
 const DashboardPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  interface User {
-    id: string;
-    role: string;
-    accessLocation: string[];
-    // Add other properties as needed
-  }
-
   const [user, setUser] = useState<User | null>(null);
-  interface UserRole {
-    displayName: string;
-    // Add other properties as needed
-  }
-
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const router = useRouter();
   const params = useParams();
   const { activeBranch } = useBranchStore();
 
+  const storeId = params.storeId as string;
+
   useEffect(() => {
     const loadData = async () => {
       try {
         const currentUserData = await currentUser();
+        const currentStoreData = await fetchStoreById(storeId)
         setUser(currentUserData);
 
-        if (!currentUserData) {
+        if (!currentUserData || !currentStoreData) {
           console.warn("No user found, redirecting to home.");
           router.push('/');
           return;
+        };
+
+        if (currentStoreData.banned) {
+          router.push(`/banned-store/${storeId}`)
+          return
         }
 
         const userRoleData = await fetchRole(currentUserData.role);

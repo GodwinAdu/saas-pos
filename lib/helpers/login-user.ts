@@ -293,6 +293,7 @@ export async function signUpUser(values: SignUpProps) {
         const newStore = new Store({
             _id: storeId,
             name: storeName,
+            owner:userId,
             storeEmail,
             numberOfBranches: Number(numberOfBranches),
             subscribed: true,
