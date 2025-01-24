@@ -26,6 +26,7 @@ import { createProduct } from '@/lib/actions/product.actions'
 import { playErrorSound, playSuccessSound } from '@/lib/audio'
 import { ImageUploader } from '@/components/commons/ImageUpload'
 import { usePathname, useRouter } from 'next/navigation'
+import { IBranch } from '@/lib/models/branch.models'
 
 
 
@@ -119,7 +120,7 @@ export default function CreateProductForm({
     const [retailMargin, setRetailMargin] = useState(0);
 
     const router = useRouter();
-    const path = usePathname();
+    // const path = usePathname();
 
 
 
@@ -170,7 +171,7 @@ export default function CreateProductForm({
     const stockMethod = form.watch('stockCalculationMethod')
     const productQuantity = form.watch('vendorPrice.productQuantity')
     const vendorUnit = form.watch('vendorPrice.unitId');
-    const productPrice = form.watch("vendorPrice.productPrice");
+    // const productPrice = form.watch("vendorPrice.productPrice");
 
 
 
@@ -252,7 +253,7 @@ export default function CreateProductForm({
     useEffect(() => {
         if (stockMethod && productQuantity && productUnits?.length) {
             try {
-                const result = automaticStock(productUnits, productQuantity, stockMethod, vendorUnit);
+                automaticStock(productUnits, productQuantity, stockMethod, vendorUnit);
                 // Use the result (e.g., update state)
             } catch (error) {
                 console.error("Error in automaticStock:", error);
@@ -267,7 +268,7 @@ export default function CreateProductForm({
     // const { control, watch, setValue, getValues } = form;
 
 
-    const onSubmit = async (values: ProductFormValues, path: string) => {
+    const onSubmit = async (values: ProductFormValues) => {
         setIsSubmitting(true)
         try {
             await createProduct(values)
@@ -707,7 +708,7 @@ export default function CreateProductForm({
                                     </div>
                                 </CardContent>
                             </div>
-                            {branch.pricingType === 'manual' ? (
+                            {branch.inventorySettings.pricingType === 'manual' ? (
                                 <div>
                                     <h2 className="text-xl font-bold mb-4">Manual Pricing</h2>
                                     <Separator />
@@ -773,7 +774,7 @@ export default function CreateProductForm({
 
                             ) : (
                                 <>
-                                    {branch?.pricingGroups?.wholesale && (
+                                    {branch?.inventorySettings.pricingGroups?.wholesale && (
                                         <div>
                                             <h2 className="text-xl font-bold mb-4">How I Will Sell In Wholesale</h2>
                                             <CardContent>
@@ -833,7 +834,7 @@ export default function CreateProductForm({
                                                             const wholesaleUnitId = form.watch('wholesalePrice.wholesaleUnitId');
                                                             const cost = form.watch('wholesalePrice.wholesaleUnitCost');
                                                             const selectedUnit = productUnits.find(unit => unit._id === wholesaleUnitId);
-                                                            const wholesaleUnitCost = selectedUnit ? cost * selectedUnit.quantity : 0;
+                                                            const wholesaleUnitCost = selectedUnit ? (cost ?? 0) * selectedUnit.quantity : 0;
                                                             form.setValue('wholesalePrice.wholesaleUnitQuantity', selectedUnit?.quantity || 0)
 
                                                             return (
@@ -876,9 +877,9 @@ export default function CreateProductForm({
 
                                                                             // Calculate wholesale price
                                                                             const unitCost = form.getValues('wholesalePrice.wholesaleUnitCost')!;
-                                                                            const cost = unitCost * selectedUnit.quantity
+                                                                            const cost = selectedUnit ? unitCost * selectedUnit.quantity : 0;
                                                                             const markupAmount = cost * (value / 100);
-                                                                            let wholesalePrice = cost + markupAmount;
+                                                                            const wholesalePrice = cost + markupAmount;
 
                                                                             // Calculate margin
                                                                             const margin = ((wholesalePrice - cost) / wholesalePrice) * 100;
@@ -911,7 +912,7 @@ export default function CreateProductForm({
                                         </div>
                                     )}
 
-                                    {branch?.pricingGroups?.retail && (
+                                    {branch?.inventorySettings.pricingGroups?.retail && (
                                         <div>
                                             <h2 className="text-xl font-bold mb-4">How I Will Sell In Retail</h2>
                                             <CardContent>
@@ -971,7 +972,7 @@ export default function CreateProductForm({
                                                             const retailUnitId = form.watch('retailPrice.retailUnitId');
                                                             const cost = form.watch('retailPrice.retailUnitCost');
                                                             const selectedUnit = productUnits.find(unit => unit._id === retailUnitId);
-                                                            const retailUnitCost = selectedUnit ? cost * selectedUnit.quantity : 0;
+                                                            const retailUnitCost = selectedUnit ?(cost ?? 0) * selectedUnit.quantity : 0;
                                                             form.setValue('retailPrice.retailUnitQuantity', selectedUnit?.quantity || 0)
 
                                                             return (
@@ -1014,9 +1015,9 @@ export default function CreateProductForm({
 
                                                                             // Calculate retail price
                                                                             const unitCost = form.getValues('retailPrice.retailUnitCost');
-                                                                            const cost = unitCost * selectedUnit.quantity
+                                                                            const cost = selectedUnit ? (unitCost ?? 0) * selectedUnit.quantity : 0;
                                                                             const markupAmount = cost * (value / 100);
-                                                                            let retailPrice = cost + markupAmount;
+                                                                            const retailPrice = cost + markupAmount;
 
                                                                             // Calculate margin
                                                                             const margin = ((retailPrice - cost) / retailPrice) * 100;
@@ -1089,16 +1090,16 @@ export default function CreateProductForm({
                                     name="stock"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>{branch.stockType === 'manual' ? 'Enter Stock' : 'Stock'}</FormLabel>
+                                            <FormLabel>{branch.inventorySettings.stockType === 'manual' ? 'Enter Stock' : 'Stock'}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="number"
-                                                    placeholder={branch.stockType === 'manual' ? 'Enter stock' : 'Calculated automatically'}
-                                                    disabled={branch.stockType !== 'manual'}
+                                                    placeholder={branch.inventorySettings.stockType === 'manual' ? 'Enter stock' : 'Calculated automatically'}
+                                                    disabled={branch.inventorySettings.stockType !== 'manual'}
                                                     {...field}
-                                                    value={branch.stockType === 'manual' ? field.value : calculateStock}
+                                                    value={branch.inventorySettings.stockType === 'manual' ? field.value : calculateStock}
                                                     onChange={(e) => {
-                                                        if (branch.stockType === 'manual') {
+                                                        if (branch.inventorySettings.stockType === 'manual') {
                                                             field.onChange(parseFloat(e.target.value));
                                                         }
                                                     }}
