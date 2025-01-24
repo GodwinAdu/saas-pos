@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils'
 import { createProduct } from '@/lib/actions/product.actions'
 import { playErrorSound, playSuccessSound } from '@/lib/audio'
 import { ImageUploader } from '@/components/commons/ImageUpload'
-import { usePathname, useRouter } from 'next/navigation'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 import { IBranch } from '@/lib/models/branch.models'
 
 
@@ -120,7 +120,10 @@ export default function CreateProductForm({
     const [retailMargin, setRetailMargin] = useState(0);
 
     const router = useRouter();
-    // const path = usePathname();
+    const path = usePathname();
+    const params = useParams()
+
+    const { storeId, branchId } = params
 
 
 
@@ -271,10 +274,10 @@ export default function CreateProductForm({
     const onSubmit = async (values: ProductFormValues) => {
         setIsSubmitting(true)
         try {
-            await createProduct(values)
+            await createProduct(values,path)
             playSuccessSound();
 
-            router.push(`/6769def86a8adf1810a37dec/dashboard/6769df1b6a8adf1810a37e06/products/add-products/`)
+            router.push(`/${storeId}/dashboard/${branchId}/products/add-products/`)
 
             toast({
                 title: "Product created",
@@ -972,7 +975,7 @@ export default function CreateProductForm({
                                                             const retailUnitId = form.watch('retailPrice.retailUnitId');
                                                             const cost = form.watch('retailPrice.retailUnitCost');
                                                             const selectedUnit = productUnits.find(unit => unit._id === retailUnitId);
-                                                            const retailUnitCost = selectedUnit ?(cost ?? 0) * selectedUnit.quantity : 0;
+                                                            const retailUnitCost = selectedUnit ? (cost ?? 0) * selectedUnit.quantity : 0;
                                                             form.setValue('retailPrice.retailUnitQuantity', selectedUnit?.quantity || 0)
 
                                                             return (

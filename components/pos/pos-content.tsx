@@ -34,6 +34,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import { Switch } from '../ui/switch'
 import { IBranch, IBrand, ICategory, IUser } from '@/lib/types'
 import { fetchAllProductsForPos } from '@/lib/actions/product.actions'
+import useCheckingStore from '@/hooks/use-checking-store'
 
 
 
@@ -118,10 +119,11 @@ export default function PosContent({ brands, categories, user, branches, branch,
     const [selectedUnit, setSelectedUnit] = useState('')
     const [showReceipt, setShowReceipt] = useState(false)
     const [products, setProducts] = useState<Product[] | []>([]);
-    const [checking, setChecking] = useState<boolean>(() => {
-        const savedChecking = localStorage.getItem('checking');
-        return savedChecking ? JSON.parse(savedChecking) : false;
-    });
+    const { checking, setChecking } = useCheckingStore();
+
+//   const handleToggle = () => {
+//     setChecking(!checking); // Toggle the checking state
+//   };
     const [searchTerm, setSearchTerm] = useState('')
     const [page, setPage] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
@@ -139,9 +141,6 @@ export default function PosContent({ brands, categories, user, branches, branch,
     };
     const handleSwitchChange = (checked: boolean) => {
         setChecking(checked);
-        if (typeof window !== "undefined") {
-            localStorage.setItem('checking', JSON.stringify(checked));
-        }
     };
     const limit = 100;
     const productSet = useRef<Set<string>>(new Set()); // Track unique product IDs
@@ -197,8 +196,33 @@ export default function PosContent({ brands, categories, user, branches, branch,
 
 
     // for manual price
-    const subtotalManual = cartItems.reduce((sum, item) => sum + findManualPrice(item.item?.manualPrice, item?.unit as string) * item.quantity, 0);
-    const subtotalAutomated = cartItems.reduce((sum, item) => sum + findAutomatedPrice(item?.item, item?.item?.unit, item?.unit as string, selectedValue as string) * item.quantity, 0);
+    const subtotalManual = cartItems.reduce((sum, item) => {
+        const manualPriceWithTax = item.item?.manualPrice.map(price => ({
+            ...price,
+            tax: (price as any).tax || 0, // Ensure tax property is present
+        }));
+        return sum + findManualPrice(manualPriceWithTax, item?.unit as string) * item.quantity;
+    }, 0);
+    const subtotalAutomated = cartItems.reduce((sum, item) => {
+        if (!item?.item) return sum;
+        const price = findAutomatedPrice(
+            {
+                ...item.item,
+                retailPrice: {
+                    retailUnitCost: item.item.retailPrice?.retailSellingPrice || 0,
+                    retailMarkupPercentage: item.item.retailPrice?.retailMarkupPercentage || 0,
+                },
+                wholesalePrice: {
+                    wholesaleUnitCost: item.item.wholesalePrice?.wholesaleSellingPrice || 0,
+                    wholesaleMarkupPercentage: item.item.wholesalePrice?.wholesaleMarkupPercentage || 0,
+                },
+            },
+            item.item.unit as unknown as { _id: string; quantity: number }[],
+            item.unit as string,
+            selectedValue as string,
+        );
+        return sum + (price ?? 0) * item.quantity;
+    }, 0);
     const subtotal = branch.pricingType === 'manual' ? subtotalManual : subtotalAutomated;
     const discount = subtotal * (discountPercent / 100);
     const total = subtotal - discount;

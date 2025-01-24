@@ -1,5 +1,6 @@
 "use server"
 
+import { revalidatePath } from "next/cache";
 import { currentUser } from "../helpers/current-user";
 import { CurrentBranchId } from "../helpers/get-current-branch";
 import { CurrentPosBranchId } from "../helpers/get-current-branchId-pos";
@@ -32,7 +33,7 @@ function sanitizeProductInput(data: ProductData) {
     return data;
 }
 
-export async function createProduct(productData: any) {
+export async function createProduct(productData: any, path: string) {
     try {
         const user = await currentUser();
         if (!user) throw new Error('Unauthenticated user')
@@ -66,6 +67,7 @@ export async function createProduct(productData: any) {
 
         });
         await product.save();
+        revalidatePath(path);
 
     } catch (error) {
         console.error("Error creating product:", error);
@@ -188,7 +190,7 @@ export async function fetchAllProductsForPos(page: number, limit: number = 50) {
             ])
             .exec();
 
-            const total = await Product.countDocuments();
+        const total = await Product.countDocuments();
         if (products.length === 0) return [];
 
         return {
@@ -206,7 +208,7 @@ export async function fetchAllProductsForPos(page: number, limit: number = 50) {
 export async function fetchAllProductById(productId: string) {
     try {
         const user = await currentUser();
-        if(!user) throw new Error('Unauthenticated')
+        if (!user) throw new Error('Unauthenticated')
 
 
         await connectToDB();
@@ -236,7 +238,7 @@ export async function quickSearchProduct(searchTerm: string) {
                 { sku: regex },
                 { barcode: regex }
             ]
-        }) .populate([
+        }).populate([
             {
                 path: 'unit',
                 model: Unit,
@@ -263,8 +265,8 @@ export async function quickSearchProduct(searchTerm: string) {
                 options: { strictPopulate: false },
             },
         ])
-        .exec();
-;
+            .exec();
+        ;
 
         if (!product) {
             return []
