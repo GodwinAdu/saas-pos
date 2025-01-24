@@ -4,15 +4,13 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogFooter, } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ShoppingCart, Plus, Minus, X, Search, Loader2 } from 'lucide-react'
+import { ShoppingCart, Plus, Minus, X, Loader2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import TransactionHistoryModal from './TransactionModal'
@@ -32,9 +30,9 @@ import BrandSelection from '../commons/BrandSelection'
 import CategorySelection from '../commons/CategorySelection'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { Switch } from '../ui/switch'
-import { IBranch, IBrand, ICategory, IUser } from '@/lib/types'
 import { fetchAllProductsForPos } from '@/lib/actions/product.actions'
 import useCheckingStore from '@/hooks/use-checking-store'
+import InventorySettings from '../branch-settings/inventory-settings';
 
 
 
@@ -59,7 +57,7 @@ interface CartItem {
     barcode: string
     quantity: number
     item: {
-        manualPrice: number
+        manualPrice: { unitId: { _id: string; name: string; }; price: number; tax: number; }[]
         unit: string[]
     }
     unit: string
@@ -113,9 +111,8 @@ export default function PosContent({ brands, categories, user, branches, branch,
     const [isProcessingPayment, setIsProcessingPayment] = useState(false)
     const [transactions, setTransactions] = useState<SaleTransaction[]>([])
     const [isTransactionHistoryOpen, setIsTransactionHistoryOpen] = useState(false)
-    const [isBarcodeMode, setIsBarcodeMode] = useState(false)
     const [barcodeInput, setBarcodeInput] = useState("")
-    const [quantity, setQuantity] = useState(1)
+    const [quantity] = useState(1)
     const [selectedUnit, setSelectedUnit] = useState('')
     const [showReceipt, setShowReceipt] = useState(false)
     const [products, setProducts] = useState<Product[] | []>([]);
@@ -199,7 +196,7 @@ export default function PosContent({ brands, categories, user, branches, branch,
     const subtotalManual = cartItems.reduce((sum, item) => {
         const manualPriceWithTax = item.item?.manualPrice.map(price => ({
             ...price,
-            tax: (price as any).tax || 0, // Ensure tax property is present
+            tax: price.tax || 0, // Ensure tax property is present
         }));
         return sum + findManualPrice(manualPriceWithTax, item?.unit as string) * item.quantity;
     }, 0);
@@ -223,7 +220,7 @@ export default function PosContent({ brands, categories, user, branches, branch,
         );
         return sum + (price ?? 0) * item.quantity;
     }, 0);
-    const subtotal = branch.pricingType === 'manual' ? subtotalManual : subtotalAutomated;
+    const subtotal = branch.inventorySettings.pricingType === 'manual' ? subtotalManual : subtotalAutomated;
     const discount = subtotal * (discountPercent / 100);
     const total = subtotal - discount;
 
@@ -382,7 +379,7 @@ export default function PosContent({ brands, categories, user, branches, branch,
                         <h2 className="text-xl font-semibold mb-4 flex items-center">
                             <ShoppingCart className="h-5 w-5 mr-2" /> Cart
                         </h2>
-                        {branch.pricingType === 'automated' && (
+                        {branch.inventorySettings.pricingType === 'automated' && (
                             <SellingGroup branch={branch} />
                         )}
                     </div>
@@ -408,7 +405,7 @@ export default function PosContent({ brands, categories, user, branches, branch,
                                                 </Avatar>
                                                 <div>
                                                     <p className="font-medium">{item?.name}</p>
-                                                    <p className="text-sm text-muted-foreground">&#x20B5;{branch.pricingType === 'manual' ? findManualPrice(item.item.manualPrice, (selectedUnit as string || item?.unit as string)).toFixed(2) : findAutomatedPrice(item?.item, item.item?.unit, item?.unit as string, selectedValue as string).toFixed(2)}</p>
+                                                    <p className="text-sm text-muted-foreground">&#x20B5;{branch.inventorySettings.pricingType === 'manual' ? findManualPrice(item.item.manualPrice, (selectedUnit as string || item?.unit as string)).toFixed(2) : findAutomatedPrice(item?.item, item.item?.unit, item?.unit as string, selectedValue as string).toFixed(2)}</p>
                                                 </div>
                                             </div>
                                             <UnitSelect
@@ -453,7 +450,7 @@ export default function PosContent({ brands, categories, user, branches, branch,
                     <div className="space-y-4">
                         <div className="flex justify-between items-center">
                             <span className="font-semibold">Subtotal:</span>
-                            <span>&#x20B5;{(branch.pricingType === 'manual' ? subtotalManual.toFixed(2) : subtotalAutomated.toFixed(2))}</span>
+                            <span>&#x20B5;{(branch.inventorySettings.pricingType === 'manual' ? subtotalManual.toFixed(2) : subtotalAutomated.toFixed(2))}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                             <Label htmlFor="discount">Discount %:</Label>
