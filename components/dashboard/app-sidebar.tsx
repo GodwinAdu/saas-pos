@@ -27,7 +27,7 @@ export function AppSidebar(props: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" {...rest}>
       <SidebarHeader>
-        <TeamSwitcher branches={branches} />
+        <TeamSwitcher store={store} branches={branches} />
       </SidebarHeader>
       <SidebarContent>
         <SideContent role={userRole} />

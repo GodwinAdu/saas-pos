@@ -83,7 +83,7 @@ export default function BranchSettings({ branch }: { branch: IBranch }) {
       <Card>
         <CardContent className="p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-7 mb-6">
+            <TabsList className="mb-6">
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="inventory">Inventory</TabsTrigger>
               <TabsTrigger value="sales">Sales</TabsTrigger>

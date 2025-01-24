@@ -23,7 +23,7 @@ import { CreateBranchModal } from "./create-branch";
 import { IBranch } from "@/lib/models/branch.models";
 import { useTourControl } from "@/hooks/use-tour-control";
 
-export function TeamSwitcher({ branches }: { branches: IBranch[] }) {
+export function TeamSwitcher({ branches, store }: { branches: IBranch[], store: IStore }) {
   const { isMobile } = useSidebar();
   const router = useRouter();
   const params = useParams();
@@ -37,7 +37,7 @@ export function TeamSwitcher({ branches }: { branches: IBranch[] }) {
   ])
 
 
-
+  const showCreateBranch = store.numberOfBranches >= store.branchIds.length
 
   const { activeBranch, setActiveBranch } = useBranchStore();
 
@@ -91,7 +91,7 @@ export function TeamSwitcher({ branches }: { branches: IBranch[] }) {
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <CreateBranchModal />
+            {!showCreateBranch && <CreateBranchModal />}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
