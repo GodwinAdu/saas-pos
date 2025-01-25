@@ -247,7 +247,9 @@ export default function PosContent({
     const subtotal = branch.inventorySettings.pricingType === "manual" ? subtotalManual : subtotalAutomated
     const discount = subtotal * (discountPercent / 100)
     const total = subtotal - discount
-
+    console.log(subtotalManual, "manual");
+    console.log(total, "total");
+    console.log(subtotalAutomated, "automatic");
     // Functionality remains the same, just use Zustand actions/state
     const handleCheckout = async () => {
         setIsProcessingPayment(true)
@@ -444,13 +446,13 @@ export default function PosContent({
                                                             ? (findManualPrice(
                                                                 item.item?.manualPrice,
                                                                 (selectedUnit as string) || (item?.unit as string),
-                                                            )|| 0)
+                                                            ) || 0)
                                                             : (findAutomatedPrice(
                                                                 item?.item,
                                                                 item.item?.unit,
                                                                 item?.unit as string,
                                                                 selectedValue as string,
-                                                            )|| 0)) }
+                                                            ) || 0))}
                                                     </p>
                                                 </div>
                                             </div>
