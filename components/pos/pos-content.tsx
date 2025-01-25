@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -9,32 +9,30 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Dialog, DialogContent, DialogFooter, } from "@/components/ui/dialog"
-import { ShoppingCart, Plus, Minus, X, Loader2 } from 'lucide-react'
-import { toast } from '@/hooks/use-toast'
-import Image from 'next/image'
-import TransactionHistoryModal from './TransactionModal'
-import CheckoutModal from './CheckoutModal'
-import UnitSelect from './UnitSelect'
-import { useCartStore } from '@/hooks/use-cart'
-import { Receipt } from './Receipt'
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog"
+import { ShoppingCart, Plus, Minus, X, Loader2 } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
+import Image from "next/image"
+import TransactionHistoryModal from "./TransactionModal"
+import CheckoutModal from "./CheckoutModal"
+import UnitSelect from "./UnitSelect"
+import { useCartStore } from "@/hooks/use-cart"
+import { Receipt } from "./Receipt"
 
-import { SellingGroup } from './selling-group'
-import { findAutomatedPrice, findManualPrice } from '@/lib/utils'
-import { useSelectSellingGroup } from '@/hooks/use-select-selling-group'
-import SuspendModal from './SuspendModal'
-import OrderModal from './OrderModal'
-import AddExpensesModal from './AddExpenses'
-import Navbar from './Navbar'
-import BrandSelection from '../commons/BrandSelection'
-import CategorySelection from '../commons/CategorySelection'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
-import { Switch } from '../ui/switch'
-import { fetchAllProductsForPos } from '@/lib/actions/product.actions'
-import useCheckingStore from '@/hooks/use-checking-store'
-import InventorySettings from '../branch-settings/inventory-settings';
-
-
+import { SellingGroup } from "./selling-group"
+import { findAutomatedPrice, findManualPrice } from "@/lib/utils"
+import { useSelectSellingGroup } from "@/hooks/use-select-selling-group"
+import SuspendModal from "./SuspendModal"
+import OrderModal from "./OrderModal"
+import AddExpensesModal from "./AddExpenses"
+import Navbar from "./Navbar"
+import BrandSelection from "../commons/BrandSelection"
+import CategorySelection from "../commons/CategorySelection"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
+import { Switch } from "../ui/switch"
+import { fetchAllProductsForPos } from "@/lib/actions/product.actions"
+import useCheckingStore from "@/hooks/use-checking-store"
+import type { IBranch } from "@/lib/models/branch.models"
 
 interface Product {
     id: number
@@ -45,6 +43,9 @@ interface Product {
     category: string
     barcode: string
     _id: string
+    images: string[]
+    unit: { _id: string; name: string }[]
+    stock: number
 }
 
 interface CartItem {
@@ -57,8 +58,10 @@ interface CartItem {
     barcode: string
     quantity: number
     item: {
-        manualPrice: { unitId: { _id: string; name: string; }; price: number; tax: number; }[]
-        unit: string[]
+        manualPrice: { unitId: { _id: string; name: string }; price: number; tax: number }[]
+        unit: { _id: string; name: string }[]
+        retailPrice?: { retailSellingPrice: number; retailMarkupPercentage: number }
+        wholesalePrice?: { wholesaleSellingPrice: number; wholesaleMarkupPercentage: number }
     }
     unit: string
 }
@@ -78,18 +81,37 @@ interface SaleTransaction {
     customer: Customer | null
     items: CartItem[]
     total: number
-    paymentMethod: 'card' | 'cash' | 'gift' | 'qr'
+    paymentMethod: "card" | "cash" | "gift" | "qr"
     discount: number
 }
 
-
-
 const customers: Customer[] = [
-    { id: 1, name: "John Doe", email: "john@example.com", loyaltyPoints: 100, address: "123 Main St, Anytown, USA", phone: "555-1234" },
-    { id: 2, name: "Jane Smith", email: "jane@example.com", loyaltyPoints: 50, address: "456 Elm St, Othertown, USA", phone: "555-5678" },
+    {
+        id: 1,
+        name: "John Doe",
+        email: "john@example.com",
+        loyaltyPoints: 100,
+        address: "123 Main St, Anytown, USA",
+        phone: "555-1234",
+    },
+    {
+        id: 2,
+        name: "Jane Smith",
+        email: "jane@example.com",
+        loyaltyPoints: 50,
+        address: "456 Elm St, Othertown, USA",
+        phone: "555-5678",
+    },
 ]
 
-export default function PosContent({ brands, categories, user, branches, branch, suspends }: { brands: IBrand[], categories: ICategory[], user: IUser, branches: IBranch[], branch: IBranch, suspends: any[] }) {
+export default function PosContent({
+    brands,
+    categories,
+    user,
+    branches,
+    branch,
+    suspends,
+}: { brands: IBrand[]; categories: ICategory[]; user: IUser; branches: IBranch[]; branch: IBranch; suspends: any[] }) {
     const {
         cartItems,
         discountPercent,
@@ -99,145 +121,143 @@ export default function PosContent({ brands, categories, user, branches, branch,
         updateQuantity,
         setDiscountPercent,
         clearCart,
-    } = useCartStore();
+    } = useCartStore()
     const { selectedValue } = useSelectSellingGroup()
 
-
-    const [selectedBrand, setSelectedBrand] = useState<string>("");
-    const [selectedCategory, setSelectedCategory] = useState<string>("");
+    const [selectedBrand, setSelectedBrand] = useState<string>("")
+    const [selectedCategory, setSelectedCategory] = useState<string>("")
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
     const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false)
-    const [paymentMethod, setPaymentMethod] = useState<'card' | 'cash' | 'gift' | 'qr'>('card')
+    const [paymentMethod, setPaymentMethod] = useState<"card" | "cash" | "gift" | "qr">("card")
     const [isProcessingPayment, setIsProcessingPayment] = useState(false)
     const [transactions, setTransactions] = useState<SaleTransaction[]>([])
     const [isTransactionHistoryOpen, setIsTransactionHistoryOpen] = useState(false)
     const [barcodeInput, setBarcodeInput] = useState("")
     const [quantity] = useState(1)
-    const [selectedUnit, setSelectedUnit] = useState('')
+    const [selectedUnit, setSelectedUnit] = useState("")
     const [showReceipt, setShowReceipt] = useState(false)
-    const [products, setProducts] = useState<Product[] | []>([]);
-    const { checking, setChecking } = useCheckingStore();
+    const [products, setProducts] = useState<Product[] | []>([])
+    const { checking, setChecking } = useCheckingStore()
 
-//   const handleToggle = () => {
-//     setChecking(!checking); // Toggle the checking state
-//   };
-    const [searchTerm, setSearchTerm] = useState('')
-    const [page, setPage] = useState<number>(1);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [hasMore, setHasMore] = useState<boolean>(true);
-    const observer = useRef<IntersectionObserver | null>(null);
-    const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+    const [searchTerm, setSearchTerm] = useState("")
+    const [page, setPage] = useState<number>(1)
+    const [loading, setLoading] = useState<boolean>(false)
+    const [hasMore, setHasMore] = useState<boolean>(true)
+    const observer = useRef<IntersectionObserver | null>(null)
+    const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
 
     const invoiceRef = useRef<HTMLDivElement>(null)
 
-    // const filteredProducts = products.filter(product =>
-    //     product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    // )
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value);
-    };
+        setSearchTerm(e.target.value)
+    }
     const handleSwitchChange = (checked: boolean) => {
-        setChecking(checked);
-    };
-    const limit = 100;
-    const productSet = useRef<Set<string>>(new Set()); // Track unique product IDs
+        setChecking(checked)
+    }
+    const limit = 100
+    const productSet = useRef<Set<string>>(new Set()) // Track unique product IDs
 
-    const filterProducts = useCallback((query: string) => {
-        if (query.trim().length >= 2) {
-            const filtered = products.filter(product =>
-                product.name.toLowerCase().includes(query.trim().toLowerCase())
-            );
-            setFilteredProducts(filtered);
-        } else {
-            setFilteredProducts(products);
-        }
-    }, [products]);
+    const filterProducts = useCallback(
+        (query: string) => {
+            if (query.trim().length >= 2) {
+                const filtered = products.filter((product) => product.name.toLowerCase().includes(query.trim().toLowerCase()))
+                setFilteredProducts(filtered)
+            } else {
+                setFilteredProducts(products)
+            }
+        },
+        [products],
+    )
 
     useEffect(() => {
-        filterProducts(searchTerm);
-    }, [searchTerm, filterProducts]);
+        filterProducts(searchTerm)
+    }, [searchTerm, filterProducts])
 
-    const lastProductElementRef = useCallback((node: HTMLDivElement) => {
-        if (loading) return;
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && hasMore) {
-                setPage((prevPage) => prevPage + 1);
-            }
-        });
-        if (node) observer.current.observe(node);
-    }, [loading, hasMore]);
+    const lastProductElementRef = useCallback(
+        (node: HTMLDivElement) => {
+            if (loading) return
+            if (observer.current) observer.current.disconnect()
+            observer.current = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && hasMore) {
+                    setPage((prevPage) => prevPage + 1)
+                }
+            })
+            if (node) observer.current.observe(node)
+        },
+        [loading, hasMore],
+    )
 
     const fetchProducts = async () => {
-        setLoading(true);
+        setLoading(true)
         try {
-            const response = await fetchAllProductsForPos(page, limit) as { products: Product[]; total: number };
-            const newProducts = response.products?.filter((product: Product) => !productSet.current.has(product._id)) || [];
+            const response = (await fetchAllProductsForPos(page, limit)) as { products: Product[]; total: number }
+            const newProducts = response.products?.filter((product: Product) => !productSet.current.has(product._id)) || []
 
             // Add new product IDs to the set
-            newProducts?.forEach((product: Product) => productSet.current.add(product._id));
+            newProducts?.forEach((product: Product) => productSet.current.add(product._id))
 
-            setProducts((prevProducts) => [...prevProducts, ...newProducts]);
-            setFilteredProducts((prevProducts) => [...prevProducts, ...newProducts]);
-            setHasMore(newProducts?.length > 0);
+            setProducts((prevProducts) => [...prevProducts, ...newProducts])
+            setFilteredProducts((prevProducts) => [...prevProducts, ...newProducts])
+            setHasMore(newProducts?.length > 0)
         } catch (error) {
-            console.error("Error fetching products:", error);
+            console.error("Error fetching products:", error)
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
-    };
+    }
 
     useEffect(() => {
-        fetchProducts();
-    }, [page]);
-
+        fetchProducts()
+    }, [page])
 
     // for manual price
     const subtotalManual = cartItems.reduce((sum, item) => {
-        const manualPriceWithTax = item.item?.manualPrice.map(price => ({
-            ...price,
-            tax: price.tax || 0, // Ensure tax property is present
-        }));
-        return sum + findManualPrice(manualPriceWithTax, item?.unit as string) * item.quantity;
-    }, 0);
+        const manualPriceWithTax =
+            item.item?.manualPrice?.map((price) => ({
+                ...price,
+                tax: price.tax || 0, // Ensure tax property is present
+            })) || []
+        const price = findManualPrice(manualPriceWithTax, item?.unit as string) || 0
+        return sum + price * (item.quantity || 0)
+    }, 0)
     const subtotalAutomated = cartItems.reduce((sum, item) => {
-        if (!item?.item) return sum;
+        if (!item?.item) return sum
         const price = findAutomatedPrice(
             {
                 ...item.item,
-                retailPrice: {
-                    retailUnitCost: item.item.retailPrice?.retailSellingPrice || 0,
-                    retailMarkupPercentage: item.item.retailPrice?.retailMarkupPercentage || 0,
-                },
-                wholesalePrice: {
-                    wholesaleUnitCost: item.item.wholesalePrice?.wholesaleSellingPrice || 0,
-                    wholesaleMarkupPercentage: item.item.wholesalePrice?.wholesaleMarkupPercentage || 0,
-                },
+                retailPrice: item.item.retailPrice
+                    ? {
+                        retailUnitCost: item.item.retailPrice?.retailSellingPrice,
+                        retailMarkupPercentage: item.item.retailPrice?.retailMarkupPercentage,
+                    }
+                    : undefined,
+                wholesalePrice: item.item.wholesalePrice
+                    ? {
+                        wholesaleUnitCost: item.item.wholesalePrice?.wholesaleSellingPrice,
+                        wholesaleMarkupPercentage: item.item.wholesalePrice?.wholesaleMarkupPercentage,
+                    }
+                    : undefined,
             },
             item.item.unit as unknown as { _id: string; quantity: number }[],
             item.unit as string,
             selectedValue as string,
-        );
-        return sum + (price ?? 0) * item.quantity;
-    }, 0);
-    const subtotal = branch.inventorySettings.pricingType === 'manual' ? subtotalManual : subtotalAutomated;
-    const discount = subtotal * (discountPercent / 100);
-    const total = subtotal - discount;
-
-
-
-
+        )
+        return sum + (price ?? 0) * (item.quantity || 0)
+    }, 0)
+    const subtotal = branch.inventorySettings.pricingType === "manual" ? subtotalManual : subtotalAutomated
+    const discount = subtotal * (discountPercent / 100)
+    const total = subtotal - discount
 
     // Functionality remains the same, just use Zustand actions/state
     const handleCheckout = async () => {
-        setIsProcessingPayment(true);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        completeTransaction();
-    };
+        setIsProcessingPayment(true)
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        completeTransaction()
+    }
 
     const completeTransaction = () => {
-        setIsProcessingPayment(false);
-        setIsCheckoutDialogOpen(false);
+        setIsProcessingPayment(false)
+        setIsCheckoutDialogOpen(false)
 
         const newTransaction: SaleTransaction = {
             id: transactions.length + 1,
@@ -247,22 +267,21 @@ export default function PosContent({ brands, categories, user, branches, branch,
             total: total,
             paymentMethod: paymentMethod,
             discount: discount,
-        };
+        }
 
-        setTransactions([...transactions, newTransaction]);
+        setTransactions([...transactions, newTransaction])
 
         toast({
-            title: 'Payment Successful',
+            title: "Payment Successful",
             description: `Total amount: $${total.toFixed(2)}`,
-        });
+        })
 
-        setShowReceipt(true);
-    };
-
+        setShowReceipt(true)
+    }
 
     const handleBarcodeSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        const product = products.find(p => p.barcode === barcodeInput)
+        const product = products.find((p) => p.barcode === barcodeInput)
         if (product) {
             addToCart(branch, product, product.unit[0]._id, quantity)
             setBarcodeInput("")
@@ -277,8 +296,14 @@ export default function PosContent({ brands, categories, user, branches, branch,
 
     return (
         <div className="flex flex-col h-screen bg-gray-100">
-
-            <Navbar products={suspends} branches={branches} user={user} customers={customers} setSelectedCustomer={setSelectedCustomer} setIsTransactionHistoryOpen={setIsTransactionHistoryOpen} />
+            <Navbar
+                products={suspends}
+                branches={branches}
+                user={user}
+                customers={customers}
+                setSelectedCustomer={setSelectedCustomer}
+                setIsTransactionHistoryOpen={setIsTransactionHistoryOpen}
+            />
             <main className="flex-grow flex flex-col md:flex-row overflow-hidden bg-background">
                 <div className="w-full md:w-2/3 p-4 ">
                     <div className="max-w-xl mx-auto  p-2 sticky top-0 z-30">
@@ -289,7 +314,10 @@ export default function PosContent({ brands, categories, user, branches, branch,
                                         <BrandSelection SelectedBrand={(value) => setSelectedBrand(value)} brands={brands} />
                                     </div>
                                     <div>
-                                        <CategorySelection SelectedCategory={(value) => setSelectedCategory(value)} categories={categories} />
+                                        <CategorySelection
+                                            SelectedCategory={(value) => setSelectedCategory(value)}
+                                            categories={categories}
+                                        />
                                     </div>
                                 </div>
                             ) : (
@@ -323,10 +351,16 @@ export default function PosContent({ brands, categories, user, branches, branch,
                     <ScrollArea className="h-[calc(100vh-200px)]">
                         {filteredProducts.length !== 0 ? (
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                {filteredProducts.map(product => (
+                                {filteredProducts.map((product) => (
                                     <Card key={product.id} className="overflow-hidden">
                                         <CardHeader className="p-0">
-                                            <Image width={100} height={100} src={product.images[0] ?? '/sardine.jpg'} alt={product.name} className="w-full h-24 object-scale-down" />
+                                            <Image
+                                                width={100}
+                                                height={100}
+                                                src={product.images[0] ?? "/sardine.jpg"}
+                                                alt={product.name}
+                                                className="w-full h-24 object-scale-down"
+                                            />
                                         </CardHeader>
                                         <CardContent className="p-2">
                                             <h3 className="font-semibold text-sm mb-1">{product.name}</h3>
@@ -335,7 +369,11 @@ export default function PosContent({ brands, categories, user, branches, branch,
                                             </Badge>
                                         </CardContent>
                                         <CardFooter className="p-2">
-                                            <Button onClick={() => addToCart(branch, product, product.unit ? product.unit[0]._id : '', quantity)} className="w-full" disabled={product.stock === 0}>
+                                            <Button
+                                                onClick={() => addToCart(branch, product, product.unit ? product.unit[0]._id : "", quantity)}
+                                                className="w-full"
+                                                disabled={product.stock === 0}
+                                            >
                                                 <Plus className="h-4 w-4 mr-2" /> Add
                                             </Button>
                                         </CardFooter>
@@ -343,28 +381,26 @@ export default function PosContent({ brands, categories, user, branches, branch,
                                 ))}
                             </div>
                         ) : (
-                            !loading &&
-                            <div className="flex flex-col items-center justify-center h-[calc(100vh-500px)]  ">
-                                <p className="text-center text-sm">No products found.</p>
-                                <p className="text-center text-sm text-muted-foreground">Try adjusting your search or filter to find what you&apos;re looking for.</p>
-                            </div>
+                            !loading && (
+                                <div className="flex flex-col items-center justify-center h-[calc(100vh-500px)]  ">
+                                    <p className="text-center text-sm">No products found.</p>
+                                    <p className="text-center text-sm text-muted-foreground">
+                                        Try adjusting your search or filter to find what you&apos;re looking for.
+                                    </p>
+                                </div>
+                            )
                         )}
-                        {loading &&
+                        {loading && (
                             <div
                                 className="flex flex-col items-center justify-center min-h-[calc(100vh-500px)] space-y-3 bg-gray-50"
                                 aria-busy="true"
                                 aria-live="polite"
                             >
                                 <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                                <p className="text-base font-semibold text-gray-700">
-                                    Loading products...
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                    Please wait while we load your content.
-                                </p>
+                                <p className="text-base font-semibold text-gray-700">Loading products...</p>
+                                <p className="text-sm text-gray-500">Please wait while we load your content.</p>
                             </div>
-
-                        }
+                        )}
                     </ScrollArea>
                     <div className="flex gap-5">
                         <SuspendModal branch={branch} />
@@ -375,13 +411,10 @@ export default function PosContent({ brands, categories, user, branches, branch,
 
                 <div className="w-full md:w-1/3 bg-background p-4 shadow-lg overflow-hidden flex flex-col">
                     <div className="flex justify-between items-center">
-
                         <h2 className="text-xl font-semibold mb-4 flex items-center">
                             <ShoppingCart className="h-5 w-5 mr-2" /> Cart
                         </h2>
-                        {branch.inventorySettings.pricingType === 'automated' && (
-                            <SellingGroup branch={branch} />
-                        )}
+                        {branch.inventorySettings.pricingType === "automated" && <SellingGroup branch={branch} />}
                     </div>
                     {selectedCustomer && (
                         <div className="mb-4 p-2 bg-gray-100 rounded-md">
@@ -395,7 +428,7 @@ export default function PosContent({ brands, categories, user, branches, branch,
                             <p className="text-muted-foreground text-center py-8">Your cartItems is empty</p>
                         ) : (
                             <ul className="space-y-4">
-                                {cartItems?.map(item => (
+                                {cartItems?.map((item) => (
                                     <li key={item.id} className="flex items-center justify-between">
                                         <div className=" flex flex-col gap-4 items-center">
                                             <div className="flex items-center space-x-4">
@@ -405,39 +438,40 @@ export default function PosContent({ brands, categories, user, branches, branch,
                                                 </Avatar>
                                                 <div>
                                                     <p className="font-medium">{item?.name}</p>
-                                                    <p className="text-sm text-muted-foreground">&#x20B5;{branch.inventorySettings.pricingType === 'manual' ? findManualPrice(item.item.manualPrice, (selectedUnit as string || item?.unit as string)).toFixed(2) : findAutomatedPrice(item?.item, item.item?.unit, item?.unit as string, selectedValue as string).toFixed(2)}</p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        &#x20B5;
+                                                        {(branch.inventorySettings.pricingType === "manual"
+                                                            ? findManualPrice(
+                                                                item.item?.manualPrice,
+                                                                (selectedUnit as string) || (item?.unit as string),
+                                                            )?.toFixed(2)
+                                                            : findAutomatedPrice(
+                                                                item?.item,
+                                                                item.item?.unit,
+                                                                item?.unit as string,
+                                                                selectedValue as string,
+                                                            )?.toFixed(2)) || "0.00"}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <UnitSelect
                                                 selectedUnit={item.unit || item.item.unit[0]._id}
                                                 onUnitChange={(value) => {
-                                                    updateUnit(item.id, value);
+                                                    updateUnit(item.id, value)
                                                 }}
                                                 units={item.item.unit}
                                             />
                                         </div>
 
                                         <div className="flex items-center space-x-2">
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                            >
+                                            <Button variant="outline" size="icon" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
                                                 <Minus className="h-4 w-4" />
                                             </Button>
                                             <span className="w-8 text-center">{item.quantity}</span>
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                            >
+                                            <Button variant="outline" size="icon" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
                                                 <Plus className="h-4 w-4" />
                                             </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => removeFromCart(item.id)}
-                                            >
+                                            <Button variant="ghost" size="icon" onClick={() => removeFromCart(item.id)}>
                                                 <X className="h-4 w-4" />
                                             </Button>
                                         </div>
@@ -450,7 +484,12 @@ export default function PosContent({ brands, categories, user, branches, branch,
                     <div className="space-y-4">
                         <div className="flex justify-between items-center">
                             <span className="font-semibold">Subtotal:</span>
-                            <span>&#x20B5;{(branch.inventorySettings.pricingType === 'manual' ? subtotalManual.toFixed(2) : subtotalAutomated.toFixed(2))}</span>
+                            <span>
+                                &#x20B5;
+                                {(branch.inventorySettings.pricingType === "manual"
+                                    ? subtotalManual?.toFixed(2)
+                                    : subtotalAutomated?.toFixed(2)) || "0.00"}
+                            </span>
                         </div>
                         <div className="flex items-center space-x-2">
                             <Label htmlFor="discount">Discount %:</Label>
@@ -461,11 +500,11 @@ export default function PosContent({ brands, categories, user, branches, branch,
                                 onChange={(e) => setDiscountPercent(Number(e.target.value))}
                                 className="w-20"
                             />
-                            <span className="text-sm text-muted-foreground">-&#x20B5;{discount.toFixed(2)}</span>
+                            <span className="text-sm text-muted-foreground">-&#x20B5;{discount?.toFixed(2) || "0.00"}</span>
                         </div>
                         <div className="flex justify-between items-center font-bold">
                             <span>Total:</span>
-                            <span>&#x20B5;{total.toFixed(2)}</span>
+                            <span>&#x20B5;{total?.toFixed(2) || "0.00"}</span>
                         </div>
                         <Button className="w-full" onClick={() => setIsCheckoutDialogOpen(true)} disabled={cartItems.length === 0}>
                             Proceed to Checkout
@@ -474,9 +513,21 @@ export default function PosContent({ brands, categories, user, branches, branch,
                 </div>
             </main>
 
-            <CheckoutModal total={total} paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod} isProcessingPayment={isProcessingPayment} isCheckoutDialogOpen={isCheckoutDialogOpen} setIsCheckoutDialogOpen={setIsCheckoutDialogOpen} handleCheckout={handleCheckout} />
+            <CheckoutModal
+                total={total}
+                paymentMethod={paymentMethod}
+                setPaymentMethod={setPaymentMethod}
+                isProcessingPayment={isProcessingPayment}
+                isCheckoutDialogOpen={isCheckoutDialogOpen}
+                setIsCheckoutDialogOpen={setIsCheckoutDialogOpen}
+                handleCheckout={handleCheckout}
+            />
 
-            <TransactionHistoryModal isTransactionHistoryOpen={isTransactionHistoryOpen} transactions={transactions} setIsTransactionHistoryOpen={setIsTransactionHistoryOpen} />
+            <TransactionHistoryModal
+                isTransactionHistoryOpen={isTransactionHistoryOpen}
+                transactions={transactions}
+                setIsTransactionHistoryOpen={setIsTransactionHistoryOpen}
+            />
 
             {showReceipt && (
                 <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
@@ -490,16 +541,20 @@ export default function PosContent({ brands, categories, user, branches, branch,
                             paymentMethod={paymentMethod}
                         />
                         <DialogFooter>
-                            <Button onClick={() => {
-                                setShowReceipt(false);
-                                clearCart();
-                            }}>
+                            <Button
+                                onClick={() => {
+                                    setShowReceipt(false)
+                                    clearCart()
+                                }}
+                            >
                                 Close
                             </Button>
-                            <Button onClick={() => {
-                                // Implement print functionality here
-                                window.print();
-                            }}>
+                            <Button
+                                onClick={() => {
+                                    // Implement print functionality here
+                                    window.print()
+                                }}
+                            >
                                 Print
                             </Button>
                         </DialogFooter>
