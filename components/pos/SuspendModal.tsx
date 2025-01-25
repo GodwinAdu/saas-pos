@@ -70,7 +70,7 @@ const SuspendModal = ({ branch }: { branch: IBranch }) => {
       productId: item.item._id,
       quantity: item.quantity,
       unit: item.unit as string,
-      price: Number(branch?.pricingType === 'manual' ? findManualPrice(item.item.manualPrice, item?.unit as string).toFixed(2) : findAutomatedPrice(item.item, item.item.unit, item.unit as string, selectedValue as string).toFixed(2))
+      price: Number(branch?.pricingType === 'manual' ? findManualPrice(item.item.manualPrice, item?.unit as string) || 0 : findAutomatedPrice(item.item, item.item.unit, item.unit as string, selectedValue as string) || 0)
     })),
   };
 

@@ -55,7 +55,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isCheckoutDialogOpen, set
                     <Separator />
                     <div className="flex justify-between items-center">
                         <span className="font-bold">Total Amount:</span>
-                        <span className="font-bold">${total.toFixed(2)}</span>
+                        <span className="font-bold">${total || 0}</span>
                     </div>
                     {paymentMethod === 'qr' && (
                         <div className="flex flex-col items-center">

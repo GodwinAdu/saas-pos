@@ -39,7 +39,7 @@ const TransactionHistoryModal: React.FC<TransactionHistoryModalProps> = ({isTran
                                 <TableCell>{transaction.id}</TableCell>
                                 <TableCell>{transaction.date.toLocaleString()}</TableCell>
                                 <TableCell>{transaction.customer?.name || 'Guest'}</TableCell>
-                                <TableCell>${transaction.total.toFixed(2)}</TableCell>
+                                <TableCell>${transaction.total || 0}</TableCell>
                                 <TableCell>{transaction.paymentMethod}</TableCell>
                             </TableRow>
                         ))}
