@@ -444,13 +444,13 @@ export default function PosContent({
                                                             ? (findManualPrice(
                                                                 item.item?.manualPrice,
                                                                 (selectedUnit as string) || (item?.unit as string),
-                                                            )|| 0).toFixed(2)
+                                                            )|| 0)
                                                             : (findAutomatedPrice(
                                                                 item?.item,
                                                                 item.item?.unit,
                                                                 item?.unit as string,
                                                                 selectedValue as string,
-                                                            )|| 0).toFixed(2)) }
+                                                            )|| 0)) }
                                                     </p>
                                                 </div>
                                             </div>
@@ -487,8 +487,8 @@ export default function PosContent({
                             <span>
                                 &#x20B5;
                                 {(branch.inventorySettings.pricingType === "manual"
-                                    ? (subtotalManual || 0).toFixed(2)
-                                    : (subtotalAutomated || 0).toFixed(2))}
+                                    ? (subtotalManual || 0)
+                                    : (subtotalAutomated || 0))}
                             </span>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -500,11 +500,11 @@ export default function PosContent({
                                 onChange={(e) => setDiscountPercent(Number(e.target.value))}
                                 className="w-20"
                             />
-                            <span className="text-sm text-muted-foreground">-&#x20B5;{(discount || 0).toFixed(2)}</span>
+                            <span className="text-sm text-muted-foreground">-&#x20B5;{(discount || 0)}</span>
                         </div>
                         <div className="flex justify-between items-center font-bold">
                             <span>Total:</span>
-                            <span>&#x20B5;{(total || 0).toFixed(2)}</span>
+                            <span>&#x20B5;{(total || 0)}</span>
                         </div>
                         <Button className="w-full" onClick={() => setIsCheckoutDialogOpen(true)} disabled={cartItems.length === 0}>
                             Proceed to Checkout
