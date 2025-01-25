@@ -273,7 +273,7 @@ export default function PosContent({
 
         toast({
             title: "Payment Successful",
-            description: `Total amount: $${total.toFixed(2)}`,
+            description: `Total amount: }`,
         })
 
         setShowReceipt(true)
@@ -441,16 +441,16 @@ export default function PosContent({
                                                     <p className="text-sm text-muted-foreground">
                                                         &#x20B5;
                                                         {(branch.inventorySettings.pricingType === "manual"
-                                                            ? findManualPrice(
+                                                            ? (findManualPrice(
                                                                 item.item?.manualPrice,
                                                                 (selectedUnit as string) || (item?.unit as string),
-                                                            )?.toFixed(2)
-                                                            : findAutomatedPrice(
+                                                            )|| 0).toFixed(2)
+                                                            : (findAutomatedPrice(
                                                                 item?.item,
                                                                 item.item?.unit,
                                                                 item?.unit as string,
                                                                 selectedValue as string,
-                                                            )?.toFixed(2)) || "0.00"}
+                                                            )|| 0).toFixed(2)) }
                                                     </p>
                                                 </div>
                                             </div>
@@ -487,8 +487,8 @@ export default function PosContent({
                             <span>
                                 &#x20B5;
                                 {(branch.inventorySettings.pricingType === "manual"
-                                    ? subtotalManual?.toFixed(2)
-                                    : subtotalAutomated?.toFixed(2)) || "0.00"}
+                                    ? (subtotalManual || 0).toFixed(2)
+                                    : (subtotalAutomated || 0).toFixed(2))}
                             </span>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -500,11 +500,11 @@ export default function PosContent({
                                 onChange={(e) => setDiscountPercent(Number(e.target.value))}
                                 className="w-20"
                             />
-                            <span className="text-sm text-muted-foreground">-&#x20B5;{discount?.toFixed(2) || "0.00"}</span>
+                            <span className="text-sm text-muted-foreground">-&#x20B5;{(discount || 0).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center font-bold">
                             <span>Total:</span>
-                            <span>&#x20B5;{total?.toFixed(2) || "0.00"}</span>
+                            <span>&#x20B5;{(total || 0).toFixed(2)}</span>
                         </div>
                         <Button className="w-full" onClick={() => setIsCheckoutDialogOpen(true)} disabled={cartItems.length === 0}>
                             Proceed to Checkout
