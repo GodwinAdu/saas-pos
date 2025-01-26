@@ -274,7 +274,9 @@ export default function CreateProductForm({
     const onSubmit = async (values: ProductFormValues) => {
         setIsSubmitting(true)
         try {
-            await createProduct(values,path)
+            if (type === 'create') {
+                await createProduct(values, path)
+            };
             playSuccessSound();
 
             router.push(`/${storeId}/dashboard/${branchId}/products/add-products/`)

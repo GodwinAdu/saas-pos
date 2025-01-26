@@ -24,7 +24,7 @@ export async function getStore() {
     }
 }
 
-export async function fetchStoreById(storeId: string){
+export async function fetchStoreById(storeId: string) {
     try {
         await connectToDB();
 
@@ -35,19 +35,19 @@ export async function fetchStoreById(storeId: string){
         }
 
         return JSON.parse(JSON.stringify(store));
-        
+
     } catch (error) {
         console.log('Error fetching store', error);
         throw error;
     }
 }
 
-export async function updateStore(storeId: string, values:any) {
+export async function updateStore(storeId: string, values: any) {
     try {
         const user = await currentUser();
         await connectToDB();
 
-        const updatedValues ={
+        const updatedValues = {
             ...values,
             modifiedBy: user._id,
             mod_flag: true,
@@ -56,11 +56,11 @@ export async function updateStore(storeId: string, values:any) {
 
         await Store.findByIdAndUpdate(
             storeId,
-            { ...updatedValues},
+            { ...updatedValues },
             { new: true }
         );
 
-        console.log('udated successfully' )
+        console.log('udated successfully')
     } catch (error) {
         console.log('Error updating store trash preference', error);
         throw error;

@@ -12,7 +12,7 @@ import { useCartSaleStore } from "@/hooks/use-cart-sale"
 import { useSelectSellingGroup } from "@/hooks/use-select-selling-group"
 import { ProductSearchAndTable } from "./ProductSearchAndTable"
 import { useSaleForm } from "@/hooks/form/use-sale-form"
-import { findAutomatedPrice, findManualPrice } from "@/lib/utils"
+import { calculateQuantity, findAutomatedPrice, findManualPrice } from "@/lib/utils"
 import { SaleFormValues } from "@/lib/validators/sale-form-schema"
 import { PaymentTermsField } from "./PaymentTerm"
 import { SaleDateField } from "./SaleDate"
@@ -80,6 +80,11 @@ const CreateSaleForm = ({ branch, accounts }: Props) => {
                 products: cartItems.map((item: any) => ({
                     ...item,
                     productId: item.item._id,
+                    totalQuantity: calculateQuantity(
+                        item.unit,
+                        item.quantity,
+                        item.item.unit,
+                    ),
                     subTotal: findManualPrice(
                         item.item.manualPrice as Price,
                         item.unit as string,

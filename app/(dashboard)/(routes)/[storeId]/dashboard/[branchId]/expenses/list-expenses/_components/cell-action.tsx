@@ -18,7 +18,7 @@ import { playErrorSound, playSuccessSound } from "@/lib/audio"
 import { toast } from "@/hooks/use-toast"
 import { DeleteDialog } from "@/components/commons/DeleteDialog"
 import useClientRole from "@/hooks/use-client-role"
-import { deleteUnit } from "@/lib/actions/unit.actions"
+
 
 interface CellActionProps {
     data: IProduct
@@ -33,7 +33,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const handleDelete = async (id: string) => {
         try {
             setLoading(true)
-            
+
             router.refresh()
             playSuccessSound()
             toast({
@@ -70,18 +70,18 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                     </DropdownMenuItem>
                 ) : (
                     <>
-                        {role?.editSales && (
+                        {role?.editExpenses && (
                             <DropdownMenuItem asChild>
-                                <Link href={`/${params.storeId}/dashboard/${params.branchId}/sales/add-sales/${data?._id}`}>
+                                <Link href={`/${params.storeId}/dashboard/${params.branchId}/expenses/add-expenses/${data?._id}`}>
                                     <Edit className="mr-2 h-4 w-4" /> Update
                                 </Link>
                             </DropdownMenuItem>
                         )}
-                        {role?.deleteSales && (
+                        {role?.deleteExpenses && (
                             <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="bg-red-500 hover:bg-red-800">
                                 <DeleteDialog
                                     id={data?._id}
-                                    title="Are you sure you want to delete this product?"
+                                    title="Are you sure you want to delete this Expenses?"
                                     description="This action cannot be undone. Are you sure you want to proceed?"
                                     onContinue={handleDelete}
                                     isLoading={loading}

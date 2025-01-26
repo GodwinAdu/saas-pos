@@ -4,10 +4,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-
-
-
-import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -18,42 +14,59 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { CalendarIcon } from 'lucide-react'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { cn, findAutomatedPrice, findManualPrice } from "@/lib/utils"
+import { calculateQuantity, cn, findAutomatedPrice, findManualPrice } from "@/lib/utils"
 import { format } from "date-fns"
 import { ProductSearch } from "./ProductSearch"
 import { IBranch } from "@/lib/models/branch.models"
 import { useCartStockAdjustmentStore } from "@/hooks/use-cart-stock-adjustment"
 import { useSelectSellingGroup } from "@/hooks/use-select-selling-group"
+import { playErrorSound, playSuccessSound } from "@/lib/audio"
+import { toast } from "@/hooks/use-toast"
+import { createStockAdjustment } from "@/lib/actions/stock-adjustment.actions"
+import { useParams, usePathname, useRouter } from "next/navigation"
 
 type Price = {
   unitId: {
-      _id: string;
-      name: string;
+    _id: string;
+    name: string;
   };
   price: number;
   tax: number;
 }[]
 
 const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  referenceNo: z.string().optional(),
+  adjustmentDate: z.date(),
+  adjustmentType: z.string().min(1, {
+    message: "Please select an adjustment type."
+  }),
+  totalAmount: z.coerce.number(),
+  reason: z.string().min(5, {
+    message: "Please enter a reason."
   }),
 })
 
 export default function StockAdjustmentForm({ branch }: { branch: IBranch }) {
-  const {cartItems} = useCartStockAdjustmentStore();
+  const { cartItems } = useCartStockAdjustmentStore();
   const { selectedValue } = useSelectSellingGroup()
+  const router = useRouter();
+  const path = usePathname();
+  const params = useParams();
+  const { storeId, branchId } = params;
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      referenceNo: "",
+      adjustmentDate: new Date(),
+      adjustmentType: "",
+      totalAmount: 0,
+      reason: "",
     },
   })
 
@@ -80,10 +93,45 @@ export default function StockAdjustmentForm({ branch }: { branch: IBranch }) {
     return sum + (price ?? 0) * item.quantity
   }, 0)
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const proceedValues = {
+        ...values,
+        products: cartItems.map((item: any) => ({
+          ...item,
+          productId: item.item._id,
+          totalQuantity: calculateQuantity(
+            item.unit,
+            item.quantity,
+            item.item.unit,
+          ),
+          subTotal: findManualPrice(
+            item.item.manualPrice as Price,
+            item.unit as string,
+          ) * item.quantity,
+        })),
+        totalAmount: subtotal,
+      };
+      await createStockAdjustment(proceedValues, path);
+      form.reset();
+      playSuccessSound();
+      router.push(`/${storeId}/dashboard/${branchId}/stock-adjustment/list-stock-adjustments`)
+      toast({
+        title: "Stock Adjustment created successfully",
+        description: "Stock adjustment has been created successfully.",
+        variant: "success",
+      })
+      console.log(proceedValues)
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      playErrorSound()
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later...",
+        variant: "destructive",
+      })
+
+    }
   }
 
   return (
@@ -98,7 +146,7 @@ export default function StockAdjustmentForm({ branch }: { branch: IBranch }) {
 
               <FormField
                 control={form.control}
-                name="username"
+                name="referenceNo"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Reference No</FormLabel>
@@ -112,10 +160,10 @@ export default function StockAdjustmentForm({ branch }: { branch: IBranch }) {
 
               <FormField
                 control={form.control}
-                name="dob"
+                name="adjustmentDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Date of birth</FormLabel>
+                    <FormLabel>Adjustment Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -154,7 +202,7 @@ export default function StockAdjustmentForm({ branch }: { branch: IBranch }) {
 
               <FormField
                 control={form.control}
-                name="email"
+                name="adjustmentType"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Adjustment</FormLabel>
@@ -167,6 +215,7 @@ export default function StockAdjustmentForm({ branch }: { branch: IBranch }) {
                       <SelectContent>
                         <SelectItem value="normal">Normal</SelectItem>
                         <SelectItem value="abnormal">Abnormal</SelectItem>
+                        <SelectItem value="remove">Remove</SelectItem>
                       </SelectContent>
                     </Select>
 
@@ -186,25 +235,38 @@ export default function StockAdjustmentForm({ branch }: { branch: IBranch }) {
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="total-recovered">Total amount recovered:</Label>
-                <Input
-                  id="total-recovered"
-                  type="number"
-                  defaultValue="0"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="totalAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="shadcn" {...field} />
+                    </FormControl>
 
-              <div className="space-y-2">
-                <Label htmlFor="reason">Reason:</Label>
-                <Textarea
-                  id="reason"
-                  placeholder="Reason"
-                  className="min-h-[100px]"
-                />
-              </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="reason"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bio</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Tell a little bit about why you made the adjustment"
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <div className="flex justify-end">

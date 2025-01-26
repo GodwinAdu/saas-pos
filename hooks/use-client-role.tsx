@@ -19,7 +19,7 @@ const useClientRole = () => {
   }, []);
 
   return { role, isLoading };
-  
+
 };
 
 export default useClientRole;

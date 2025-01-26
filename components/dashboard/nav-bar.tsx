@@ -10,7 +10,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/
 import Calculator from "../commons/Calculater";
 import FullScreenButton from "../commons/FullScreenButton";
 import SettingComponent from "../pos/Settings";
-import { IUser } from "@/lib/types";
 import { useTourControl } from "@/hooks/use-tour-control";
 
 const Navbar = ({ user }: { user: IUser }) => {

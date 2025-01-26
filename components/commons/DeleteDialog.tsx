@@ -12,17 +12,18 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Trash } from "lucide-react"
+import { Loader2, Trash } from "lucide-react"
 import { useState } from "react"
 
 type DeleteDialogProps = {
-    id: string
-    title: string
-    description: string
-    onContinue: (data: string) => void
+    id: string;
+    title: string;
+    description: string;
+    onContinue: (data: string) => void;
+    isLoading: boolean;
 }
 
-export function DeleteDialog({ id, title, description, onContinue }: DeleteDialogProps) {
+export function DeleteDialog({ id, title, description, onContinue, isLoading }: DeleteDialogProps) {
     const [open, setOpen] = useState(false)
 
     const handleContinue = () => {
@@ -32,9 +33,12 @@ export function DeleteDialog({ id, title, description, onContinue }: DeleteDialo
 
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
-            <AlertDialogTrigger  asChild>
-                <button className="flex gap-2 hover:text-black w-full text-white">
-                    <Trash className="mr-2 h-4 w-4" />  Delete
+            <AlertDialogTrigger asChild>
+                <button className="flex gap-2 hover:text-black w-full text-white" disabled={isLoading}>
+                    {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {isLoading ? "Deleting..." : (
+                        <span className="flex gap-2"> <Trash className="mr-2 h-4 w-4" />  Delete</span>
+                    )}
                 </button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -44,7 +48,10 @@ export function DeleteDialog({ id, title, description, onContinue }: DeleteDialo
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction className="bg-red-500 hover:bg-red-800" onClick={handleContinue}>Continue</AlertDialogAction>
+                    <AlertDialogAction className="bg-red-500 hover:bg-red-800" onClick={handleContinue} disabled={isLoading}>
+                        {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {isLoading ? "Deleting..." : "Delete"}
+                    </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

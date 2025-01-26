@@ -72,6 +72,7 @@ export async function fetchAllExpensesCategories() {
         const user = await currentUser();
 
         const storeId = user.storeId as string;
+        
 
         await connectToDB();
 

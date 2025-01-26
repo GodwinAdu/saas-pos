@@ -76,7 +76,7 @@ export const findManualPurchasePrice = (
 ) => {
   const findUnit = units?.find((unit) => unit._id === selectedUnit);
   const total = findUnit && findUnit?.quantity * price
-  const grandTotal =  quantity * total!
+  const grandTotal = quantity * total!
   return grandTotal.toFixed(2)
 }
 
@@ -116,6 +116,11 @@ export const findAutomatedPrice = (
   }
 };
 
+export function calculateQuantity(selectedUnit: string, quantity: number, units: { _id: string, quantity: number }[]): number {
+  const findUnit = units.find(u => u._id === selectedUnit);
+  const value = findUnit ? findUnit.quantity * quantity : 0;
+  return Math.round(value);
+}
 
 export function debounce<T extends (...args: string[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
   let timeout: ReturnType<typeof setTimeout>;
@@ -125,3 +130,11 @@ export function debounce<T extends (...args: string[]) => void>(func: T, wait: n
     timeout = setTimeout(() => func.apply(this, args), wait);
   };
 }
+
+export function generateReferenceNumber(prefix = "REF") {
+  const timestamp = Date.now().toString(36).toUpperCase(); // Base36 timestamp
+  const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase(); // Random string
+  return `${prefix}-${timestamp}-${randomPart}`;
+}
+
+

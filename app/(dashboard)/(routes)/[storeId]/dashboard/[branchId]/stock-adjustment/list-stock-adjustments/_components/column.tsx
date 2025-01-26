@@ -1,5 +1,6 @@
 'use client';
 
+
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -7,21 +8,13 @@ import Image from 'next/image';
 
 export const columns: ColumnDef<any>[] = [
     {
-        accessorKey: 'saleDate',
-        header: 'Sale Date',
-        cell: ({ row }) => <div>{new Date(row.original.saleDate).toLocaleDateString()}</div>,
-    },
-    {
-        accessorKey: 'customerId',
-        header: 'Customer',
-        cell: ({ row }) => (
-            <div>{row.original.customerId === null ? 'Walk in customer' : ''}</div>
-        ),
-    },
-    {
-        accessorKey: 'product',
-        header: 'Product',
+        accessorKey: 'products',
+        header: 'Products',
         cell: ({ row }) => <ProductButton data={row.original} />,
+    },
+    {
+        accessorKey: 'referenceNo',
+        header: 'Reference',
     },
     {
         accessorKey: 'totalAmount',
@@ -29,31 +22,22 @@ export const columns: ColumnDef<any>[] = [
         cell: ({ row }) => <div>{row.original.totalAmount}</div>,
     },
     {
-        accessorKey: 'paymentMethod',
-        header: 'Payment Method',
-    },
-    {
-        accessorKey: 'shippingStatus',
-        header: 'Status',
+        accessorKey: 'adjustmentType',
+        header: 'Adjustment Type',
         cell: ({ row }) => (
-            row.original.shippingStatus && (
+            row.original.adjustmentType && (
                 <span
-                    className={`px-2 py-1 mr-2 rounded text-sm font-medium ${row.original.shippingStatus === "Delivered" || row.original.shippingStatus === "Shipped"
+                    className={`px-2 py-1 mr-2 rounded text-sm font-medium ${row.original.adjustmentType === "normal"
                         ? "bg-green-100 text-green-700"
-                        : row.original.shippingStatus === "Cancelled" || row.original.shippingStatus === "Suspended"
+                        : row.original.adjustmentType === "remove"
                             ? "bg-red-100 text-red-700"
                             : "bg-yellow-100 text-yellow-700"
                         }`}
                 >
-                    {row.original.shippingStatus}
+                    {row.original.adjustmentType}
                 </span>
             )
         ),
-    },
-    {
-        accessorKey: 'account',
-        header: 'Account Linked',
-        cell: ({ row }) => <div>{row.original.account?.name}</div>,
     },
     {
         accessorKey: 'createdBy',
@@ -87,15 +71,10 @@ const ProductButton = ({ data }: { data: any }) => {
                     <div className="mt-4 space-y-4">
                         {/* Transaction Info */}
                         <div>
-                            <h2 className="text-lg font-semibold text-gray-700">Transaction Information</h2>
-                            <p><strong>Invoice No:</strong> {data?.invoiceNo}</p>
-                            <p><strong>Sale Date:</strong> {new Date(data.saleDate).toLocaleString()}</p>
-                            <p><strong>Delivery To:</strong> {data.deliveryTo}</p>
-                            <p><strong>Payment Method:</strong> {data.paymentMethod}</p>
-                            <p><strong>Payment Date:</strong> {new Date(data.paymentDate).toLocaleString()}</p>
-                            <p><strong>Shipping Address:</strong> {data.shippingAddress}</p>
-                            <p><strong>Shipping Charges:</strong> ${data.shippingCharges}</p>
-                            <p><strong>Shipping Status:</strong> {data.shippingStatus}</p>
+                            <h2 className="text-lg font-semibold text-gray-700">Adjustment Information</h2>
+                            <p><strong>Reference No:</strong> {data?.referenceNo}</p>
+                            <p><strong>Adjustment Date:</strong> {new Date(data.adjustmentDate).toLocaleString()}</p>
+                            <p><strong>Reason:</strong> {data.reason}</p>
                         </div>
 
                         {/* Products */}
@@ -109,8 +88,8 @@ const ProductButton = ({ data }: { data: any }) => {
                                     >
                                         <div className="flex items-center gap-4">
                                             <Image
-                                            width={100}
-                                            height={100}
+                                                width={100}
+                                                height={100}
                                                 src={product.productId.images[0]}
                                                 alt={product.productId.name}
                                                 className="w-16 h-16 object-cover rounded"
@@ -121,7 +100,7 @@ const ProductButton = ({ data }: { data: any }) => {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p>Qty: {product.quantity}</p>
+                                            <p>Qty: {product.totalQuantity}</p>
                                             <p className="font-medium text-gray-800">
                                                 Subtotal: ${product.subTotal}
                                             </p>
@@ -134,8 +113,6 @@ const ProductButton = ({ data }: { data: any }) => {
                         {/* Summary */}
                         <div className="mt-6 border-t pt-4">
                             <h2 className="text-lg font-semibold text-gray-700">Summary</h2>
-                            <p><strong>Discount:</strong> ${data.discountAmount}</p>
-                            <p><strong>Tax Amount:</strong> ${data.taxAmount}</p>
                             <p className="text-xl font-bold text-gray-800">
                                 Total Amount: ${data.totalAmount}
                             </p>

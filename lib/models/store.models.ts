@@ -1,4 +1,6 @@
-import { Model, model, models, Schema, Document } from "mongoose";
+import { Model, model, models, Schema, Document, CallbackError } from "mongoose";
+import Product from "./product.models";
+import Sale from "./sale.models";
 
 interface IStore extends Document {
     name: string;
@@ -165,7 +167,7 @@ const StoreSchema: Schema<IStore> = new Schema({
             type: Date,
         },
         paymentStatus: {
-            type: String, 
+            type: String,
             default: 'Free Tier'
         },
     },
@@ -341,7 +343,7 @@ const StoreSchema: Schema<IStore> = new Schema({
         ref: "Branch",
         default: null,
     }],
-    banned:{
+    banned: {
         type: Boolean,
         default: false
     },
@@ -370,6 +372,30 @@ const StoreSchema: Schema<IStore> = new Schema({
     timestamps: true,
     versionKey: false,
 });
+
+StoreSchema.pre('findOneAndDelete', async function (next) {
+    const storeId = this.getQuery()._id;
+
+    try {
+        // Define collections to clean up
+        const collections = [
+            { model: Product, filter: { storeId } },
+            { model: Sale, filter: { storeId } },
+            // Add more models referencing storeId here
+        ];
+
+        // Iterate through and delete documents from each collection
+        for (const { model, filter } of collections) {
+            await model.deleteMany(filter);
+        }
+
+        next();
+    } catch (error) {
+        console.error('Error cleaning up related data:', error);
+        next(error as CallbackError);
+    }
+});
+
 
 type StoreModel = Model<IStore>;
 

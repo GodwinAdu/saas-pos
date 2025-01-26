@@ -18,7 +18,6 @@ import { playErrorSound, playSuccessSound } from "@/lib/audio"
 import { toast } from "@/hooks/use-toast"
 import { DeleteDialog } from "@/components/commons/DeleteDialog"
 import useClientRole from "@/hooks/use-client-role"
-import { deleteUnit } from "@/lib/actions/unit.actions"
 
 interface CellActionProps {
     data: IProduct
@@ -33,7 +32,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const handleDelete = async (id: string) => {
         try {
             setLoading(true)
-            
+
             router.refresh()
             playSuccessSound()
             toast({

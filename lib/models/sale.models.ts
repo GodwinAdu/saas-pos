@@ -1,5 +1,6 @@
 
-import { models, Schema, model } from "mongoose";
+import { models, Schema, model, UpdateQuery } from "mongoose";
+import RevenueSummary from "./revenue-summary.models";
 
 
 const SaleSchema = new Schema({
@@ -82,6 +83,9 @@ const SaleSchema = new Schema({
         unitPrice: {
             type: Number,
         },
+        totalQuantity:{
+            type: Number,
+        },
         subTotal: {
             type: Number,
         }
@@ -115,6 +119,68 @@ const SaleSchema = new Schema({
     timestamps: true,
     versionKey: false,
 });
+SaleSchema.post("save", async function (doc) {
+    try {
+        const { storeId, branchId, totalAmount, saleDate } = doc;
+        // Get the first day of the month
+        const startOfMonth = new Date(saleDate.getFullYear(), saleDate.getMonth(), 1);
+
+        await RevenueSummary.updateOne(
+            { storeId, branchId, date: startOfMonth },
+            { $inc: { totalRevenue: totalAmount } },
+            { upsert: true }
+        );
+    } catch (error) {
+        console.error("Error updating revenue summary:", error);
+    }
+});
+
+SaleSchema.post("findOneAndUpdate", async function (doc) {
+    if (doc) {
+        try {
+            const originalAmount = doc.totalAmount || 0;
+            const update = this.getUpdate() as UpdateQuery<typeof doc>;
+            const updatedAmount = update.totalAmount || 0;
+            const difference = updatedAmount - originalAmount;
+
+            const { storeId, branchId, saleDate } = doc;
+            const startOfMonth = new Date(saleDate.getFullYear(), saleDate.getMonth(), 1);
+
+            if (difference !== 0) {
+                await RevenueSummary.updateOne(
+                    { storeId, branchId, date: startOfMonth },
+                    { $inc: { totalRevenue: difference } }
+                );
+            }
+        } catch (error) {
+            console.error("Error updating revenue summary on edit:", error);
+        }
+    }
+});
+
+
+SaleSchema.post("findOneAndDelete", async function (doc) {
+    if (doc) {
+        try {
+            const { storeId, branchId, totalAmount, saleDate } = doc;
+            if (!storeId || !branchId || !saleDate) {
+                console.error("Missing fields in deleted sale document.");
+                return;
+            }
+
+            const startOfMonth = new Date(saleDate.getFullYear(), saleDate.getMonth(), 1);
+
+            await RevenueSummary.updateOne(
+                { storeId, branchId, date: startOfMonth },
+                { $inc: { totalRevenue: - totalAmount } }
+            );
+        } catch (error) {
+            console.error("Error updating revenue summary on delete:", error);
+        }
+    }
+});
+
+
 
 
 const Sale = models.Sale || model('Sale', SaleSchema);

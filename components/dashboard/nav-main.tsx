@@ -113,7 +113,6 @@ interface NavMainProps {
 }
 
 export function NavMain({ role }: NavMainProps) {
-  console.log(role,'roles')
 
   const params = useParams();
   const pathname = usePathname();
@@ -126,9 +125,7 @@ export function NavMain({ role }: NavMainProps) {
   );
 
 
-  const storeId = params?.storeId as string;
-
-  const branchId = params?.branchId as string;
+  const { storeId, branchId } = params
 
   const navMain: NavItem[] = [
     {

@@ -61,9 +61,8 @@ export function WarrantModal() {
                 description: "New warrant was added successfully...",
                 variant: "success",
             });
-        } catch (error: any) {
+        } catch  {
             playErrorSound();
-            console.error("Error occurred while creating unit:", error);
             toast({
                 title: "Something went wrong",
                 description: "Please try again later...",

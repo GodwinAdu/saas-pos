@@ -12,6 +12,8 @@ import TodayTransactions from '@/components/commons/dashboard/today-transaction'
 import TopSellingProducts from '@/components/commons/dashboard/top-selling-products'
 import TransactionHistory from '@/components/commons/dashboard/transaction-history'
 import TrashItemsCount from '@/components/commons/dashboard/trash-item-count'
+import { fetchCurrentMonthRevenue } from '@/lib/actions/revenue-summary.actions'
+import { getTodaySales, getTopProductsOfCurrentMonth } from '@/lib/actions/sale.actions'
 import { fetchStoreById } from '@/lib/actions/store.actions'
 import { redirect } from 'next/navigation'
 
@@ -20,6 +22,12 @@ const page = async ({ params }: { params: StoreIdParams }) => {
   const { storeId } = await params;
 
   const store = await fetchStoreById(storeId);
+  const todaySales = await getTodaySales()
+  const topProducts = await getTopProductsOfCurrentMonth()
+  const totalRevenue = await fetchCurrentMonthRevenue()
+  console.log(topProducts,"top products")
+  console.log(todaySales,"today sales")
+  console.log(totalRevenue,"total revenue")
 
   if (!store) {
     redirect('/')
