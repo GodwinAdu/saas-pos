@@ -34,10 +34,10 @@ export function TeamSwitcher({ branches, store }: { branches: IBranch[], store: 
       content: 'Hello this is where to switch between branches ',
       disableBeacon: true,
     },
-  ])
+  ]);
 
 
-  const showCreateBranch = store.numberOfBranches >= store.branchIds.length
+  const showCreateBranch = store.numberOfBranches <= store.branchIds.length
 
   const { activeBranch, setActiveBranch } = useBranchStore();
 
