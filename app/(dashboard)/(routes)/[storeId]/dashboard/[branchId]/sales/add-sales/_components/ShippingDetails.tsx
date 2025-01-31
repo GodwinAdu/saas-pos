@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Control } from "react-hook-form"
 import { SaleFormValues } from "@/lib/validators/sale-form-schema"
 
-export function ShippingDetailsFields({ control }:{ control: Control<SaleFormValues>;}) {
+export function ShippingDetailsFields({ control }: { control: Control<SaleFormValues>; }) {
     return (
         <Card>
             <CardHeader>
@@ -65,18 +65,20 @@ export function ShippingDetailsFields({ control }:{ control: Control<SaleFormVal
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    <SelectItem value="Ordered">Ordered</SelectItem>
-                                    <SelectItem value="Packed">Packed</SelectItem>
-                                    <SelectItem value="Shipped">Shipped</SelectItem>
-                                    <SelectItem value="Delivered">Delivered</SelectItem>
-                                    <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                    <SelectItem value="Suspended">Suspended</SelectItem>
+                                    {["Ordered", "Packed", "Shipped", "Delivered", "Cancelled", "Suspended"].map(
+                                        (status) => (
+                                            <SelectItem key={status} value={status}>
+                                                {status}
+                                            </SelectItem>
+                                        )
+                                    )}
                                 </SelectContent>
                             </Select>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={control}
                     name="deliveryTo"

@@ -111,7 +111,16 @@ export default function PosContent({
     branches,
     branch,
     suspends,
-}: { brands: IBrand[]; categories: ICategory[]; user: IUser; branches: IBranch[]; branch: IBranch; suspends: any[] }) {
+    currency
+}: {
+    brands: IBrand[];
+    categories: ICategory[];
+    user: IUser;
+    branches: IBranch[];
+    branch: IBranch;
+    suspends: any[];
+    currency: string;
+}) {
     const {
         cartItems,
         discountPercent,
@@ -441,18 +450,18 @@ export default function PosContent({
                                                 <div>
                                                     <p className="font-medium">{item?.name}</p>
                                                     <p className="text-sm text-muted-foreground">
-                                                        &#x20B5;
+                                                        {currency}
                                                         {(branch.inventorySettings.pricingType === "manual"
                                                             ? (findManualPrice(
                                                                 item.item?.manualPrice,
                                                                 (selectedUnit as string) || (item?.unit as string),
-                                                            ) || 0)
+                                                            ) || 0).toFixed(2)
                                                             : (findAutomatedPrice(
                                                                 item?.item,
                                                                 item.item?.unit,
                                                                 item?.unit as string,
                                                                 selectedValue as string,
-                                                            ) || 0))}
+                                                            ) || 0).toFixed(2))}
                                                     </p>
                                                 </div>
                                             </div>
@@ -487,10 +496,10 @@ export default function PosContent({
                         <div className="flex justify-between items-center">
                             <span className="font-semibold">Subtotal:</span>
                             <span>
-                                &#x20B5;
+                                {currency}
                                 {(branch.inventorySettings.pricingType === "manual"
-                                    ? (subtotalManual || 0)
-                                    : (subtotalAutomated || 0))}
+                                    ? (subtotalManual || 0).toFixed(2)
+                                    : (subtotalAutomated || 0).toFixed(2))}
                             </span>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -502,11 +511,11 @@ export default function PosContent({
                                 onChange={(e) => setDiscountPercent(Number(e.target.value))}
                                 className="w-20"
                             />
-                            <span className="text-sm text-muted-foreground">-&#x20B5;{(discount || 0)}</span>
+                            <span className="text-sm text-muted-foreground">-{currency}{(discount || 0).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center font-bold">
                             <span>Total:</span>
-                            <span>&#x20B5;{(total || 0)}</span>
+                            <span>{currency}{(total || 0).toFixed(2)}</span>
                         </div>
                         <Button className="w-full" onClick={() => setIsCheckoutDialogOpen(true)} disabled={cartItems.length === 0}>
                             Proceed to Checkout

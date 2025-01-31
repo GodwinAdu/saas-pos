@@ -10,6 +10,7 @@ import { currentUser } from '@/lib/helpers/current-user'
 import { fetchAllWarrants } from '@/lib/actions/warrant.actions'
 import { fetchAllVariations } from '@/lib/actions/variation.actions'
 import CreateProductForm from './_components/CreateProduct'
+import { getCurrencySymbol, paymentMethods } from '@/lib/settings/store.settings'
 
 const page = async ({ params }: { params: BranchIdParams }) => {
 
@@ -22,6 +23,8 @@ const page = async ({ params }: { params: BranchIdParams }) => {
   const branches = await fetchAllBranches() || [];
   const warrants = await fetchAllWarrants() || [];
   const variations = await fetchAllVariations() || [];
+  const currency = await getCurrencySymbol();
+  
   return (
     <>
       <div className="">
@@ -32,6 +35,7 @@ const page = async ({ params }: { params: BranchIdParams }) => {
       <Separator />
       <div className="">
         <CreateProductForm
+          currency={currency}
           user={user}
           warrants={warrants}
           variations={variations}

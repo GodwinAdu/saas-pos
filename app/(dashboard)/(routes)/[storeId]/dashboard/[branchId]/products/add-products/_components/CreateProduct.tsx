@@ -48,6 +48,7 @@ const productSchema = z.object({
         unitId: z.string(),
         productPrice: z.coerce.number(),
         productQuantity: z.coerce.number(),
+        costPrice: z.coerce.number(),
     }),
     manualPrice: z.array(z.object({
         tax: z.coerce.number().optional(),
@@ -93,7 +94,8 @@ interface ProductProps {
     units: IUnit[];
     branch: IBranch,
     branches: IBranch[],
-    user: IUser
+    user: IUser,
+    currency: string
 }
 
 export default function CreateProductForm({
@@ -107,6 +109,7 @@ export default function CreateProductForm({
     categories,
     brands,
     initialData,
+    currency,
 }: ProductProps) {
 
     const [wholesaleSellingPrice, setWholesaleSellingPrice] = useState<number>(0)
@@ -244,6 +247,8 @@ export default function CreateProductForm({
                 setCostPerUnit(costPerUnit);
                 form.setValue("wholesalePrice.wholesaleUnitCost", costPerUnit);
                 form.setValue("retailPrice.retailUnitCost", costPerUnit);
+                const roundPrice = Math.round(costPerUnit)
+                form.setValue("vendorPrice.costPrice",roundPrice)
 
                 // Calculate price per unit
                 const pricePerUnit = productPrice / productQuantity;
@@ -251,6 +256,9 @@ export default function CreateProductForm({
             }
         }
     };
+
+    const testPrice = form.watch('vendorPrice.costPrice')
+    console.log(testPrice,'test pricing')
 
 
     useEffect(() => {
@@ -645,7 +653,7 @@ export default function CreateProductForm({
                                             name="vendorPrice.productPrice"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Total Cost (GH₵)</FormLabel>
+                                                    <FormLabel>Total Cost ({currency})</FormLabel>
                                                     <FormControl>
                                                         <Input
                                                             type="number"
@@ -687,24 +695,25 @@ export default function CreateProductForm({
 
                                         {/* Cost Per Unit Calculation */}
                                         <FormItem>
-                                            <FormLabel>Cost Per Unit (GH₵)</FormLabel>
+                                            <FormLabel>Cost Per Unit ({currency})</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    type="text"
-                                                    value={costPerUnit.toFixed(2)}
+                                                    type="number"
+                                                    value={Math.round(costPerUnit).toFixed() ?? 0} // Ensure a default value
                                                     readOnly
-                                                    className="bg-gray-100 cursor-not-allowed"
+                                                    className="bg-gray-100"
                                                 />
                                             </FormControl>
                                         </FormItem>
 
+
                                         {/* Price Per Unit */}
                                         <FormItem>
-                                            <FormLabel>Price Per Unit (GH₵)</FormLabel>
+                                            <FormLabel>Price Per Unit ({currency})</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="text"
-                                                    value={pricePerUnit.toFixed(2)}
+                                                    value={Math.round(pricePerUnit).toFixed(2)}
                                                     readOnly
                                                     className="bg-gray-100 cursor-not-allowed"
                                                 />
@@ -749,7 +758,7 @@ export default function CreateProductForm({
                                                         name={`manualPrice.${index}.price`}
                                                         render={({ field }) => (
                                                             <FormItem>
-                                                                <FormLabel>Price (GH₵)</FormLabel>
+                                                                <FormLabel>Price ({currency})</FormLabel>
                                                                 <FormControl>
                                                                     <div className="relative">
                                                                         <Input
@@ -844,7 +853,7 @@ export default function CreateProductForm({
 
                                                             return (
                                                                 <FormItem>
-                                                                    <FormLabel>Unit Cost</FormLabel>
+                                                                    <FormLabel>Unit Cost ({currency})</FormLabel>
                                                                     <FormControl>
                                                                         <Input
                                                                             type="number"
@@ -907,7 +916,7 @@ export default function CreateProductForm({
                                                         </FormControl>
                                                     </FormItem>
                                                     <FormItem>
-                                                        <FormLabel>Unit Sell Price</FormLabel>
+                                                        <FormLabel>Unit Sell Price ({currency})</FormLabel>
                                                         <FormControl>
                                                             <Input type="number" disabled value={wholesaleSellingPrice.toFixed(2)} />
                                                         </FormControl>
@@ -982,7 +991,7 @@ export default function CreateProductForm({
 
                                                             return (
                                                                 <FormItem>
-                                                                    <FormLabel>Unit Cost</FormLabel>
+                                                                    <FormLabel>Unit Cost ({currency})</FormLabel>
                                                                     <FormControl>
                                                                         <Input
                                                                             type="number"
@@ -1045,7 +1054,7 @@ export default function CreateProductForm({
                                                         </FormControl>
                                                     </FormItem>
                                                     <FormItem>
-                                                        <FormLabel>Unit Sell Price</FormLabel>
+                                                        <FormLabel>Unit Sell Price ({currency})</FormLabel>
                                                         <FormControl>
                                                             <Input type="number" disabled value={retailSellingPrice.toFixed(2)} />
                                                         </FormControl>

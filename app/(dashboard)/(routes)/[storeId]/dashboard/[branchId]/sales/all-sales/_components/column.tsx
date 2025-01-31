@@ -4,6 +4,8 @@ import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Image from 'next/image';
+import { getCurrencySymbol } from '@/lib/settings/store.settings';
+import { useEffect, useState } from 'react';
 
 export const columns: ColumnDef<any>[] = [
     {
@@ -68,6 +70,23 @@ export const columns: ColumnDef<any>[] = [
 
 // Button Component for Product Column
 const ProductButton = ({ data }: { data: any }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [currency, setCurrency] = useState<string>('');
+
+    useEffect(() => {
+        const fetchCurrency = async () => {
+            try {
+                setIsLoading(true);
+                const result = await getCurrencySymbol();
+                setCurrency(result);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchCurrency()
+    },[]);
 
     return (
         <>
@@ -94,7 +113,7 @@ const ProductButton = ({ data }: { data: any }) => {
                             <p><strong>Payment Method:</strong> {data.paymentMethod}</p>
                             <p><strong>Payment Date:</strong> {new Date(data.paymentDate).toLocaleString()}</p>
                             <p><strong>Shipping Address:</strong> {data.shippingAddress}</p>
-                            <p><strong>Shipping Charges:</strong> ${data.shippingCharges}</p>
+                            <p><strong>Shipping Charges:</strong> {isLoading ? '-' : currency} {data.shippingCharges}</p>
                             <p><strong>Shipping Status:</strong> {data.shippingStatus}</p>
                         </div>
 
@@ -123,7 +142,7 @@ const ProductButton = ({ data }: { data: any }) => {
                                         <div className="text-right">
                                             <p>Qty: {product.quantity}</p>
                                             <p className="font-medium text-gray-800">
-                                                Subtotal: ${product.subTotal}
+                                                Subtotal: {isLoading ? '-' : currency} {product.subTotal}
                                             </p>
                                         </div>
                                     </div>
@@ -134,10 +153,10 @@ const ProductButton = ({ data }: { data: any }) => {
                         {/* Summary */}
                         <div className="mt-6 border-t pt-4">
                             <h2 className="text-lg font-semibold text-gray-700">Summary</h2>
-                            <p><strong>Discount:</strong> ${data.discountAmount}</p>
-                            <p><strong>Tax Amount:</strong> ${data.taxAmount}</p>
+                            <p><strong>Discount:</strong> {isLoading ? '-' : currency} {data.discountAmount}</p>
+                            <p><strong>Tax Amount:</strong> {isLoading ? '-' : currency} {data.taxAmount}</p>
                             <p className="text-xl font-bold text-gray-800">
-                                Total Amount: ${data.totalAmount}
+                                Total Amount: {isLoading ? '-' : currency} {data.totalAmount}
                             </p>
                         </div>
                     </div>

@@ -77,7 +77,20 @@ export const findManualPurchasePrice = (
   const findUnit = units?.find((unit) => unit._id === selectedUnit);
   const total = findUnit && findUnit?.quantity * price
   const grandTotal = quantity * total!
-  return grandTotal.toFixed(2)
+  return grandTotal
+}
+
+
+export const calculateCostPrice = (
+  units: { _id: string; quantity: number }[],
+  selectedUnit: string,
+  quantity: number,
+  price: number
+) =>{
+  const findUnit = units?.find((unit) => unit._id === selectedUnit);
+  const total = findUnit && findUnit?.quantity * price
+  const grandTotal = quantity * total!
+  return grandTotal
 }
 
 // calculate automated price for branch products

@@ -54,7 +54,10 @@ const ProductSchema: Schema<IProduct> = new Schema(
       },
       productQuantity: {
         type: Number,
-      }
+      },
+      costPrice: {
+        type: Number,
+      },
     },
     manualPrice: [{
       tax: {

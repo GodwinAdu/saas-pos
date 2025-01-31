@@ -242,3 +242,145 @@ export const getTopProductsOfCurrentMonth = async () => {
         throw error;
     }
 };
+export const getTopProductsByRange = async (startDate: Date, endDate: Date, quantity: number) => {
+    try {
+        const user = await currentUser();
+        const storeId = user.storeId as string;
+        const branchId = await CurrentBranchId();
+
+        // Adjust end date to include the entire day
+        const adjustedEndDate = new Date(endDate);
+        adjustedEndDate.setHours(23, 59, 59, 999);
+
+        await connectToDB();
+
+        const result = await Sale.aggregate([
+            {
+                // Match sales within the current month, store, and branch
+                $match: {
+                    storeId: new Types.ObjectId(storeId),
+                    branchId: new Types.ObjectId(branchId),
+                    saleDate: {
+                        $gte: startDate,
+                        $lt: adjustedEndDate,
+                    },
+                },
+            },
+            {
+                // Unwind the products array to process each product individually
+                $unwind: "$products",
+            },
+            {
+                // Group by productId and calculate total quantity sold and total revenue
+                $group: {
+                    _id: "$products.productId",
+                    totalQuantity: { $sum: "$products.totalQuantity" },
+                    totalRevenue: { $sum: "$products.subTotal" },
+                },
+            },
+            {
+                // Sort by total quantity sold in descending order
+                $sort: { totalQuantity: -1 },
+            },
+            {
+                // Optionally limit to top 5 products
+                $limit: quantity,
+            },
+            {
+                // Lookup product details from the Product collection
+                $lookup: {
+                    from: "products", // Name of the Product collection
+                    localField: "_id", // Match the productId
+                    foreignField: "_id", // Reference the _id field in Product
+                    as: "productDetails",
+                },
+            },
+            {
+                // Unwind the productDetails array to extract product info
+                $unwind: "$productDetails",
+            },
+            {
+                // Format the output
+                $project: {
+                    _id: 0,
+                    productId: "$_id",
+                    productName: "$productDetails.name", // Assuming "name" field exists in Product
+                    totalQuantity: 1,
+                    totalRevenue: 1,
+                },
+            },
+        ]);
+
+        return JSON.parse(JSON.stringify(result));
+
+
+    } catch (error) {
+        console.log('Failed to get top products of current month', error);
+        throw error;
+    }
+};
+
+
+
+export const calculateProfitOrLoss = async () => {
+    try {
+        const user = await currentUser();
+        const storeId = user.storeId as string;
+        const branchId = await CurrentBranchId();
+        await connectToDB();
+
+        const result = await Sale.aggregate([
+            {
+                // Match sales within the current store and branch
+                $match: {
+                    storeId: new Types.ObjectId(storeId),
+                    branchId: new Types.ObjectId(branchId),
+                    shippingStatus: "Delivered",
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    costPrice: { $sum: "$costPrice" },
+                    totalAmount: { $sum: "$totalAmount" }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    costPrice: 1,
+                    totalAmount: 1,
+                    profitOrLoss: { $subtract: ["$totalAmount", "$costPrice"] },
+                    percentage: {
+                        $cond: {
+                            if: { $eq: ["$costPrice", 0] }, // Prevent divide by zero
+                            then: 0, // If costPrice is 0, set percentage to 0
+                            else: {
+                                $multiply: [
+                                    { $divide: [{ $subtract: ["$totalAmount", "$costPrice"] }, "$costPrice"] },
+                                    100
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        ]);
+
+        if (result.length === 0) return { message: "No sales data available." };
+
+        const { costPrice, totalAmount, profitOrLoss, percentage } = result[0];
+
+        return {
+            costPrice,
+            totalAmount,
+            profitOrLoss,
+            percentage: percentage.toFixed(2),
+            status: profitOrLoss >= 0 ? "Profit" : "Loss"
+        };
+
+    } catch (error) {
+        console.log('Failed to calculate profit or loss', error);
+        throw error;
+    }
+};

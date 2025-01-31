@@ -1,5 +1,4 @@
 
-import { Types } from "mongoose";
 import { Model, model, models, Schema } from "mongoose";
 
 export interface Address {
@@ -121,14 +120,6 @@ const UserSchema: Schema<IUser> = new Schema(
             accountType: {
                 type: String,
                 default: null,
-            },
-            commissionRate: {
-                type: Number,
-                default: null,
-            },
-            salesTarget: {
-                type: Number,
-                default: null
             }
         },
         startDate: {

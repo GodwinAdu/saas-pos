@@ -1,20 +1,54 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-import { MapPin, Printer, Calendar, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { Printer, TrendingUp, ArrowUpRight, ArrowDownRight, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { DateRange } from 'react-day-picker'
+import { DateRangePicker } from '@/components/commons/DateRangePicker'
+import { fetchProfitLossDataByRange } from '@/lib/actions/combined.actions'
 
-export default function ProfitLossReport() {
-    const [selectedLocation, setSelectedLocation] = useState('all')
+const currentYear = new Date().getFullYear();
+export default function ProfitLossReport({ currency }: { currency: string }) {
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: new Date(currentYear, 0, 1),
+        to: new Date(currentYear, 11, 31),
+    });
+    const [isLoading, setIsLoading] = useState(false);
+    const [financialData, setFinancialData] = useState({
+        totalSales: 0,
+        totalProfitLoss: 0,
+        totalExpenses: 0,
+        totalAdjustments: 0,
+        netProfit: 0,
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                if (dateRange?.from && dateRange?.to) {
+                    const response = await fetchProfitLossDataByRange(dateRange.from, dateRange.to);
+                    setFinancialData({
+                        totalSales: response.totalSales,
+                        totalProfitLoss: response.sales.profitOrLoss,
+                        totalExpenses: response.totalExpenses,
+                        totalAdjustments: response.totalAdjustments,
+                        netProfit: response.netProfit,
+                    });
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [dateRange?.from, dateRange?.to]);
+
+    const { totalSales, totalProfitLoss, totalExpenses, totalAdjustments, netProfit } = financialData;
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
@@ -26,21 +60,10 @@ export default function ProfitLossReport() {
                         <p className="text-muted-foreground">Financial overview and analysis</p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3">
-                        <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                            <SelectTrigger className="w-[200px] bg-white dark:bg-gray-900">
-                                <MapPin className="w-4 h-4 mr-2 text-primary" />
-                                <SelectValue placeholder="Select location" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All locations</SelectItem>
-                                <SelectItem value="loc1">Location 1</SelectItem>
-                                <SelectItem value="loc2">Location 2</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Button variant="outline" className="bg-white dark:bg-gray-900">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            Filter by date
-                        </Button>
+                        <DateRangePicker
+                            className="w-[300px]"
+                            onDateRangeChange={setDateRange}
+                        />
                     </div>
                 </div>
 
@@ -56,7 +79,7 @@ export default function ProfitLossReport() {
                                 <div className="flex justify-between items-start">
                                     <div className="space-y-1">
                                         <p className="text-sm font-medium text-muted-foreground">Total Sales</p>
-                                        <p className="text-2xl font-bold">GHS 6,437.00</p>
+                                        <p className="text-2xl font-bold flex items-center"><span>{currency}</span> {isLoading ? <Loader2 className='w-4 h-4 animate-spin' /> : (totalSales ?? 0).toFixed(2)}</p>
                                     </div>
                                     <div className="p-3 bg-primary/10 rounded-full">
                                         <TrendingUp className="w-5 h-5 text-primary" />
@@ -79,7 +102,7 @@ export default function ProfitLossReport() {
                             <CardContent className="p-6">
                                 <div className="space-y-1">
                                     <p className="text-sm font-medium text-muted-foreground">Gross Profit</p>
-                                    <p className="text-2xl font-bold">GHS 1,887.00</p>
+                                    <p className="text-2xl font-bold flex items-center"><span>{currency}</span> {isLoading ? <Loader2 className='w-4 h-4 animate-spin' /> : (totalProfitLoss ?? 0).toFixed(2)}</p>
                                     <p className="text-xs text-muted-foreground">Total sell price - Total purchase price</p>
                                 </div>
                                 <div className="mt-4 flex items-center text-green-600 text-sm">
@@ -99,7 +122,7 @@ export default function ProfitLossReport() {
                             <CardContent className="p-6">
                                 <div className="space-y-1">
                                     <p className="text-sm font-medium text-muted-foreground">Net Profit</p>
-                                    <p className="text-2xl font-bold">GHS 1,887.00</p>
+                                    <p className="text-2xl font-bold flex items-center"><span>{currency}</span> {isLoading ? <Loader2 className='w-4 h-4 animate-spin' /> : (netProfit ?? 0).toFixed(2)}</p>
                                     <p className="text-xs text-muted-foreground">After adjustments & expenses</p>
                                 </div>
                                 <div className="mt-4 flex items-center text-red-600 text-sm">
@@ -214,14 +237,14 @@ export default function ProfitLossReport() {
                                                 <p className="font-medium">Total Stock Adjustment</p>
                                                 <p className="text-sm text-muted-foreground">Current period</p>
                                             </div>
-                                            <p className="font-medium">GHS 0.00</p>
+                                            <p className="font-medium flex item-center"><span>{currency}</span> {isLoading ? <Loader2 className='w-4 h-4 animate-spin' /> : (totalAdjustments ?? 0).toFixed(2)}</p>
                                         </div>
                                         <div className="flex justify-between items-center p-3 bg-primary/5 rounded-lg">
                                             <div>
                                                 <p className="font-medium">Total Expenses</p>
                                                 <p className="text-sm text-muted-foreground">Current period</p>
                                             </div>
-                                            <p className="font-medium">GHS 0.00</p>
+                                            <p className="font-medium flex items-center"><span>{currency}</span> {isLoading ? <Loader2 className='w-4 h-4 animate-spin' /> : (totalExpenses ?? 0).toFixed(2)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -232,10 +255,6 @@ export default function ProfitLossReport() {
 
                 {/* Actions */}
                 <div className="flex justify-end gap-4">
-                    <Button variant="outline" className="bg-white dark:bg-gray-900">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Filter by date
-                    </Button>
                     <Button className="bg-primary hover:bg-primary/90">
                         <Printer className="w-4 h-4 mr-2" />
                         Print Report

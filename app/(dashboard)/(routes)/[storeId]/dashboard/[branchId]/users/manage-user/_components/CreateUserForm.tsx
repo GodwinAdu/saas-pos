@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -72,6 +70,7 @@ const CreateUserForm = ({ type, initialData }: { type: "create" | "update"; init
       }
       toast({ title: "Success", description: `User has been ${type === "create" ? "created" : "updated"}.` });
     } catch (error) {
+      console.error(error);
       toast({ title: "Error", description: "An error occurred. Please try again.", variant: "destructive" });
     }
   };

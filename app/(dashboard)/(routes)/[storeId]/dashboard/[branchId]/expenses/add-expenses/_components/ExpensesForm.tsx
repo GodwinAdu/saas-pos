@@ -43,6 +43,8 @@ import { playErrorSound, playSuccessSound } from "@/lib/audio"
 import { createExpenses } from "@/lib/actions/expenses.actions"
 import { useParams, usePathname, useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
+import { paymentMethods } from '../../../../../../../../../lib/settings/store.settings';
+import { getCurrencySymbol } from '@/lib/settings/store.settings';
 
 
 const formSchema = z.object({
@@ -80,9 +82,13 @@ interface Account {
 interface ExpenseFormProps {
   accounts: Account[];
   categories: Category[];
+  currency: string;
+  paymentMethods: {
+    name: string
+  }[]
 }
 
-export default function ExpenseForm({ accounts, categories }: ExpenseFormProps) {
+export default function ExpenseForm({ accounts, categories, currency, paymentMethods }: ExpenseFormProps) {
   const router = useRouter();
   const path = usePathname();
   const params = useParams();
@@ -245,7 +251,7 @@ export default function ExpenseForm({ accounts, categories }: ExpenseFormProps) 
                   name="tax"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Applicable Tax</FormLabel>
+                      <FormLabel>Applicable Tax (%)</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="shadcn" {...field} />
                       </FormControl>
@@ -260,7 +266,7 @@ export default function ExpenseForm({ accounts, categories }: ExpenseFormProps) 
                   name="totalAmount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Total Amount</FormLabel>
+                      <FormLabel>Total Amount <span>({currency})</span></FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="shadcn" {...field} />
                       </FormControl>
@@ -384,7 +390,7 @@ export default function ExpenseForm({ accounts, categories }: ExpenseFormProps) 
                   name="paymentAmount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Payment Amount</FormLabel>
+                      <FormLabel>Payment Amount <span>({currency})</span></FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="payment amount" {...field} />
                       </FormControl>
@@ -448,10 +454,11 @@ export default function ExpenseForm({ accounts, categories }: ExpenseFormProps) 
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="cash">Cash</SelectItem>
-                          <SelectItem value="card">Card</SelectItem>
-                          <SelectItem value="bank">Bank Transfer</SelectItem>
-                          <SelectItem value="mobile_money">Mobile Money</SelectItem>
+                          {paymentMethods.map(method => (
+                            <SelectItem key={method.name} value={method.name}>
+                              {method.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />

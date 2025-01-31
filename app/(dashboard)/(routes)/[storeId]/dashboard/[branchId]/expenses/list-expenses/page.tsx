@@ -14,8 +14,8 @@ const page = () => {
 
             </div>
             <Separator />
-            <div className="">
-               <ExpensesTable />
+            <div className="py-4">
+                <ExpensesTable />
             </div>
         </>
     )

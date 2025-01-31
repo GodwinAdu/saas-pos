@@ -9,6 +9,11 @@ const data = [
   { name: 'Toaster', stock: 98 },
   { name: 'Microwave', stock: 39 },
   { name: 'Electric Kettle', stock: 48 },
+  { name: 'Electric Kettle', stock: 48 },
+  { name: 'Electric Kettle', stock: 48 },
+  { name: 'Electric Kettle', stock: 48 },
+  { name: 'Electric Kettle', stock: 48 },
+  { name: 'Electric Kettle', stock: 48 },
 ]
 
 export default function InventoryStatus() {

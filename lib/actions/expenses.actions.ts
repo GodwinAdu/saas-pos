@@ -79,3 +79,41 @@ export async function fetchAllExpenses(startDate: Date, endDate: Date) {
         throw error
     }
 }
+
+export async function fetchExpensesAmountByRange(startDate: Date, endDate: Date) {
+    try {
+        const user = await currentUser();
+
+        if (!user) throw new Error("Unauthenticated user");
+
+        const storeId = user.storeId as string;
+        const branchId = await CurrentBranchId();
+
+        // Adjust end date to include the entire day
+        const adjustedEndDate = new Date(endDate);
+        adjustedEndDate.setHours(23, 59, 59, 999);
+
+        // Fetch total sum of stock adjustments within the date range
+        const result = await Expense.aggregate([
+            {
+                $match: {
+                    storeId,
+                    branchId,
+                    createdAt: { $gte: startDate, $lte: adjustedEndDate },
+                },
+            },
+            {
+                $group: {
+                    _id: null, // Group everything together
+                    paymentAmount: { $sum: "$paymentAmount" },
+                },
+            },
+        ]);
+
+        return result.length ? result[0].paymentAmount : 0; // Return sum or 0 if no records
+
+    } catch (error) {
+        console.error("Error fetching sales:", error);
+        throw error;
+    }
+}

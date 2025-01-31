@@ -335,8 +335,6 @@ interface IUser extends Document {
         accountName: string;
         accountNumber: string;
         accountType: string;
-        commissionRate: number;
-        salesTarget: number;
     }
     startDate: Date;
     isVerified: boolean;

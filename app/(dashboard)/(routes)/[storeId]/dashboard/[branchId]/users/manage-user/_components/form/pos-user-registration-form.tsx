@@ -58,9 +58,7 @@ const formSchema = z.object({
         accountName: z.string().optional(),
         accountNumber: z.string().optional(),
         accountType: z.string().optional(),
-        commissionRate: z.coerce.number().optional(),
-        salesTarget: z.coerce.number().optional(),
-        monthlyPaymentAmount: z.coerce.number().optional(),
+        monthlyPaymentAmount:z.coerce.number()
     }).optional(),
     workSchedule: z.array(
         z.object({
@@ -133,8 +131,6 @@ export function POSUserRegistrationForm({
                 accountName: "",
                 accountNumber: "",
                 monthlyPaymentAmount: 0,
-                commissionRate: 0,
-                salesTarget: 0,
             },
             workSchedule: [],
             availableAllSchedule: false,
@@ -618,20 +614,6 @@ export function POSUserRegistrationForm({
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="accountDetails.commissionRate"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Commission Rates</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="5% on all sales" {...field} />
-                                                </FormControl>
-                                                <FormDescription>For sales staff</FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
                                         name="accountDetails.accountType"
                                         render={({ field }) => (
                                             <FormItem>
@@ -681,20 +663,7 @@ export function POSUserRegistrationForm({
                                             </FormItem>
                                         )}
                                     />
-                                    <FormField
-                                        control={form.control}
-                                        name="accountDetails.salesTarget"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Sales Targets/Quota</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="GH10,000 per month" {...field} />
-                                                </FormControl>
-                                                <FormDescription>To set performance goals (Optional)</FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                   
                                     <FormField
                                         control={form.control}
                                         name="availableAllSchedule"

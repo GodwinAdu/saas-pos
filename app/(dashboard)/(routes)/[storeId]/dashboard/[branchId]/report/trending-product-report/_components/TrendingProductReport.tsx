@@ -1,16 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { Calendar } from '@/components/ui/calendar'
 import { Button } from '@/components/ui/button'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
+
 import {
     Card,
     CardContent,
@@ -19,20 +12,37 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { CalendarIcon, PrinterIcon } from 'lucide-react'
-import { format } from 'date-fns'
 
-const data = [
-    { name: 'GULDER (Bx(es))', value: 380 },
-    { name: 'BelAqua Water (Pc(s))', value: 280 },
-    { name: 'Bigoo (Pc(s))', value: 240 },
-    { name: 'Ice Water (Pc(s))', value: 180 },
-    { name: 'black shoe (Bx(es))', value: 150 },
-]
+import { PrinterIcon } from 'lucide-react'
+import { DateRangePicker } from '@/components/commons/DateRangePicker'
+import { DateRange } from 'react-day-picker'
+import { getTopProductsByRange } from '@/lib/actions/sale.actions'
+
+const currentYear = new Date().getFullYear();
 
 export default function TrendingProducts() {
-    const [date, setDate] = useState<Date>()
+    const [numberOfProducts, setNumberOfProducts] = useState(5)
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: new Date(currentYear, 0, 1),
+        to: new Date(currentYear, 11, 31),
+    });
+    const [productsData, setProductsData] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                if (dateRange?.from && dateRange?.to) {
+                    const response = await getTopProductsByRange(dateRange.from, dateRange.to, numberOfProducts);
+                    setProductsData(response);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        fetchData();
+    }, [dateRange?.to, dateRange?.from, numberOfProducts]);
+    console.log(productsData);
 
     return (
         <div className="min-h-screen bg-background p-8">
@@ -51,63 +61,15 @@ export default function TrendingProducts() {
                 <CardContent>
                     <div className="space-y-6">
                         {/* Filters Section */}
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-                            <Select defaultValue="all">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Business Location" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Locations</SelectItem>
-                                    <SelectItem value="main">Main Branch</SelectItem>
-                                    <SelectItem value="north">North Branch</SelectItem>
-                                </SelectContent>
-                            </Select>
-
-                            <Select defaultValue="all">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Categories</SelectItem>
-                                    <SelectItem value="beverages">Beverages</SelectItem>
-                                    <SelectItem value="food">Food</SelectItem>
-                                </SelectContent>
-                            </Select>
-
-                            <Select defaultValue="all">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Sub Category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Sub Categories</SelectItem>
-                                    <SelectItem value="soft-drinks">Soft Drinks</SelectItem>
-                                    <SelectItem value="water">Water</SelectItem>
-                                </SelectContent>
-                            </Select>
-
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        className="justify-start text-left font-normal"
-                                    >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {date ? format(date, "PPP") : <span>Pick a date</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                        mode="single"
-                                        selected={date}
-                                        onSelect={setDate}
-                                        initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
-
-                            <Input type="number" placeholder="Number of products" defaultValue="5" />
+                        <div className="flex gap-4 items-center">
+                            <DateRangePicker
+                                className="w-[300px]"
+                                onDateRangeChange={setDateRange}
+                            />
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                                <Input type="number" value={numberOfProducts} onChange={(e) => setNumberOfProducts(Number(e.target.value))} placeholder="Number of products" />
+                            </div>
                         </div>
-
                         {/* Chart Section */}
                         <Card className="pt-6">
                             <CardHeader>
@@ -117,7 +79,7 @@ export default function TrendingProducts() {
                                 <div className="h-[400px] w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart
-                                            data={data}
+                                            data={productsData}
                                             margin={{
                                                 top: 5,
                                                 right: 30,
@@ -127,7 +89,7 @@ export default function TrendingProducts() {
                                         >
                                             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                                             <XAxis
-                                                dataKey="name"
+                                                dataKey="productName"
                                                 className="text-xs"
                                                 tick={{ fill: 'hsl(var(--foreground))' }}
                                             />
@@ -139,10 +101,11 @@ export default function TrendingProducts() {
                                                 }}
                                             />
                                             <Bar
-                                                dataKey="value"
+                                                dataKey="totalQuantity"
                                                 fill="hsl(var(--primary))"
                                                 radius={[4, 4, 0, 0]}
                                             />
+                                            
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </div>

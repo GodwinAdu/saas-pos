@@ -1,10 +1,12 @@
 import React from 'react'
 import SaleRepresentativeReport from './_components/SaleRepresentativeReport'
+import { getCurrencySymbol } from '@/lib/settings/store.settings'
 
-const page = () => {
+const page = async () => {
+  const currency = await getCurrencySymbol()
   return (
     <>
-    <SaleRepresentativeReport />
+    <SaleRepresentativeReport currency={currency} />
     </>
   )
 }

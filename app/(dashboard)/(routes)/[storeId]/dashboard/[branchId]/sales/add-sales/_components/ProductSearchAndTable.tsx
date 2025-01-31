@@ -10,10 +10,10 @@ import { toast } from "@/hooks/use-toast"
 import debounce from "lodash/debounce"
 import UnitSelect from "./UnitSelect"
 import { findAutomatedPrice, findManualPrice, } from "@/lib/utils"
-import type { IBranch, IUnit } from "@/lib/types"
 
 interface ProductSearchAndTableProps {
-    branch: IBranch
+    branch: IBranch;
+    currency: string;
 }
 type Price = {
     unitId: {
@@ -24,7 +24,7 @@ type Price = {
     tax: number;
 }[]
 
-export function ProductSearchAndTable({ branch }: ProductSearchAndTableProps) {
+export function ProductSearchAndTable({ branch ,currency}: ProductSearchAndTableProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const { addToCart, cartItems, removeFromCart, updateQuantity, updateUnit } = useCartSaleStore()
@@ -85,8 +85,8 @@ export function ProductSearchAndTable({ branch }: ProductSearchAndTableProps) {
                         <TableHead className="w-[40%]">Product</TableHead>
                         <TableHead>Quantity</TableHead>
                         <TableHead>Unit</TableHead>
-                        <TableHead>Unit Price</TableHead>
-                        <TableHead>Subtotal</TableHead>
+                        <TableHead>Unit Price ({currency})</TableHead>
+                        <TableHead>Subtotal ({currency})</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                 </TableHeader>

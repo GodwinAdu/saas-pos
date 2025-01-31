@@ -90,6 +90,10 @@ const SaleSchema = new Schema({
             type: Number,
         }
     }],
+    costPrice:{
+        type: Number,
+        default:0
+    },
     totalAmount: {
         type: Number,
         required: true,

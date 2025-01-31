@@ -20,9 +20,13 @@ interface Account {
 interface PaymentDetailsFieldsProps {
     control: Control<SaleFormValues>;
     accounts: Account[];
+    currency: string;
+    paymentMethods: {
+        name: string
+    }[];
 }
 
-export function PaymentDetailsFields({ control, accounts }: PaymentDetailsFieldsProps) {
+export function PaymentDetailsFields({ control, accounts, currency, paymentMethods }: PaymentDetailsFieldsProps) {
     return (
         <Card>
             <CardHeader>
@@ -34,7 +38,7 @@ export function PaymentDetailsFields({ control, accounts }: PaymentDetailsFields
                     name="paymentAmount"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Payment Amount (GH₵)</FormLabel>
+                            <FormLabel>Payment Amount ({currency})</FormLabel>
                             <FormControl>
                                 <Input type="number" placeholder="Enter payment amount" {...field} />
                             </FormControl>
@@ -135,9 +139,9 @@ export function PaymentDetailsFields({ control, accounts }: PaymentDetailsFields
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    <SelectItem value="Cash">Cash</SelectItem>
-                                    <SelectItem value="Mobile Money">Mobile Money</SelectItem>
-                                    <SelectItem value="Card">Card</SelectItem>
+                                    {paymentMethods?.map((method) => (
+                                        <SelectItem key={method.name} value={method.name}>{method.name}</SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                             <FormMessage />

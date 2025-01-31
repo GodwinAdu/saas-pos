@@ -12,7 +12,7 @@ import { useCartSaleStore } from "@/hooks/use-cart-sale"
 import { useSelectSellingGroup } from "@/hooks/use-select-selling-group"
 import { ProductSearchAndTable } from "./ProductSearchAndTable"
 import { useSaleForm } from "@/hooks/form/use-sale-form"
-import { calculateQuantity, findAutomatedPrice, findManualPrice } from "@/lib/utils"
+import { calculateCostPrice, calculateQuantity, findAutomatedPrice, findManualPrice } from "@/lib/utils"
 import { SaleFormValues } from "@/lib/validators/sale-form-schema"
 import { PaymentTermsField } from "./PaymentTerm"
 import { SaleDateField } from "./SaleDate"
@@ -26,11 +26,16 @@ import { playErrorSound, playSuccessSound } from "@/lib/audio"
 import { toast } from "@/hooks/use-toast"
 import { createSale } from "@/lib/actions/sale.actions"
 import { useParams, usePathname, useRouter } from "next/navigation"
+import { paymentMethods } from '../../../../../../../../../lib/settings/store.settings';
 
 
 type Props = {
     branch: IBranch
-    accounts: IAccount[]
+    accounts: IAccount[];
+    currency: string;
+    paymentMethods: {
+        name: string
+    }[];
 }
 type Price = {
     unitId: {
@@ -40,7 +45,7 @@ type Price = {
     price: number;
     tax: number;
 }[]
-const CreateSaleForm = ({ branch, accounts }: Props) => {
+const CreateSaleForm = ({ branch, accounts, currency, paymentMethods }: Props) => {
     const form = useSaleForm()
     const { cartItems, clearCart } = useCartSaleStore()
     const { selectedValue } = useSelectSellingGroup()
@@ -71,7 +76,19 @@ const CreateSaleForm = ({ branch, accounts }: Props) => {
                     selectedValue as string,
                 )
         return sum + (price ?? 0) * item.quantity
-    }, 0)
+    }, 0);
+
+
+    const costPrice = cartItems.reduce((sum, item) => {
+        const price = calculateCostPrice(
+            item.item.unit as unknown as { _id: string; quantity: number; }[],
+            item.unit as string,
+            item.item.vendorPrice.costPrice as number,
+            item.quantity,
+        ),
+        return sum + price
+    }, 0);
+
 
     async function onSubmit(values: SaleFormValues) {
         try {
@@ -90,6 +107,7 @@ const CreateSaleForm = ({ branch, accounts }: Props) => {
                         item.unit as string,
                     ) * item.quantity,
                 })),
+                costPrice,
                 totalAmount: subtotal,
             }
 
@@ -141,9 +159,9 @@ const CreateSaleForm = ({ branch, accounts }: Props) => {
                     <Separator />
                     <Card>
                         <CardContent className="space-y-4">
-                            <ProductSearchAndTable branch={branch} />
+                            <ProductSearchAndTable currency={currency} branch={branch} />
                             <div className="flex justify-end">
-                                <p className="text-lg font-semibold">Total Amount: {subtotal.toFixed(2)}</p>
+                                <p className="text-lg font-semibold">Total Amount:  {currency} {subtotal.toFixed(2)}</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -155,7 +173,7 @@ const CreateSaleForm = ({ branch, accounts }: Props) => {
                         </CardContent>
                     </Card>
                     <ShippingDetailsFields control={form.control} />
-                    <PaymentDetailsFields control={form.control} accounts={accounts} />
+                    <PaymentDetailsFields paymentMethods={paymentMethods} currency={currency} control={form.control} accounts={accounts} />
                     <Button type="submit">Submit</Button>
                 </form>
             </Form>

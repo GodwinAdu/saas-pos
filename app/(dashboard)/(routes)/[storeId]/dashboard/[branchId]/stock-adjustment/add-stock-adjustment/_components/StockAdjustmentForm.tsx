@@ -51,7 +51,7 @@ const formSchema = z.object({
   }),
 })
 
-export default function StockAdjustmentForm({ branch }: { branch: IBranch }) {
+export default function StockAdjustmentForm({ branch,currency }: { branch: IBranch,currency:string }) {
   const { cartItems } = useCartStockAdjustmentStore();
   const { selectedValue } = useSelectSellingGroup()
   const router = useRouter();
@@ -227,9 +227,9 @@ export default function StockAdjustmentForm({ branch }: { branch: IBranch }) {
 
             <Card>
               <CardContent className="space-y-4">
-                <ProductSearch branch={branch} />
+                <ProductSearch currency={currency} branch={branch} />
                 <div className="flex justify-end">
-                  <p className="text-lg font-semibold">Total Amount: {subtotal.toFixed(2)}</p>
+                  <p className="text-lg font-semibold">Total Amount: {currency} {subtotal.toFixed(2)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -240,7 +240,7 @@ export default function StockAdjustmentForm({ branch }: { branch: IBranch }) {
                 name="totalAmount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>Total Amount</FormLabel>
                     <FormControl>
                       <Input placeholder="shadcn" {...field} />
                     </FormControl>

@@ -8,14 +8,14 @@ import { quickSearchProduct } from "@/lib/actions/product.actions"
 import { toast } from "@/hooks/use-toast"
 import debounce from "lodash/debounce"
 import { findAutomatedPrice, findManualPrice, } from "@/lib/utils"
-import UnitSelection from "@/components/commons/UnitSelection"
 import { useCartStockAdjustmentStore } from "@/hooks/use-cart-stock-adjustment"
 import { IBranch } from "@/lib/models/branch.models"
 import UnitSelect from "./UnitSelect"
 
 
 interface ProductSearchAndTableProps {
-    branch: IBranch
+    branch: IBranch;
+    currency: string;
 }
 type Price = {
     unitId: {
@@ -26,7 +26,7 @@ type Price = {
     tax: number;
 }[]
 
-export function ProductSearch({ branch }: ProductSearchAndTableProps) {
+export function ProductSearch({ branch,currency }: ProductSearchAndTableProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const { addToCart, cartItems, removeFromCart, updateQuantity, updateUnit } = useCartStockAdjustmentStore()
@@ -89,8 +89,8 @@ export function ProductSearch({ branch }: ProductSearchAndTableProps) {
                         <TableHead className="w-[40%]">Product</TableHead>
                         <TableHead>Quantity</TableHead>
                         <TableHead>Unit</TableHead>
-                        <TableHead>Unit Price</TableHead>
-                        <TableHead>Subtotal</TableHead>
+                        <TableHead>Unit Price ({currency})</TableHead>
+                        <TableHead>Subtotal ({currency})</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                 </TableHeader>

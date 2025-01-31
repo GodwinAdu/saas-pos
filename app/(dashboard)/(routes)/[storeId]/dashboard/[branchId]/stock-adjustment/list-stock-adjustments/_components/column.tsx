@@ -5,6 +5,8 @@ import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { getCurrencySymbol } from '@/lib/settings/store.settings';
 
 export const columns: ColumnDef<any>[] = [
     {
@@ -51,7 +53,40 @@ export const columns: ColumnDef<any>[] = [
 ];
 
 // Button Component for Product Column
-const ProductButton = ({ data }: { data: any }) => {
+interface Product {
+    _id: string;
+    productId: { images: string[]; name: string };
+    unit: { name: string; quantity: number };
+    totalQuantity: number;
+    subTotal: number;
+}
+
+interface Data {
+    referenceNo: string;
+    adjustmentDate: string;
+    reason: string;
+    products: Product[];
+    totalAmount: number;
+}
+
+const ProductButton = ({ data }: { data: Data }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [currency, setCurrency] = useState<string>('');
+
+    useEffect(() => {
+        const fetchCurrency = async () => {
+            try {
+                setIsLoading(true);
+                const result = await getCurrencySymbol();
+                setCurrency(result);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchCurrency()
+    },[]);
 
     return (
         <>
@@ -61,7 +96,7 @@ const ProductButton = ({ data }: { data: any }) => {
                         View
                     </button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[600px] p-6 bg-white rounded-lg shadow-lg h-[70%] overflow-auto">
+                <DialogContent className="sm:max-w-[600px] p-6 rounded-lg shadow-lg h-[70%] overflow-auto">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-gray-800">Sale Details</DialogTitle>
                         <DialogDescription className="text-sm text-gray-500">
@@ -81,7 +116,7 @@ const ProductButton = ({ data }: { data: any }) => {
                         <div>
                             <h2 className="text-lg font-semibold text-gray-700">Products</h2>
                             <div className="border border-gray-200 rounded-md p-4">
-                                {data.products.map((product, index) => (
+                                {data.products.map((product: { _id: string; productId: { images: string[]; name: string }; unit: { name: string; quantity: number }; totalQuantity: number; subTotal: number }) => (
                                     <div
                                         key={product._id}
                                         className="flex justify-between items-center border-b border-gray-200 py-2 last:border-none"
@@ -102,7 +137,7 @@ const ProductButton = ({ data }: { data: any }) => {
                                         <div className="text-right">
                                             <p>Qty: {product.totalQuantity}</p>
                                             <p className="font-medium text-gray-800">
-                                                Subtotal: ${product.subTotal}
+                                                Subtotal: {isLoading ? '-' : currency} {product.subTotal}
                                             </p>
                                         </div>
                                     </div>
@@ -114,7 +149,7 @@ const ProductButton = ({ data }: { data: any }) => {
                         <div className="mt-6 border-t pt-4">
                             <h2 className="text-lg font-semibold text-gray-700">Summary</h2>
                             <p className="text-xl font-bold text-gray-800">
-                                Total Amount: ${data.totalAmount}
+                                Total Amount: {isLoading ? '-' : currency} {data.totalAmount}
                             </p>
                         </div>
                     </div>
