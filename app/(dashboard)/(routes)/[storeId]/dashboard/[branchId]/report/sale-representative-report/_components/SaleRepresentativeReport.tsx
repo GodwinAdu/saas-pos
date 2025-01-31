@@ -102,7 +102,7 @@ export default function SaleRepresentativeReport({ currency }: { currency: strin
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
-                <Card>
+                <Card className='bg-primary/5 border-none shadow-lg'>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
                     </CardHeader>
@@ -113,7 +113,7 @@ export default function SaleRepresentativeReport({ currency }: { currency: strin
                         </p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className='bg-primary/5 border-none shadow-lg'>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Returns</CardTitle>
                     </CardHeader>
@@ -124,7 +124,7 @@ export default function SaleRepresentativeReport({ currency }: { currency: strin
                         </p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className='bg-primary/5 border-none shadow-lg'>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
                     </CardHeader>
