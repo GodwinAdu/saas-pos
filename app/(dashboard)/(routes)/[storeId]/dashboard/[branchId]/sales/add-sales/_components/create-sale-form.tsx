@@ -85,7 +85,7 @@ const CreateSaleForm = ({ branch, accounts, currency, paymentMethods }: Props) =
             item.unit as string,
             item.item.vendorPrice.costPrice as number,
             item.quantity,
-        ),
+        );
         return sum + price
     }, 0);
 
